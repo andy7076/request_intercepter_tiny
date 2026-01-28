@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Request Interceptor</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1>🔄 Request Interceptor</h1>
+        <p class="subtitle">拦截请求 · 修改响应</p>
+      </header>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="rules">规则列表</button>
+        <button class="tab-btn" data-tab="add">添加规则</button>
+        <button class="tab-btn" data-tab="logs">请求日志</button>
+      </div>
+
+      <!-- 规则列表面板 -->
+      <div id="rules-panel" class="panel active">
+        <div class="rules-header">
+          <span class="rules-count"
+            >共 <span id="rule-count">0</span> 条规则</span
+          >
+          <div class="rules-actions">
+            <button type="button" id="import-btn" class="btn-icon" title="导入规则">
+              📥
+            </button>
+            <button type="button" id="export-btn" class="btn-icon" title="导出规则">
+              📤
+            </button>
+          </div>
+        </div>
+        <div id="rules-list" class="rules-list">
+          <div class="empty-state">
+            <span class="empty-icon">📋</span>
+            <p>暂无规则</p>
+            <p class="hint">点击"添加规则"创建第一条规则</p>
+          </div>
+        </div>
+        <input type="file" id="import-file" accept=".json" style="display: none" />
+      </div>
+
+      <!-- 添加规则面板 -->
+      <div id="add-panel" class="panel">
+        <form id="rule-form">
+          <div class="form-group">
+            <label for="rule-name">规则名称</label>
+            <input
+              type="text"
+              id="rule-name"
+              placeholder="例如：修改API响应头"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="url-pattern">URL匹配模式</label>
+            <input
+              type="text"
+              id="url-pattern"
+              placeholder="例如：*://api.example.com/*"
+              required
+            />
+            <span class="hint">支持通配符 * 匹配任意字符</span>
+          </div>
+
+          <div class="form-group">
+            <label for="rule-type">规则类型</label>
+            <select id="rule-type">
+              <option value="modifyHeaders">修改Headers</option>
+              <option value="mockResponse">Mock Response</option>
+              <option value="redirect">重定向</option>
+              <option value="block">阻止请求</option>
+            </select>
+          </div>
+
+          <!-- 修改Headers的配置 -->
+          <div id="headers-config" class="config-section">
+            <div class="section-header">
+              <h3>Header修改配置</h3>
+              <button type="button" id="add-header-btn" class="btn-small">
+                + 添加Header
+              </button>
+            </div>
+            <div id="headers-list" class="headers-list">
+              <!-- 动态添加的header配置 -->
+            </div>
+          </div>
+
+          <!-- 重定向配置 -->
+          <div id="redirect-config" class="config-section hidden">
+            <div class="form-group">
+              <label for="redirect-url">重定向到</label>
+              <input
+                type="text"
+                id="redirect-url"
+                placeholder="https://new-url.com/path"
+              />
+            </div>
+          </div>
+
+          <!-- Mock Response配置 -->
+          <div id="mock-config" class="config-section hidden">
+            <div class="form-group">
+              <label for="content-type">Content-Type</label>
+              <select id="content-type">
+                <option value="application/json">application/json</option>
+                <option value="text/plain">text/plain</option>
+                <option value="text/html">text/html</option>
+                <option value="application/javascript">application/javascript</option>
+                <option value="text/css">text/css</option>
+                <option value="application/xml">application/xml</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="response-body">响应内容</label>
+              <textarea id="response-body" rows="8" placeholder='{"success": true, "data": {}}'></textarea>
+              <span class="hint">输入要返回的响应内容（JSON、文本等）</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="priority">优先级</label>
+            <input type="number" id="priority" value="1" min="1" max="100" />
+            <span class="hint">数值越大优先级越高</span>
+          </div>
+
+          <div class="form-group">
+            <label>资源类型 <span class="hint-inline">(留空匹配所有)</span></label>
+            <div class="resource-types">
+              <label class="checkbox-label">
+                <input type="checkbox" name="resourceType" value="xmlhttprequest" />
+                <span>XHR/Fetch</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="resourceType" value="script" />
+                <span>Script</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="resourceType" value="stylesheet" />
+                <span>CSS</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="resourceType" value="image" />
+                <span>Image</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="resourceType" value="font" />
+                <span>Font</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="resourceType" value="main_frame" />
+                <span>主页面</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="resourceType" value="sub_frame" />
+                <span>iframe</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="resourceType" value="media" />
+                <span>Media</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="resourceType" value="websocket" />
+                <span>WebSocket</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="resourceType" value="other" />
+                <span>Other</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" id="cancel-btn" class="btn-secondary">
+              取消
+            </button>
+            <button type="submit" class="btn-primary">保存规则</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- 请求日志面板 -->
+      <div id="logs-panel" class="panel">
+        <div class="logs-header">
+          <span class="logs-info">最近 <span id="log-count">0</span> 条匹配记录</span>
+          <div class="logs-actions">
+            <button type="button" id="clear-logs-btn" class="btn-small btn-danger">清空日志</button>
+          </div>
+        </div>
+        <div id="logs-list" class="logs-list">
+          <div class="empty-state">
+            <span class="empty-icon">📊</span>
+            <p>暂无日志</p>
+            <p class="hint">当规则匹配到请求时会在这里显示</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Header配置模板 -->
+    <template id="header-template">
+      <div class="header-item">
+        <div class="header-row">
+          <select class="header-target">
+            <option value="response">Response Header</option>
+            <option value="request">Request Header</option>
+          </select>
+          <select class="header-operation">
+            <option value="set">设置</option>
+            <option value="append">追加</option>
+            <option value="remove">删除</option>
+          </select>
+          <button type="button" class="btn-remove">×</button>
+        </div>
+        <div class="header-row">
+          <input type="text" class="header-name" placeholder="Header名称" />
+          <input type="text" class="header-value" placeholder="Header值" />
+        </div>
+      </div>
+    </template>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
