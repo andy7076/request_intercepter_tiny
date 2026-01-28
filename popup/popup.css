@@ -229,20 +229,6 @@ body {
   transition: var(--transition);
 }
 
-.btn-primary-icon {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: white;
-}
-
-.btn-primary-icon:hover {
-  background: var(--primary-dark);
-  border-color: var(--primary-dark);
-  color: white;
-  box-shadow: var(--shadow-glow);
-}
-
-
 .rules-list {
   max-height: calc(100vh - 220px);
   overflow-y: auto;

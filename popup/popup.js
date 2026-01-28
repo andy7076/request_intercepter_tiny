@@ -12,7 +12,6 @@ const headersList = document.getElementById('headers-list');
 const addHeaderBtn = document.getElementById('add-header-btn');
 const headerTemplate = document.getElementById('header-template');
 const cancelBtn = document.getElementById('cancel-btn');
-const applyRulesBtn = document.getElementById('apply-rules-btn');
 const importBtn = document.getElementById('import-btn');
 const exportBtn = document.getElementById('export-btn');
 const importFile = document.getElementById('import-file');
@@ -62,9 +61,6 @@ function setupEventListeners() {
     resetForm();
     switchTab('rules');
   });
-  
-  // 应用规则按钮
-  applyRulesBtn.addEventListener('click', handleApplyRules);
   
   // 导入导出按钮
   importBtn.addEventListener('click', () => importFile.click());
@@ -442,41 +438,6 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
-}
-
-// 应用规则到当前页面
-async function handleApplyRules() {
-  try {
-    // 获取当前活动标签页
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    
-    if (!tab || !tab.id) {
-      showToast('无法获取当前标签页', true);
-      return;
-    }
-    
-    // 检查是否是受限页面
-    if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
-      showToast('无法在Chrome内部页面应用规则', true);
-      return;
-    }
-    
-    // 向标签页发送重载规则的消息
-    chrome.tabs.sendMessage(tab.id, { type: 'RELOAD_RULES' }, (response) => {
-      if (chrome.runtime.lastError) {
-        console.error('发送消息失败:', chrome.runtime.lastError.message);
-        showToast('应用失败,请刷新页面后重试', true);
-      } else if (response && response.success) {
-        showToast(`✅ 规则已应用! (${response.rulesCount} 条规则)`);
-        console.log('[Request Interceptor Pro] 规则已成功应用到当前页面');
-      } else {
-        showToast('应用失败,请刷新页面后重试', true);
-      }
-    });
-  } catch (error) {
-    console.error('应用规则失败:', error);
-    showToast('应用失败: ' + error.message, true);
-  }
 }
 
 

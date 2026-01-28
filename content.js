@@ -58,16 +58,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     mockRules = message.rules || [];
     console.log('[Request Interceptor Pro] 收到规则更新消息:', mockRules.length);
   }
-  
-  // 添加手动重载规则的支持
-  if (message.type === 'RELOAD_RULES') {
-    console.log('[Request Interceptor Pro] 🔄 收到手动重载请求...');
-    loadMockRules().then(() => {
-      console.log('[Request Interceptor Pro] ✅ 规则重载完成');
-      sendResponse({ success: true, rulesCount: mockRules.length });
-    });
-    return true; // 保持消息通道开放以支持异步响应
-  }
 });
 
 // URL 匹配函数 - 支持通配符
