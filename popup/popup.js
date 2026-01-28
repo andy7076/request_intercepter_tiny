@@ -186,15 +186,19 @@ function scrollToMatch(textarea, searchLength, shouldFocus = true) {
   if (!shouldFocus) {
     // 技巧：短暂聚焦 textarea 以激活 selection 高亮，随即切回搜索框
     const activeInput = document.activeElement;
-    const selStart = activeInput.selectionStart;
-    const selEnd = activeInput.selectionEnd;
+    const isEditable = activeInput && (activeInput.tagName === 'INPUT' || activeInput.tagName === 'TEXTAREA');
+    
+    const selStart = isEditable ? activeInput.selectionStart : 0;
+    const selEnd = isEditable ? activeInput.selectionEnd : 0;
     
     textarea.focus({ preventScroll: true });
     textarea.setSelectionRange(matchPos, matchPos + searchLength);
     
     if (activeInput && activeInput !== textarea) {
       activeInput.focus({ preventScroll: true });
-      activeInput.setSelectionRange(selStart, selEnd);
+      if (isEditable) {
+        activeInput.setSelectionRange(selStart, selEnd);
+      }
     }
   } else {
     textarea.focus();
