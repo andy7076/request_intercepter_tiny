@@ -120,7 +120,7 @@ async function addRule(rule) {
     createdAt: new Date().toISOString(),
     ...rule
   };
-  rules.push(newRule);
+  rules.unshift(newRule);
   await chrome.storage.local.set({ [RULES_STORAGE_KEY]: rules });
   await applyRules();
   // 如果是 mock 规则，通知 content scripts
