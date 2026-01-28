@@ -268,7 +268,30 @@ async function applyRules() {
       });
     }
     
-    // mockResponse 规则通过 content script 处理，不再使用 declarativeNetRequest
+    // 处理 mockResponse 规则 - 使用 redirect 到 data URL
+    if (rule.type === 'mockResponse' && rule.responseBody) {
+      try {
+        // 将响应内容编码为 base64
+        const contentType = rule.contentType || 'application/json';
+        const base64Content = btoa(unescape(encodeURIComponent(rule.responseBody)));
+        const dataUrl = `data:${contentType};base64,${base64Content}`;
+        
+        netRequestRules.push({
+          id: ruleId,
+          priority: rule.priority || 1,
+          action: {
+            type: 'redirect',
+            redirect: { url: dataUrl }
+          },
+          condition: {
+            urlFilter: rule.urlPattern,
+            resourceTypes: rule.resourceTypes || ['main_frame', 'sub_frame', 'xmlhttprequest', 'script', 'stylesheet', 'image', 'font', 'object', 'ping', 'csp_report', 'media', 'websocket', 'other']
+          }
+        });
+      } catch (e) {
+        console.error('创建 mockResponse 规则失败:', e, rule);
+      }
+    }
   });
   
   // 添加新规则
