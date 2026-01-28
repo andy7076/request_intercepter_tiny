@@ -4,19 +4,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Request Interceptor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
     <div class="container">
       <header class="header">
-        <h1>🔄 Request Interceptor</h1>
-        <p class="subtitle">拦截请求 · 修改响应</p>
+        <div class="header-content">
+          <h1>Request Interceptor Pro</h1>
+          <p class="subtitle">高级网络请求拦截与分析工具</p>
+        </div>
       </header>
 
       <div class="tabs">
-        <button class="tab-btn active" data-tab="rules">规则列表</button>
-        <button class="tab-btn" data-tab="add">添加规则</button>
-        <button class="tab-btn" data-tab="logs">请求日志</button>
+        <button class="tab-btn active" data-tab="rules"><span>📋</span> 规则列表</button>
+        <button class="tab-btn" data-tab="add"><span>➕</span> 添加规则</button>
+        <button class="tab-btn" data-tab="logs"><span>📊</span> 请求日志</button>
       </div>
 
       <!-- 规则列表面板 -->
@@ -26,10 +34,20 @@
             >共 <span id="rule-count">0</span> 条规则</span
           >
           <div class="rules-actions">
-            <button type="button" id="import-btn" class="btn-icon" title="导入规则">
+            <button
+              type="button"
+              id="import-btn"
+              class="btn-icon"
+              title="导入规则"
+            >
               📥
             </button>
-            <button type="button" id="export-btn" class="btn-icon" title="导出规则">
+            <button
+              type="button"
+              id="export-btn"
+              class="btn-icon"
+              title="导出规则"
+            >
               📤
             </button>
           </div>
@@ -41,7 +59,12 @@
             <p class="hint">点击"添加规则"创建第一条规则</p>
           </div>
         </div>
-        <input type="file" id="import-file" accept=".json" style="display: none" />
+        <input
+          type="file"
+          id="import-file"
+          accept=".json"
+          style="display: none"
+        />
       </div>
 
       <!-- 添加规则面板 -->
@@ -52,7 +75,7 @@
             <input
               type="text"
               id="rule-name"
-              placeholder="例如：修改API响应头"
+              placeholder="例如：配置修改接口"
               required
             />
           </div>
@@ -71,15 +94,15 @@
           <div class="form-group">
             <label for="rule-type">规则类型</label>
             <select id="rule-type">
-              <option value="modifyHeaders">修改Headers</option>
               <option value="mockResponse">Mock Response</option>
+              <option value="modifyHeaders">修改Headers</option>
               <option value="redirect">重定向</option>
               <option value="block">阻止请求</option>
             </select>
           </div>
 
           <!-- 修改Headers的配置 -->
-          <div id="headers-config" class="config-section">
+          <div id="headers-config" class="config-section hidden">
             <div class="section-header">
               <h3>Header修改配置</h3>
               <button type="button" id="add-header-btn" class="btn-small">
@@ -104,21 +127,63 @@
           </div>
 
           <!-- Mock Response配置 -->
-          <div id="mock-config" class="config-section hidden">
+          <div id="mock-config" class="config-section">
             <div class="form-group">
               <label for="content-type">Content-Type</label>
               <select id="content-type">
                 <option value="application/json">application/json</option>
                 <option value="text/plain">text/plain</option>
                 <option value="text/html">text/html</option>
-                <option value="application/javascript">application/javascript</option>
+                <option value="application/javascript">
+                  application/javascript
+                </option>
                 <option value="text/css">text/css</option>
                 <option value="application/xml">application/xml</option>
               </select>
             </div>
             <div class="form-group">
-              <label for="response-body">响应内容</label>
-              <textarea id="response-body" rows="8" placeholder='{"success": true, "data": {}}'></textarea>
+              <div class="response-label-row">
+                <label for="response-body">响应内容</label>
+                <div class="response-tools">
+                  <div class="search-box">
+                    <input
+                      type="text"
+                      id="response-search"
+                      placeholder="搜索..."
+                    />
+                    <span id="search-count" class="search-count"></span>
+                    <button
+                      type="button"
+                      id="search-prev"
+                      class="btn-search"
+                      title="上一个"
+                    >
+                      &#9652;
+                    </button>
+                    <button
+                      type="button"
+                      id="search-next"
+                      class="btn-search"
+                      title="下一个"
+                    >
+                      &#9662;
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    id="expand-editor"
+                    class="btn-expand"
+                    title="放大编辑"
+                  >
+                    ⛶
+                  </button>
+                </div>
+              </div>
+              <textarea
+                id="response-body"
+                rows="10"
+                placeholder='{"success": true, "data": {}}'
+              ></textarea>
               <span class="hint">输入要返回的响应内容（JSON、文本等）</span>
             </div>
           </div>
@@ -130,10 +195,16 @@
           </div>
 
           <div class="form-group">
-            <label>资源类型 <span class="hint-inline">(留空匹配所有)</span></label>
+            <label
+              >资源类型 <span class="hint-inline">(留空匹配所有)</span></label
+            >
             <div class="resource-types">
               <label class="checkbox-label">
-                <input type="checkbox" name="resourceType" value="xmlhttprequest" />
+                <input
+                  type="checkbox"
+                  name="resourceType"
+                  value="xmlhttprequest"
+                />
                 <span>XHR/Fetch</span>
               </label>
               <label class="checkbox-label">
@@ -187,9 +258,17 @@
       <!-- 请求日志面板 -->
       <div id="logs-panel" class="panel">
         <div class="logs-header">
-          <span class="logs-info">最近 <span id="log-count">0</span> 条匹配记录</span>
+          <span class="logs-info"
+            >最近 <span id="log-count">0</span> 条匹配记录</span
+          >
           <div class="logs-actions">
-            <button type="button" id="clear-logs-btn" class="btn-small btn-danger">清空日志</button>
+            <button
+              type="button"
+              id="clear-logs-btn"
+              class="btn-small btn-danger"
+            >
+              清空日志
+            </button>
           </div>
         </div>
         <div id="logs-list" class="logs-list">
@@ -223,6 +302,49 @@
         </div>
       </div>
     </template>
+
+    <!-- 全屏编辑器模态框 -->
+    <div id="editor-modal" class="editor-modal">
+      <div class="editor-modal-header">
+        <h3>📝 响应内容编辑器</h3>
+        <div class="editor-modal-tools">
+          <div class="editor-modal-search">
+            <input type="text" id="modal-search" placeholder="搜索内容..." />
+            <span id="modal-search-count" class="search-count"></span>
+            <button
+              type="button"
+              id="modal-search-prev"
+              class="btn-search"
+              title="上一个"
+            >
+              &#9652;
+            </button>
+            <button
+              type="button"
+              id="modal-search-next"
+              class="btn-search"
+              title="下一个"
+            >
+              &#9662;
+            </button>
+          </div>
+          <button
+            type="button"
+            id="modal-close"
+            class="btn-modal-close"
+            title="关闭"
+          >
+            ×
+          </button>
+        </div>
+      </div>
+      <div class="editor-modal-content">
+        <textarea
+          id="modal-textarea"
+          placeholder='{"success": true, "data": {}}'
+        ></textarea>
+      </div>
+    </div>
 
     <script src="popup.js"></script>
   </body>

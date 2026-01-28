@@ -183,18 +183,34 @@ function scrollToMatch(textarea, searchLength, shouldFocus = true) {
   
   const matchPos = searchMatches[currentMatchIndex];
   
-  // 设置选中状态
-  if (shouldFocus) {
+  if (!shouldFocus) {
+    // 技巧：短暂聚焦 textarea 以激活 selection 高亮，随即切回搜索框
+    const activeInput = document.activeElement;
+    const selStart = activeInput.selectionStart;
+    const selEnd = activeInput.selectionEnd;
+    
+    textarea.focus({ preventScroll: true });
+    textarea.setSelectionRange(matchPos, matchPos + searchLength);
+    
+    if (activeInput && activeInput !== textarea) {
+      activeInput.focus({ preventScroll: true });
+      activeInput.setSelectionRange(selStart, selEnd);
+    }
+  } else {
     textarea.focus();
+    textarea.setSelectionRange(matchPos, matchPos + searchLength);
   }
-  textarea.setSelectionRange(matchPos, matchPos + searchLength);
   
   // 计算并滚动到匹配位置
-  const textBeforeMatch = textarea.value.substring(0, matchPos);
-  const linesBefore = textBeforeMatch.split('\n').length;
+  const textBefore = textarea.value.substring(0, matchPos);
+  const linesBefore = textBefore.split('\n').length;
   const lineHeight = parseInt(getComputedStyle(textarea).lineHeight) || 20;
-  const scrollTop = (linesBefore - 3) * lineHeight;
-  textarea.scrollTop = Math.max(0, scrollTop);
+  // 尽量让匹配行出现在中间偏上位置
+  const scrollTop = Math.max(0, (linesBefore - 3) * lineHeight);
+  textarea.scrollTo({
+    top: scrollTop,
+    behavior: 'smooth'
+  });
 }
 
 // 打开全屏编辑器

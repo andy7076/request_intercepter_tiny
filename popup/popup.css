@@ -448,10 +448,24 @@ body {
 }
 
 .form-group textarea {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: var(--transition);
+  font-family: "JetBrains Mono", "Monaco", monospace;
   resize: vertical;
   min-height: 120px;
-  font-family: "JetBrains Mono", "Monaco", monospace;
   line-height: 1.6;
+}
+
+.form-group textarea::selection {
+  background: var(--primary);
+  color: #fff;
+  text-shadow: none;
 }
 
 .form-group input:focus,
@@ -811,6 +825,11 @@ body {
   resize: none;
 }
 
+.editor-modal-content textarea::selection {
+  background: var(--primary);
+  color: #fff;
+}
+
 /* Animations */
 .rule-card {
   animation: slideIn 0.3s ease-out forwards;
@@ -846,8 +865,8 @@ body {
   box-shadow: 0 0 0 2px var(--primary-glow);
 }
 
-.search-box input, .editor-modal-search input {
-  width: 100px;
+.search-box input {
+  width: 150px;
   background: transparent;
   border: none;
   color: var(--text-primary);
@@ -857,22 +876,30 @@ body {
 }
 
 .editor-modal-search input {
-  width: 200px;
+  width: 180px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 13px;
+  padding: 6px 4px;
+  outline: none;
 }
 
 .search-count {
   font-size: 11px;
   color: var(--text-secondary);
   font-family: monospace;
-  min-width: 40px;
+  min-width: 38px;
+  margin: 0 4px;
   text-align: center;
+  opacity: 0.8;
 }
 
 .btn-search,
 .btn-expand,
 .btn-modal-close {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   color: var(--text-primary);
@@ -882,7 +909,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 10px;
+}
+
+.btn-search {
+  font-size: 8px;
 }
 
 .btn-search:hover,
