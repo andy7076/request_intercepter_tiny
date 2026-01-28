@@ -12,6 +12,7 @@ const headersList = document.getElementById('headers-list');
 const addHeaderBtn = document.getElementById('add-header-btn');
 const headerTemplate = document.getElementById('header-template');
 const cancelBtn = document.getElementById('cancel-btn');
+const applyRulesBtn = document.getElementById('apply-rules-btn');
 const importBtn = document.getElementById('import-btn');
 const exportBtn = document.getElementById('export-btn');
 const importFile = document.getElementById('import-file');
@@ -21,24 +22,14 @@ const clearLogsBtn = document.getElementById('clear-logs-btn');
 
 // 响应内容编辑器相关
 const responseBody = document.getElementById('response-body');
-const responseSearch = document.getElementById('response-search');
-const searchCount = document.getElementById('search-count');
-const searchPrev = document.getElementById('search-prev');
-const searchNext = document.getElementById('search-next');
 const expandEditor = document.getElementById('expand-editor');
 
 // 全屏编辑器模态框
 const editorModal = document.getElementById('editor-modal');
 const modalTextarea = document.getElementById('modal-textarea');
-const modalSearch = document.getElementById('modal-search');
-const modalSearchCount = document.getElementById('modal-search-count');
-const modalSearchPrev = document.getElementById('modal-search-prev');
-const modalSearchNext = document.getElementById('modal-search-next');
 const modalClose = document.getElementById('modal-close');
 
 let editingRuleId = null;
-let searchMatches = [];
-let currentMatchIndex = -1;
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
@@ -72,6 +63,9 @@ function setupEventListeners() {
     switchTab('rules');
   });
   
+  // 应用规则按钮
+  applyRulesBtn.addEventListener('click', handleApplyRules);
+  
   // 导入导出按钮
   importBtn.addEventListener('click', () => importFile.click());
   exportBtn.addEventListener('click', handleExport);
@@ -80,19 +74,9 @@ function setupEventListeners() {
   // 清空日志按钮
   clearLogsBtn.addEventListener('click', handleClearLogs);
   
-  // 响应内容搜索功能
-  responseSearch.addEventListener('input', () => handleSearch(responseBody, responseSearch, searchCount));
-  searchPrev.addEventListener('click', () => navigateSearch(responseBody, -1, searchCount));
-  searchNext.addEventListener('click', () => navigateSearch(responseBody, 1, searchCount));
-  
   // 放大编辑器
   expandEditor.addEventListener('click', openEditorModal);
   modalClose.addEventListener('click', closeEditorModal);
-  
-  // 全屏编辑器搜索
-  modalSearch.addEventListener('input', () => handleSearch(modalTextarea, modalSearch, modalSearchCount));
-  modalSearchPrev.addEventListener('click', () => navigateSearch(modalTextarea, -1, modalSearchCount));
-  modalSearchNext.addEventListener('click', () => navigateSearch(modalTextarea, 1, modalSearchCount));
   
   // ESC关闭模态框
   document.addEventListener('keydown', (e) => {
@@ -131,107 +115,11 @@ function handleRuleTypeChange() {
   }
 }
 
-// 搜索功能
-function handleSearch(textarea, searchInput, countDisplay) {
-  const searchText = searchInput.value.toLowerCase();
-  const content = textarea.value.toLowerCase();
-  
-  searchMatches = [];
-  currentMatchIndex = -1;
-  
-  if (searchText.length === 0) {
-    countDisplay.textContent = '';
-    return;
-  }
-  
-  // 查找所有匹配位置
-  let pos = 0;
-  while ((pos = content.indexOf(searchText, pos)) !== -1) {
-    searchMatches.push(pos);
-    pos += searchText.length;
-  }
-  
-  if (searchMatches.length > 0) {
-    currentMatchIndex = 0;
-    countDisplay.textContent = `1/${searchMatches.length}`;
-    scrollToMatch(textarea, searchInput.value.length, false);
-  } else {
-    countDisplay.textContent = '0/0';
-  }
-}
-
-// 导航搜索结果
-function navigateSearch(textarea, direction, countDisplay) {
-  if (searchMatches.length === 0) return;
-  
-  currentMatchIndex += direction;
-  
-  if (currentMatchIndex < 0) {
-    currentMatchIndex = searchMatches.length - 1;
-  } else if (currentMatchIndex >= searchMatches.length) {
-    currentMatchIndex = 0;
-  }
-  
-  const searchInput = textarea === modalTextarea ? modalSearch : responseSearch;
-  countDisplay.textContent = `${currentMatchIndex + 1}/${searchMatches.length}`;
-  scrollToMatch(textarea, searchInput.value.length, true);
-}
-
-// 滚动到匹配位置
-function scrollToMatch(textarea, searchLength, shouldFocus = true) {
-  if (currentMatchIndex < 0 || currentMatchIndex >= searchMatches.length) return;
-  
-  const matchPos = searchMatches[currentMatchIndex];
-  
-  if (!shouldFocus) {
-    // 技巧：短暂聚焦 textarea 以激活 selection 高亮，随即切回搜索框
-    const activeInput = document.activeElement;
-    const canSetRange = activeInput && typeof activeInput.setSelectionRange === 'function';
-    
-    const selStart = canSetRange ? activeInput.selectionStart : 0;
-    const selEnd = canSetRange ? activeInput.selectionEnd : 0;
-    
-    if (textarea && typeof textarea.setSelectionRange === 'function') {
-      textarea.focus({ preventScroll: true });
-      textarea.setSelectionRange(matchPos, matchPos + searchLength);
-    }
-    
-    if (activeInput && activeInput !== textarea) {
-      activeInput.focus({ preventScroll: true });
-      if (canSetRange) {
-        activeInput.setSelectionRange(selStart, selEnd);
-      }
-    }
-  } else {
-    if (textarea && typeof textarea.setSelectionRange === 'function') {
-      textarea.focus();
-      textarea.setSelectionRange(matchPos, matchPos + searchLength);
-    }
-  }
-  
-  // 计算并滚动到匹配位置
-  const textBefore = textarea.value.substring(0, matchPos);
-  const linesBefore = textBefore.split('\n').length;
-  const lineHeight = parseInt(getComputedStyle(textarea).lineHeight) || 20;
-  // 尽量让匹配行出现在中间偏上位置
-  const scrollTop = Math.max(0, (linesBefore - 3) * lineHeight);
-  textarea.scrollTo({
-    top: scrollTop,
-    behavior: 'smooth'
-  });
-}
-
 // 打开全屏编辑器
 function openEditorModal() {
   modalTextarea.value = responseBody.value;
   editorModal.classList.add('active');
   modalTextarea.focus();
-  
-  // 同步搜索内容
-  if (responseSearch.value) {
-    modalSearch.value = responseSearch.value;
-    handleSearch(modalTextarea, modalSearch, modalSearchCount);
-  }
 }
 
 // 关闭全屏编辑器
@@ -239,12 +127,6 @@ function closeEditorModal() {
   // 同步内容回原来的输入框
   responseBody.value = modalTextarea.value;
   editorModal.classList.remove('active');
-  
-  // 清空搜索状态
-  modalSearch.value = '';
-  modalSearchCount.textContent = '';
-  searchMatches = [];
-  currentMatchIndex = -1;
 }
 
 // 添加Header配置项
@@ -511,18 +393,35 @@ function resetForm() {
   document.querySelectorAll('input[name="resourceType"]').forEach(cb => {
     cb.checked = false;
   });
-  // 清空搜索状态
-  responseSearch.value = '';
-  searchCount.textContent = '';
-  searchMatches = [];
-  currentMatchIndex = -1;
   handleRuleTypeChange();
 }
 
 // 发送消息给background
 function sendMessage(message) {
   return new Promise((resolve) => {
-    chrome.runtime.sendMessage(message, resolve);
+    try {
+      chrome.runtime.sendMessage(message, (response) => {
+        if (chrome.runtime.lastError) {
+          console.error('通信失败:', chrome.runtime.lastError.message);
+          // 如果后台服务未响应，根据请求类型返回安全的默认值
+          if (message.type && message.type.startsWith('GET_')) {
+            resolve([]);
+          } else {
+            resolve(null);
+          }
+          // 不再显示Toast，避免在初始化时频繁弹出
+        } else {
+          resolve(response);
+        }
+      });
+    } catch (e) {
+      console.error('发送消息异常:', e);
+      if (message.type && message.type.startsWith('GET_')) {
+        resolve([]);
+      } else {
+        resolve(null);
+      }
+    }
   });
 }
 
@@ -544,6 +443,42 @@ function escapeHtml(text) {
   div.textContent = text;
   return div.innerHTML;
 }
+
+// 应用规则到当前页面
+async function handleApplyRules() {
+  try {
+    // 获取当前活动标签页
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    
+    if (!tab || !tab.id) {
+      showToast('无法获取当前标签页', true);
+      return;
+    }
+    
+    // 检查是否是受限页面
+    if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
+      showToast('无法在Chrome内部页面应用规则', true);
+      return;
+    }
+    
+    // 向标签页发送重载规则的消息
+    chrome.tabs.sendMessage(tab.id, { type: 'RELOAD_RULES' }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.error('发送消息失败:', chrome.runtime.lastError.message);
+        showToast('应用失败,请刷新页面后重试', true);
+      } else if (response && response.success) {
+        showToast(`✅ 规则已应用! (${response.rulesCount} 条规则)`);
+        console.log('[Request Interceptor Pro] 规则已成功应用到当前页面');
+      } else {
+        showToast('应用失败,请刷新页面后重试', true);
+      }
+    });
+  } catch (error) {
+    console.error('应用规则失败:', error);
+    showToast('应用失败: ' + error.message, true);
+  }
+}
+
 
 // 导出规则
 async function handleExport() {

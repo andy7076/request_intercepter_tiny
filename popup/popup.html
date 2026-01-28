@@ -36,11 +36,26 @@
           <div class="rules-actions">
             <button
               type="button"
+              id="apply-rules-btn"
+              class="btn-icon btn-primary-icon"
+              title="应用规则到当前页面"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
+            </button>
+            <button
+              type="button"
               id="import-btn"
               class="btn-icon"
               title="导入规则"
             >
-              📥
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
             </button>
             <button
               type="button"
@@ -48,7 +63,11 @@
               class="btn-icon"
               title="导出规则"
             >
-              📤
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
             </button>
           </div>
         </div>
@@ -144,40 +163,14 @@
             <div class="form-group">
               <div class="response-label-row">
                 <label for="response-body">响应内容</label>
-                <div class="response-tools">
-                  <div class="search-box">
-                    <input
-                      type="text"
-                      id="response-search"
-                      placeholder="搜索..."
-                    />
-                    <span id="search-count" class="search-count"></span>
-                    <button
-                      type="button"
-                      id="search-prev"
-                      class="btn-search"
-                      title="上一个"
-                    >
-                      &#9652;
-                    </button>
-                    <button
-                      type="button"
-                      id="search-next"
-                      class="btn-search"
-                      title="下一个"
-                    >
-                      &#9662;
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    id="expand-editor"
-                    class="btn-expand"
-                    title="放大编辑"
-                  >
-                    ⛶
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  id="expand-editor"
+                  class="btn-expand"
+                  title="放大编辑"
+                >
+                  ⛶
+                </button>
               </div>
               <textarea
                 id="response-body"
@@ -307,36 +300,14 @@
     <div id="editor-modal" class="editor-modal">
       <div class="editor-modal-header">
         <h3>📝 响应内容编辑器</h3>
-        <div class="editor-modal-tools">
-          <div class="editor-modal-search">
-            <input type="text" id="modal-search" placeholder="搜索内容..." />
-            <span id="modal-search-count" class="search-count"></span>
-            <button
-              type="button"
-              id="modal-search-prev"
-              class="btn-search"
-              title="上一个"
-            >
-              &#9652;
-            </button>
-            <button
-              type="button"
-              id="modal-search-next"
-              class="btn-search"
-              title="下一个"
-            >
-              &#9662;
-            </button>
-          </div>
-          <button
-            type="button"
-            id="modal-close"
-            class="btn-modal-close"
-            title="关闭"
-          >
-            ×
-          </button>
-        </div>
+        <button
+          type="button"
+          id="modal-close"
+          class="btn-modal-close"
+          title="关闭"
+        >
+          ×
+        </button>
       </div>
       <div class="editor-modal-content">
         <textarea
