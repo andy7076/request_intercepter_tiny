@@ -19,7 +19,26 @@ const logsList = document.getElementById('logs-list');
 const logCount = document.getElementById('log-count');
 const clearLogsBtn = document.getElementById('clear-logs-btn');
 
+// 响应内容编辑器相关
+const responseBody = document.getElementById('response-body');
+const responseSearch = document.getElementById('response-search');
+const searchCount = document.getElementById('search-count');
+const searchPrev = document.getElementById('search-prev');
+const searchNext = document.getElementById('search-next');
+const expandEditor = document.getElementById('expand-editor');
+
+// 全屏编辑器模态框
+const editorModal = document.getElementById('editor-modal');
+const modalTextarea = document.getElementById('modal-textarea');
+const modalSearch = document.getElementById('modal-search');
+const modalSearchCount = document.getElementById('modal-search-count');
+const modalSearchPrev = document.getElementById('modal-search-prev');
+const modalSearchNext = document.getElementById('modal-search-next');
+const modalClose = document.getElementById('modal-close');
+
 let editingRuleId = null;
+let searchMatches = [];
+let currentMatchIndex = -1;
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
@@ -60,6 +79,27 @@ function setupEventListeners() {
   
   // 清空日志按钮
   clearLogsBtn.addEventListener('click', handleClearLogs);
+  
+  // 响应内容搜索功能
+  responseSearch.addEventListener('input', () => handleSearch(responseBody, responseSearch, searchCount));
+  searchPrev.addEventListener('click', () => navigateSearch(responseBody, -1, searchCount));
+  searchNext.addEventListener('click', () => navigateSearch(responseBody, 1, searchCount));
+  
+  // 放大编辑器
+  expandEditor.addEventListener('click', openEditorModal);
+  modalClose.addEventListener('click', closeEditorModal);
+  
+  // 全屏编辑器搜索
+  modalSearch.addEventListener('input', () => handleSearch(modalTextarea, modalSearch, modalSearchCount));
+  modalSearchPrev.addEventListener('click', () => navigateSearch(modalTextarea, -1, modalSearchCount));
+  modalSearchNext.addEventListener('click', () => navigateSearch(modalTextarea, 1, modalSearchCount));
+  
+  // ESC关闭模态框
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && editorModal.classList.contains('active')) {
+      closeEditorModal();
+    }
+  });
 }
 
 // 切换Tab
@@ -72,8 +112,9 @@ function switchTab(tab) {
     panel.classList.toggle('active', panel.id === `${tab}-panel`);
   });
 
-  if (tab === 'add' && headersList.children.length === 0) {
-    addHeaderItem();
+  if (tab === 'add') {
+    // 初始化规则类型配置显示
+    handleRuleTypeChange();
   }
 }
 
@@ -83,6 +124,103 @@ function handleRuleTypeChange() {
   headersConfig.classList.toggle('hidden', type !== 'modifyHeaders');
   redirectConfig.classList.toggle('hidden', type !== 'redirect');
   mockConfig.classList.toggle('hidden', type !== 'mockResponse');
+  
+  // 如果是 modifyHeaders 类型且没有 header 项，添加一个
+  if (type === 'modifyHeaders' && headersList.children.length === 0) {
+    addHeaderItem();
+  }
+}
+
+// 搜索功能
+function handleSearch(textarea, searchInput, countDisplay) {
+  const searchText = searchInput.value.toLowerCase();
+  const content = textarea.value.toLowerCase();
+  
+  searchMatches = [];
+  currentMatchIndex = -1;
+  
+  if (searchText.length === 0) {
+    countDisplay.textContent = '';
+    return;
+  }
+  
+  // 查找所有匹配位置
+  let pos = 0;
+  while ((pos = content.indexOf(searchText, pos)) !== -1) {
+    searchMatches.push(pos);
+    pos += searchText.length;
+  }
+  
+  if (searchMatches.length > 0) {
+    currentMatchIndex = 0;
+    countDisplay.textContent = `1/${searchMatches.length}`;
+    scrollToMatch(textarea, searchInput.value.length, false);
+  } else {
+    countDisplay.textContent = '0/0';
+  }
+}
+
+// 导航搜索结果
+function navigateSearch(textarea, direction, countDisplay) {
+  if (searchMatches.length === 0) return;
+  
+  currentMatchIndex += direction;
+  
+  if (currentMatchIndex < 0) {
+    currentMatchIndex = searchMatches.length - 1;
+  } else if (currentMatchIndex >= searchMatches.length) {
+    currentMatchIndex = 0;
+  }
+  
+  const searchInput = textarea === modalTextarea ? modalSearch : responseSearch;
+  countDisplay.textContent = `${currentMatchIndex + 1}/${searchMatches.length}`;
+  scrollToMatch(textarea, searchInput.value.length, true);
+}
+
+// 滚动到匹配位置
+function scrollToMatch(textarea, searchLength, shouldFocus = true) {
+  if (currentMatchIndex < 0 || currentMatchIndex >= searchMatches.length) return;
+  
+  const matchPos = searchMatches[currentMatchIndex];
+  
+  // 设置选中状态
+  if (shouldFocus) {
+    textarea.focus();
+  }
+  textarea.setSelectionRange(matchPos, matchPos + searchLength);
+  
+  // 计算并滚动到匹配位置
+  const textBeforeMatch = textarea.value.substring(0, matchPos);
+  const linesBefore = textBeforeMatch.split('\n').length;
+  const lineHeight = parseInt(getComputedStyle(textarea).lineHeight) || 20;
+  const scrollTop = (linesBefore - 3) * lineHeight;
+  textarea.scrollTop = Math.max(0, scrollTop);
+}
+
+// 打开全屏编辑器
+function openEditorModal() {
+  modalTextarea.value = responseBody.value;
+  editorModal.classList.add('active');
+  modalTextarea.focus();
+  
+  // 同步搜索内容
+  if (responseSearch.value) {
+    modalSearch.value = responseSearch.value;
+    handleSearch(modalTextarea, modalSearch, modalSearchCount);
+  }
+}
+
+// 关闭全屏编辑器
+function closeEditorModal() {
+  // 同步内容回原来的输入框
+  responseBody.value = modalTextarea.value;
+  editorModal.classList.remove('active');
+  
+  // 清空搜索状态
+  modalSearch.value = '';
+  modalSearchCount.textContent = '';
+  searchMatches = [];
+  currentMatchIndex = -1;
 }
 
 // 添加Header配置项
@@ -124,9 +262,9 @@ function renderRules(rules) {
   if (rules.length === 0) {
     rulesList.innerHTML = `
       <div class="empty-state">
-        <span class="empty-icon">📋</span>
-        <p>暂无规则</p>
-        <p class="hint">点击"添加规则"创建第一条规则</p>
+        <span class="empty-icon">📂</span>
+        <p>暂无拦截规则</p>
+        <p class="hint">点击下方或顶部的"添加规则"开启高效调试</p>
       </div>
     `;
     return;
@@ -200,10 +338,10 @@ function renderRuleDetails(rule) {
 // 获取规则类型标签
 function getRuleTypeLabel(type) {
   const labels = {
-    modifyHeaders: 'Headers',
-    mockResponse: 'Mock',
-    redirect: '重定向',
-    block: '阻止'
+    modifyHeaders: '✨ Headers',
+    mockResponse: '🎯 Mock',
+    redirect: '🔀 重定向',
+    block: '🚫 阻止'
   };
   return labels[type] || type;
 }
@@ -343,12 +481,17 @@ function resetForm() {
   editingRuleId = null;
   ruleForm.reset();
   headersList.innerHTML = '';
-  document.getElementById('rule-type').value = 'modifyHeaders';
+  document.getElementById('rule-type').value = 'mockResponse';
   document.getElementById('response-body').value = '';
   // 清空资源类型复选框
   document.querySelectorAll('input[name="resourceType"]').forEach(cb => {
     cb.checked = false;
   });
+  // 清空搜索状态
+  responseSearch.value = '';
+  searchCount.textContent = '';
+  searchMatches = [];
+  currentMatchIndex = -1;
   handleRuleTypeChange();
 }
 
@@ -457,9 +600,9 @@ function renderLogs(logs) {
   if (logs.length === 0) {
     logsList.innerHTML = `
       <div class="empty-state">
-        <span class="empty-icon">📊</span>
-        <p>暂无日志</p>
-        <p class="hint">当规则匹配到请求时会在这里显示</p>
+        <span class="empty-icon">📉</span>
+        <p>暂无网络日志</p>
+        <p class="hint">开启规则后，匹配到的请求将在此实时展示</p>
       </div>
     `;
     return;
