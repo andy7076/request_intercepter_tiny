@@ -62,6 +62,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 // URL 匹配函数 - 支持通配符
 function matchUrl(pattern, url) {
+  // 如果模式不包含通配符 *，使用包含匹配
+  if (!pattern.includes('*')) {
+    // 直接检查 URL 是否包含该模式（忽略大小写）
+    return url.toLowerCase().includes(pattern.toLowerCase());
+  }
+  
   // 将通配符模式转换为正则表达式
   const regexPattern = pattern
     .replace(/[.+?^${}()|[\]\\]/g, '\\$&') // 转义特殊字符
