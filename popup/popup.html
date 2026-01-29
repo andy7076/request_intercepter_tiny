@@ -18,8 +18,8 @@
         <div class="header-content">
           <div class="header-title-row">
             <div class="header-title">
-              <h1>Request Interceptor Pro</h1>
-              <p class="subtitle">高级网络请求拦截与分析工具</p>
+              <h1>Request Interceptor Tiny</h1>
+              <p class="subtitle">轻量级接口模拟工具</p>
             </div>
             <button type="button" id="open-in-tab-btn" class="btn-open-tab" title="在完整窗口中打开">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -111,59 +111,11 @@
             <span class="hint">支持通配符 * 匹配任意字符</span>
           </div>
 
-          <div class="form-group">
-            <label for="rule-type">规则类型</label>
-            <select id="rule-type">
-              <option value="mockResponse">Mock Response</option>
-              <option value="modifyHeaders">修改Headers</option>
-              <option value="redirect">重定向</option>
-              <option value="block">阻止请求</option>
-            </select>
-          </div>
-
-          <!-- 修改Headers的配置 -->
-          <div id="headers-config" class="config-section hidden">
-            <div class="section-header">
-              <h3>Header修改配置</h3>
-              <button type="button" id="add-header-btn" class="btn-small">
-                + 添加Header
-              </button>
-            </div>
-            <div id="headers-list" class="headers-list">
-              <!-- 动态添加的header配置 -->
-            </div>
-          </div>
-
-          <!-- 重定向配置 -->
-          <div id="redirect-config" class="config-section hidden">
-            <div class="form-group">
-              <label for="redirect-url">重定向到</label>
-              <input
-                type="text"
-                id="redirect-url"
-                placeholder="https://new-url.com/path"
-              />
-            </div>
-          </div>
-
           <!-- Mock Response配置 -->
           <div id="mock-config" class="config-section">
             <div class="form-group">
-              <label for="content-type">Content-Type</label>
-              <select id="content-type">
-                <option value="application/json">application/json</option>
-                <option value="text/plain">text/plain</option>
-                <option value="text/html">text/html</option>
-                <option value="application/javascript">
-                  application/javascript
-                </option>
-                <option value="text/css">text/css</option>
-                <option value="application/xml">application/xml</option>
-              </select>
-            </div>
-            <div class="form-group">
               <div class="response-label-row">
-                <label for="response-body">响应内容</label>
+                <label for="response-body">响应内容 (JSON)</label>
                 <button
                   type="button"
                   id="expand-editor"
@@ -178,7 +130,10 @@
                 rows="10"
                 placeholder='{"success": true, "data": {}}'
               ></textarea>
-              <span class="hint">输入要返回的响应内容（JSON、文本等）</span>
+              <div class="json-status">
+                <span id="json-status-indicator" class="json-status-indicator"></span>
+                <span id="json-status-text" class="hint">输入要返回的 JSON 响应内容</span>
+              </div>
             </div>
           </div>
 
@@ -217,28 +172,6 @@
       </div>
     </div>
 
-    <!-- Header配置模板 -->
-    <template id="header-template">
-      <div class="header-item">
-        <div class="header-row">
-          <select class="header-target">
-            <option value="response">Response Header</option>
-            <option value="request">Request Header</option>
-          </select>
-          <select class="header-operation">
-            <option value="set">设置</option>
-            <option value="append">追加</option>
-            <option value="remove">删除</option>
-          </select>
-          <button type="button" class="btn-remove">×</button>
-        </div>
-        <div class="header-row">
-          <input type="text" class="header-name" placeholder="Header名称" />
-          <input type="text" class="header-value" placeholder="Header值" />
-        </div>
-      </div>
-    </template>
-
     <!-- 全屏编辑器模态框 -->
     <div id="editor-modal" class="editor-modal">
       <div class="editor-modal-header">
@@ -272,6 +205,12 @@
           id="modal-textarea"
           placeholder='{"success": true, "data": {}}'
         ></textarea>
+      </div>
+      <div class="editor-modal-footer">
+        <div class="json-status">
+          <span id="modal-json-status-indicator" class="json-status-indicator"></span>
+          <span id="modal-json-status-text" class="hint">输入要返回的 JSON 响应内容</span>
+        </div>
       </div>
     </div>
 

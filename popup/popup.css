@@ -656,6 +656,45 @@ body {
   font-weight: normal;
 }
 
+/* JSON Validation Status */
+.json-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.json-status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.json-status-indicator.valid {
+  background: var(--success);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+}
+
+.json-status-indicator.invalid {
+  background: var(--danger);
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+}
+
+.json-status .hint {
+  margin-top: 0;
+}
+
+.json-status .hint.valid {
+  color: var(--success);
+}
+
+.json-status .hint.invalid {
+  color: var(--danger);
+}
+
 /* Resource Types Checkboxes */
 .resource-types {
   display: grid;
@@ -1025,6 +1064,14 @@ body {
 .editor-modal-content textarea::selection {
   background: var(--primary);
   color: #fff;
+}
+
+
+.editor-modal-footer {
+  padding: 12px 20px;
+  background: var(--bg-dark);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
 /* Animations */

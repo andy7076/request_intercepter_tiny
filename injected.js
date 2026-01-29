@@ -37,8 +37,8 @@
     
     // 监听规则更新通知
     if (event.data.type === 'REQUEST_INTERCEPTOR_RULES_UPDATED') {
-      console.log(`[Request Interceptor Pro] 🔄 规则已更新! 当前启用规则数: ${event.data.rulesCount}`);
-      console.log('[Request Interceptor Pro] 💡 新的请求将使用更新后的规则');
+      console.log(`[Request Interceptor Tiny] 🔄 规则已更新! 当前启用规则数: ${event.data.rulesCount}`);
+      console.log('[Request Interceptor Tiny] 💡 新的请求将使用更新后的规则');
     }
   });
   
@@ -80,30 +80,32 @@
       const mockResponse = await checkMockRule(url);
       
       if (mockResponse) {
-        console.log('[Request Interceptor Pro] Will mock fetch response:', url);
+        console.log('[Request Interceptor Tiny] 🎭 Will mock fetch response:', url);
         
-        // 先发出真实请求（这样 Network 面板能看到）
-        try {
-          const realResponse = await originalFetch.apply(this, arguments);
-          // 消费响应但忽略结果（防止流被锁定）
-          realResponse.clone().text().catch(() => {});
-        } catch (e) {
-          // 忽略真实请求的错误，仍然返回 mock 响应
-          console.log('[Request Interceptor Pro] Real request failed, returning mock response');
-        }
+        // 发出真实请求（Network 面板显示原始请求和响应）
+        const realResponse = await originalFetch.apply(this, arguments);
         
-        // 返回 mock 的响应
-        return new Response(mockResponse.body, {
-          status: mockResponse.status || 200,
-          statusText: mockResponse.statusText || 'OK (Mocked)',
-          headers: {
-            'Content-Type': mockResponse.contentType || 'application/json',
-            'X-Mocked-By': 'Request-Interceptor-Pro'
-          }
+        // 创建一个伪装的 Response 对象，它保留原始响应的属性，但返回 mock 的内容
+        // 这样 Network 面板显示的是真实的原始响应，但代码读取的是 mock 数据
+        const mockedResponse = new Response(mockResponse.body, {
+          status: realResponse.status, // 保留原始状态码（Network 显示一致）
+          statusText: realResponse.statusText,
+          headers: realResponse.headers // 保留原始头部
         });
+        
+        // 复制原始响应的只读属性
+        Object.defineProperties(mockedResponse, {
+          url: { value: realResponse.url },
+          redirected: { value: realResponse.redirected },
+          type: { value: realResponse.type }
+        });
+        
+        console.log('[Request Interceptor Tiny] ✅ Response mocked for:', url);
+        
+        return mockedResponse;
       }
     } catch (e) {
-      console.error('[Request Interceptor Pro] Error checking mock rule:', e);
+      console.error('[Request Interceptor Tiny] Error checking mock rule:', e);
     }
     
     // 正常执行请求
@@ -138,7 +140,7 @@
     // 异步检查 mock 规则
     checkMockRule(url).then(mockResponse => {
       if (mockResponse) {
-        console.log('[Request Interceptor Pro] Will mock XHR response:', url);
+        console.log('[Request Interceptor Tiny] 🎭 Will mock XHR response:', url);
         
         // 保存原始的事件处理器
         const originalOnReadyStateChange = xhr.onreadystatechange;
@@ -151,7 +153,8 @@
         // 重写 onreadystatechange
         xhr.onreadystatechange = function() {
           if (xhr.readyState === 4 && xhr._mockResponse) {
-            // 在请求完成后，覆盖响应属性
+            // 在请求完成后，覆盖响应属性（Network 面板显示原始响应，代码读取 mock 数据）
+            console.log('[Request Interceptor Tiny] ✅ Response mocked for XHR:', url);
             const mock = xhr._mockResponse;
             
             try {
@@ -183,7 +186,7 @@
                 configurable: true
               });
             } catch (e) {
-              console.warn('[Request Interceptor Pro] Failed to override XHR properties:', e);
+              console.warn('[Request Interceptor Tiny] Failed to override XHR properties:', e);
             }
             
             // 覆盖 getResponseHeader
@@ -230,5 +233,5 @@
     });
   };
   
-  console.log('[Request Interceptor Pro] Injected script loaded - responses will be mocked after real request');
+  console.log('[Request Interceptor Tiny] 🚀 Injected script loaded - Network shows original responses, page displays mocked content');
 })();

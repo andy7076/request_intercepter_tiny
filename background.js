@@ -9,7 +9,7 @@ chrome.runtime.onInstalled.addListener(async () => {
   if (!result[RULES_STORAGE_KEY]) {
     await chrome.storage.local.set({ [RULES_STORAGE_KEY]: [] });
   }
-  console.log('Request Interceptor Pro 扩展已安装');
+  console.log('Request Interceptor Tiny 扩展已安装');
 });
 
 // 点击扩展图标时打开 Side Panel
@@ -180,128 +180,21 @@ async function toggleRule(ruleId) {
 }
 
 // 应用规则到declarativeNetRequest
+// 注意：mockResponse (JSON) 规则由 content script 处理，这里主要是清理旧规则
 async function applyRules() {
-  const rules = await getRules();
-  const enabledRules = rules.filter(r => r.enabled);
-  
   // 获取现有的动态规则
   const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
   const existingRuleIds = existingRules.map(r => r.id);
   
-  // 移除所有现有规则
+  // 移除所有现有规则（清理可能存在的旧规则）
   if (existingRuleIds.length > 0) {
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: existingRuleIds
     });
   }
   
-  // 构建新规则
-  const netRequestRules = [];
-  
-  enabledRules.forEach((rule, index) => {
-    const ruleId = index + 1;
-    
-    // 处理header修改规则
-    if (rule.type === 'modifyHeaders' && rule.headerModifications) {
-      const requestHeaders = [];
-      const responseHeaders = [];
-      
-      rule.headerModifications.forEach(mod => {
-        const headerAction = {
-          header: mod.name,
-          operation: mod.operation || 'set',
-          value: mod.operation !== 'remove' ? mod.value : undefined
-        };
-        
-        if (mod.target === 'request') {
-          requestHeaders.push(headerAction);
-        } else {
-          responseHeaders.push(headerAction);
-        }
-      });
-      
-      const action = { type: 'modifyHeaders' };
-      if (requestHeaders.length > 0) {
-        action.requestHeaders = requestHeaders;
-      }
-      if (responseHeaders.length > 0) {
-        action.responseHeaders = responseHeaders;
-      }
-      
-      netRequestRules.push({
-        id: ruleId,
-        priority: 1,
-        action: action,
-        condition: {
-          urlFilter: rule.urlPattern,
-          resourceTypes: ['main_frame', 'sub_frame', 'xmlhttprequest', 'script', 'stylesheet', 'image', 'font', 'object', 'ping', 'csp_report', 'media', 'websocket', 'other']
-        }
-      });
-    }
-    
-    // 处理redirect规则
-    if (rule.type === 'redirect' && rule.redirectUrl) {
-      netRequestRules.push({
-        id: ruleId,
-        priority: 1,
-        action: {
-          type: 'redirect',
-          redirect: { url: rule.redirectUrl }
-        },
-        condition: {
-          urlFilter: rule.urlPattern,
-          resourceTypes: ['main_frame', 'sub_frame', 'xmlhttprequest']
-        }
-      });
-    }
-    
-    // 处理block规则
-    if (rule.type === 'block') {
-      netRequestRules.push({
-        id: ruleId,
-        priority: 1,
-        action: { type: 'block' },
-        condition: {
-          urlFilter: rule.urlPattern,
-          resourceTypes: ['main_frame', 'sub_frame', 'xmlhttprequest', 'script', 'stylesheet', 'image', 'font', 'object', 'ping', 'csp_report', 'media', 'websocket', 'other']
-        }
-      });
-    }
-    
-    // 处理 mockResponse 规则 - 使用 redirect 到 data URL
-    if (rule.type === 'mockResponse' && rule.responseBody) {
-      try {
-        // 将响应内容编码为 base64
-        const contentType = rule.contentType || 'application/json';
-        const base64Content = btoa(unescape(encodeURIComponent(rule.responseBody)));
-        const dataUrl = `data:${contentType};base64,${base64Content}`;
-        
-        netRequestRules.push({
-          id: ruleId,
-          priority: 1,
-          action: {
-            type: 'redirect',
-            redirect: { url: dataUrl }
-          },
-          condition: {
-            urlFilter: rule.urlPattern,
-            resourceTypes: ['main_frame', 'sub_frame', 'xmlhttprequest', 'script', 'stylesheet', 'image', 'font', 'object', 'ping', 'csp_report', 'media', 'websocket', 'other']
-          }
-        });
-      } catch (e) {
-        console.error('创建 mockResponse 规则失败:', e, rule);
-      }
-    }
-  });
-  
-  // 添加新规则
-  if (netRequestRules.length > 0) {
-    await chrome.declarativeNetRequest.updateDynamicRules({
-      addRules: netRequestRules
-    });
-  }
-  
-  console.log('已应用规则:', netRequestRules.length);
+  // mockResponse 规则由 content script 处理，不需要添加 declarativeNetRequest 规则
+  console.log('[Request Interceptor Tiny] 规则已清理，mockResponse 由 content script 处理');
 }
 
 // 启动时应用规则

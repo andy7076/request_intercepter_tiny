@@ -4,13 +4,6 @@ const panels = document.querySelectorAll('.panel');
 const rulesList = document.getElementById('rules-list');
 const ruleCount = document.getElementById('rule-count');
 const ruleForm = document.getElementById('rule-form');
-const ruleTypeSelect = document.getElementById('rule-type');
-const headersConfig = document.getElementById('headers-config');
-const redirectConfig = document.getElementById('redirect-config');
-const mockConfig = document.getElementById('mock-config');
-const headersList = document.getElementById('headers-list');
-const addHeaderBtn = document.getElementById('add-header-btn');
-const headerTemplate = document.getElementById('header-template');
 const cancelBtn = document.getElementById('cancel-btn');
 const importBtn = document.getElementById('import-btn');
 const exportBtn = document.getElementById('export-btn');
@@ -52,12 +45,6 @@ function setupEventListeners() {
     });
   });
 
-  // 规则类型切换
-  ruleTypeSelect.addEventListener('change', handleRuleTypeChange);
-
-  // 添加Header按钮
-  addHeaderBtn.addEventListener('click', addHeaderItem);
-
   // 表单提交
   ruleForm.addEventListener('submit', handleFormSubmit);
 
@@ -74,6 +61,14 @@ function setupEventListeners() {
   
   // 清空日志按钮
   clearLogsBtn.addEventListener('click', handleClearLogs);
+  
+  // JSON 实时验证
+  responseBody.addEventListener('input', validateJsonRealtime);
+  modalTextarea.addEventListener('input', () => {
+    // 同步到主输入框并验证
+    responseBody.value = modalTextarea.value;
+    validateJsonRealtime();
+  });
   
   // 放大编辑器
   expandEditor.addEventListener('click', openEditorModal);
@@ -117,23 +112,60 @@ function switchTab(tab) {
   panels.forEach(panel => {
     panel.classList.toggle('active', panel.id === `${tab}-panel`);
   });
-
-  if (tab === 'add') {
-    // 初始化规则类型配置显示
-    handleRuleTypeChange();
-  }
 }
 
-// 处理规则类型切换
-function handleRuleTypeChange() {
-  const type = ruleTypeSelect.value;
-  headersConfig.classList.toggle('hidden', type !== 'modifyHeaders');
-  redirectConfig.classList.toggle('hidden', type !== 'redirect');
-  mockConfig.classList.toggle('hidden', type !== 'mockResponse');
+// 实时验证 JSON 格式
+function validateJsonRealtime() {
+  const mainIndicator = document.getElementById('json-status-indicator');
+  const mainStatusText = document.getElementById('json-status-text');
+  const modalIndicator = document.getElementById('modal-json-status-indicator');
+  const modalStatusText = document.getElementById('modal-json-status-text');
   
-  // 如果是 modifyHeaders 类型且没有 header 项，添加一个
-  if (type === 'modifyHeaders' && headersList.children.length === 0) {
-    addHeaderItem();
+  const targets = [];
+  if (mainIndicator && mainStatusText) targets.push({ indicator: mainIndicator, text: mainStatusText });
+  if (modalIndicator && modalStatusText) targets.push({ indicator: modalIndicator, text: modalStatusText });
+  
+  const value = responseBody.value.trim();
+  
+  if (!value) {
+    // 空内容时重置为默认状态
+    targets.forEach(({ indicator, text }) => {
+      indicator.className = 'json-status-indicator';
+      text.className = 'hint';
+      text.textContent = '输入要返回的 JSON 响应内容';
+    });
+    return false;
+  }
+  
+  try {
+    const parsed = JSON.parse(value);
+    // 检查是否为对象或数组（API 响应通常是这两种格式）
+    if (typeof parsed !== 'object' || parsed === null) {
+      targets.forEach(({ indicator, text }) => {
+        indicator.className = 'json-status-indicator invalid';
+        text.className = 'hint invalid';
+        text.textContent = '✗ 需要 JSON 对象 {} 或数组 []';
+      });
+      return false;
+    }
+    
+    targets.forEach(({ indicator, text }) => {
+      indicator.className = 'json-status-indicator valid';
+      text.className = 'hint valid';
+      text.textContent = '✓ JSON 格式有效';
+    });
+    return true;
+  } catch (err) {
+    // 提取错误位置信息
+    const match = err.message.match(/position (\d+)/);
+    const errorMsg = match ? `✗ JSON 格式错误 (位置 ${match[1]})` : '✗ JSON 格式错误';
+    
+    targets.forEach(({ indicator, text }) => {
+      indicator.className = 'json-status-indicator invalid';
+      text.className = 'hint invalid';
+      text.textContent = errorMsg;
+    });
+    return false;
   }
 }
 
@@ -158,32 +190,8 @@ function closeEditorModal() {
   // 同步内容回原来的输入框
   responseBody.value = modalTextarea.value;
   editorModal.classList.remove('active');
-}
-
-// 添加Header配置项
-function addHeaderItem() {
-  const clone = headerTemplate.content.cloneNode(true);
-  const item = clone.querySelector('.header-item');
-  
-  // 删除按钮
-  item.querySelector('.btn-remove').addEventListener('click', () => {
-    item.remove();
-  });
-  
-  // 操作类型变化时处理value输入框
-  const operationSelect = item.querySelector('.header-operation');
-  const valueInput = item.querySelector('.header-value');
-  operationSelect.addEventListener('change', () => {
-    valueInput.disabled = operationSelect.value === 'remove';
-    if (operationSelect.value === 'remove') {
-      valueInput.value = '';
-      valueInput.placeholder = '删除操作不需要值';
-    } else {
-      valueInput.placeholder = 'Header值';
-    }
-  });
-  
-  headersList.appendChild(clone);
+  // 验证 JSON 格式
+  validateJsonRealtime();
 }
 
 // 加载规则列表
@@ -212,7 +220,6 @@ function renderRules(rules) {
       <div class="rule-header">
         <div class="rule-toggle ${rule.enabled ? 'active' : ''}" data-id="${rule.id}"></div>
         <span class="rule-name">${escapeHtml(rule.name)}</span>
-        <span class="rule-type ${rule.type}">${getRuleTypeLabel(rule.type)}</span>
       </div>
       <div class="rule-url">${escapeHtml(rule.urlPattern)}</div>
       ${renderRuleDetails(rule)}
@@ -257,25 +264,7 @@ function renderRules(rules) {
 
 // 渲染规则详情
 function renderRuleDetails(rule) {
-  if (rule.type === 'modifyHeaders' && rule.headerModifications) {
-    return `
-      <div class="rule-details" style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
-        ${rule.headerModifications.map(h => 
-          `<div>• ${h.target === 'request' ? '请求' : '响应'} ${h.operation}: ${escapeHtml(h.name)}${h.value ? ' = ' + escapeHtml(h.value) : ''}</div>`
-        ).join('')}
-      </div>
-    `;
-  }
-  
-  if (rule.type === 'redirect' && rule.redirectUrl) {
-    return `
-      <div class="rule-details" style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
-        → ${escapeHtml(rule.redirectUrl)}
-      </div>
-    `;
-  }
-  
-  if (rule.type === 'mockResponse' && rule.responseBody) {
+  if (rule.responseBody) {
     const preview = rule.responseBody.length > 60 
       ? rule.responseBody.substring(0, 60) + '...' 
       : rule.responseBody;
@@ -285,7 +274,7 @@ function renderRuleDetails(rule) {
     return `
       <div class="rule-details response-preview" data-rule-id="${rule.id}">
         <div class="response-header">
-          <span class="content-type-label">Content-Type: ${escapeHtml(rule.contentType || 'application/json')}</span>
+          <span class="content-type-label">application/json</span>
           ${needsExpand ? `<button type="button" class="btn-expand-preview" data-rule-id="${rule.id}">
             <span class="expand-icon">▶</span>
             <span class="expand-text">展开</span>
@@ -302,16 +291,7 @@ function renderRuleDetails(rule) {
   return '';
 }
 
-// 获取规则类型标签
-function getRuleTypeLabel(type) {
-  const labels = {
-    modifyHeaders: '✨ Headers',
-    mockResponse: '🎯 Mock',
-    redirect: '🔀 重定向',
-    block: '🚫 阻止'
-  };
-  return labels[type] || type;
-}
+
 
 // 处理开关切换
 async function handleToggle(ruleId) {
@@ -332,33 +312,10 @@ async function handleEdit(ruleId) {
   // 填充表单
   document.getElementById('rule-name').value = rule.name;
   document.getElementById('url-pattern').value = rule.urlPattern;
-  document.getElementById('rule-type').value = rule.type;
+  document.getElementById('response-body').value = rule.responseBody || '';
   
-  handleRuleTypeChange();
-  
-  // 填充Header配置
-  if (rule.type === 'modifyHeaders' && rule.headerModifications) {
-    headersList.innerHTML = '';
-    rule.headerModifications.forEach(mod => {
-      addHeaderItem();
-      const item = headersList.lastElementChild;
-      item.querySelector('.header-target').value = mod.target;
-      item.querySelector('.header-operation').value = mod.operation;
-      item.querySelector('.header-name').value = mod.name;
-      item.querySelector('.header-value').value = mod.value || '';
-    });
-  }
-  
-  // 填充重定向URL
-  if (rule.type === 'redirect') {
-    document.getElementById('redirect-url').value = rule.redirectUrl || '';
-  }
-  
-  // 填充Mock Response配置
-  if (rule.type === 'mockResponse') {
-    document.getElementById('content-type').value = rule.contentType || 'application/json';
-    document.getElementById('response-body').value = rule.responseBody || '';
-  }
+  // 验证 JSON 格式
+  validateJsonRealtime();
   
   switchTab('add');
 }
@@ -376,47 +333,32 @@ async function handleDelete(ruleId) {
 async function handleFormSubmit(e) {
   e.preventDefault();
   
+  const responseBody = document.getElementById('response-body').value;
+  
+  // 验证 JSON 格式（必须是对象或数组）
+  try {
+    const parsed = JSON.parse(responseBody);
+    if (typeof parsed !== 'object' || parsed === null) {
+      showToast('需要 JSON 对象 {} 或数组 []', true);
+      return;
+    }
+  } catch (err) {
+    showToast('请输入有效的 JSON 格式', true);
+    return;
+  }
+  
   const rule = {
     name: document.getElementById('rule-name').value.trim(),
     urlPattern: document.getElementById('url-pattern').value.trim(),
-    type: document.getElementById('rule-type').value
+    type: 'mockResponse',
+    contentType: 'application/json',
+    responseBody: responseBody
   };
   
-  // 收集Header配置
-  if (rule.type === 'modifyHeaders') {
-    const headerItems = headersList.querySelectorAll('.header-item');
-    rule.headerModifications = Array.from(headerItems).map(item => ({
-      target: item.querySelector('.header-target').value,
-      operation: item.querySelector('.header-operation').value,
-      name: item.querySelector('.header-name').value.trim(),
-      value: item.querySelector('.header-value').value.trim()
-    })).filter(h => h.name);
-    
-    if (rule.headerModifications.length === 0) {
-      showToast('请至少添加一个Header配置', true);
-      return;
-    }
+  if (!rule.responseBody) {
+    showToast('请输入响应内容', true);
+    return;
   }
-  
-  // 收集重定向URL
-  if (rule.type === 'redirect') {
-    rule.redirectUrl = document.getElementById('redirect-url').value.trim();
-    if (!rule.redirectUrl) {
-      showToast('请输入重定向URL', true);
-      return;
-    }
-  }
-  
-  // 收集Mock Response配置
-  if (rule.type === 'mockResponse') {
-    rule.contentType = document.getElementById('content-type').value;
-    rule.responseBody = document.getElementById('response-body').value;
-    if (!rule.responseBody) {
-      showToast('请输入响应内容', true);
-      return;
-    }
-  }
-  
   
   if (editingRuleId) {
     await sendMessage({ type: 'UPDATE_RULE', ruleId: editingRuleId, rule });
@@ -435,10 +377,9 @@ async function handleFormSubmit(e) {
 function resetForm() {
   editingRuleId = null;
   ruleForm.reset();
-  headersList.innerHTML = '';
-  document.getElementById('rule-type').value = 'mockResponse';
   document.getElementById('response-body').value = '';
-  handleRuleTypeChange();
+  // 重置 JSON 验证状态
+  validateJsonRealtime();
 }
 
 // 发送消息给background
@@ -588,7 +529,7 @@ function renderLogs(logs) {
       <div class="log-item">
         <div class="log-header">
           <span>
-            <span class="log-type ${log.ruleType}">${getRuleTypeLabel(log.ruleType)}</span>
+            <span class="log-type mockResponse">🎯 Mock</span>
             <span class="log-rule">${escapeHtml(log.ruleName)}</span>
           </span>
           <span class="log-time">${time}</span>

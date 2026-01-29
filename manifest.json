@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Request Interceptor Pro",
+  "name": "Request Interceptor Tiny",
   "version": "1.0.0",
   "description": "拦截请求，修改响应的headers和response内容",
   "permissions": [
