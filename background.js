@@ -73,6 +73,34 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse({ success: true });
     return true;
   }
+  
+  // Content Script 请求注入拦截脚本（使用 chrome.scripting 绕过 CSP）
+  if (message.type === 'INJECT_INTERCEPTOR') {
+    const tabId = sender.tab?.id;
+    const frameId = sender.frameId ?? 0;
+    
+    if (!tabId) {
+      sendResponse({ success: false, error: 'No tab ID' });
+      return true;
+    }
+    
+    // 使用 chrome.scripting.executeScript 注入脚本到页面主世界
+    // 这种方式可以绕过 CSP 限制
+    chrome.scripting.executeScript({
+      target: { tabId: tabId, frameIds: [frameId] },
+      files: ['injected.js'],
+      world: 'MAIN',  // 关键：注入到页面的主世界，而不是隔离的 content script 世界
+      injectImmediately: true
+    }).then(() => {
+      console.log(`[Request Interceptor Tiny] ✅ 脚本已注入到 tab ${tabId}, frame ${frameId}`);
+      sendResponse({ success: true });
+    }).catch((err) => {
+      console.error(`[Request Interceptor Tiny] ❌ 注入失败:`, err);
+      sendResponse({ success: false, error: err.message });
+    });
+    
+    return true; // 异步响应
+  }
 });
 
 // 获取所有规则
