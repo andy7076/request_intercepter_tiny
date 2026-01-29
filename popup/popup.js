@@ -27,6 +27,11 @@ const expandEditor = document.getElementById('expand-editor');
 const editorModal = document.getElementById('editor-modal');
 const modalTextarea = document.getElementById('modal-textarea');
 const modalClose = document.getElementById('modal-close');
+const modalSearchBtn = document.getElementById('modal-search-btn');
+const editorModalContent = document.getElementById('editor-modal-content');
+
+// 搜索替换实例
+let editorSearchReplace = null;
 
 let editingRuleId = null;
 
@@ -74,9 +79,22 @@ function setupEventListeners() {
   expandEditor.addEventListener('click', openEditorModal);
   modalClose.addEventListener('click', closeEditorModal);
   
-  // ESC关闭模态框
+  // 搜索替换按钮
+  if (modalSearchBtn) {
+    modalSearchBtn.addEventListener('click', () => {
+      if (editorSearchReplace) {
+        editorSearchReplace.show();
+      }
+    });
+  }
+  
+  // ESC关闭模态框（但不关闭搜索替换，由搜索替换组件自己处理）
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && editorModal.classList.contains('active')) {
+      // 如果搜索替换组件显示中，让它先关闭
+      if (editorSearchReplace && editorSearchReplace.isVisible) {
+        return; // 由搜索替换组件处理
+      }
       closeEditorModal();
     }
   });
@@ -124,10 +142,19 @@ function openEditorModal() {
   modalTextarea.value = responseBody.value;
   editorModal.classList.add('active');
   modalTextarea.focus();
+  
+  // 初始化搜索替换功能
+  if (!editorSearchReplace && window.EditorSearchReplace) {
+    editorSearchReplace = new EditorSearchReplace('modal-textarea', 'editor-modal-content');
+  }
 }
 
 // 关闭全屏编辑器
 function closeEditorModal() {
+  // 先隐藏搜索替换组件
+  if (editorSearchReplace && editorSearchReplace.isVisible) {
+    editorSearchReplace.hide();
+  }
   // 同步内容回原来的输入框
   responseBody.value = modalTextarea.value;
   editorModal.classList.remove('active');

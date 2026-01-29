@@ -112,18 +112,21 @@ body {
 }
 
 .btn-open-tab {
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
+  height: 34px;
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
   color: var(--text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   transition: var(--transition);
   flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .btn-open-tab:hover {
@@ -1081,4 +1084,246 @@ body {
   border-color: var(--primary);
   color: white;
   transform: translateY(-1px);
+}
+
+/* Editor Modal Actions */
+.editor-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-modal-action {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 8px;
+  color: var(--primary-light);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-modal-action:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-glow);
+}
+
+.btn-modal-action svg {
+  flex-shrink: 0;
+}
+
+/* Search Replace Widget - VSCode Style */
+.search-replace-widget {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 100;
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+}
+
+.search-replace-widget.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.search-replace-container {
+  padding: 12px;
+  min-width: 360px;
+}
+
+.search-row,
+.replace-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.replace-row {
+  margin-top: 8px;
+}
+
+.search-input-wrapper,
+.replace-input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.search-input,
+.replace-input {
+  width: 100%;
+  padding: 8px 12px;
+  padding-right: 60px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: 'JetBrains Mono', 'Monaco', monospace;
+  transition: var(--transition);
+}
+
+.replace-input {
+  padding-right: 12px;
+}
+
+.search-input:focus,
+.replace-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--bg-main);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.search-input::placeholder,
+.replace-input::placeholder {
+  color: var(--text-muted);
+}
+
+.match-info {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.match-info.no-results {
+  color: var(--danger);
+}
+
+.search-options {
+  display: flex;
+  gap: 4px;
+}
+
+.option-btn {
+  width: 28px;
+  height: 28px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  font-family: 'JetBrains Mono', 'Monaco', monospace;
+}
+
+.option-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
+.option-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  box-shadow: 0 0 8px var(--primary-glow);
+}
+
+.search-nav {
+  display: flex;
+  gap: 4px;
+}
+
+.nav-btn {
+  width: 28px;
+  height: 28px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.nav-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.close-btn {
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  border-radius: 6px;
+}
+
+.close-btn:hover {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.replace-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.action-btn {
+  padding: 6px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.action-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.action-btn:active {
+  transform: scale(0.96);
+}
+
+/* Adjust modal content for search widget positioning */
+.editor-modal-content {
+  position: relative;
 }
