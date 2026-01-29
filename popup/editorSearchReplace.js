@@ -166,10 +166,11 @@ class EditorSearchReplace {
         this.regexBtn.classList.toggle('active', this.useRegex);
         break;
     }
-    this.performSearch();
+    // 切换选项时不自动聚焦
+    this.performSearch(false);
   }
   
-  performSearch() {
+  performSearch(shouldFocus = false) {
     const searchText = this.searchInput.value;
     const content = this.textarea.value;
     
@@ -212,7 +213,10 @@ class EditorSearchReplace {
       
       if (this.matches.length > 0) {
         this.currentMatchIndex = 0;
-        this.highlightCurrentMatch();
+        // 只在需要聚焦时才高亮（例如点击导航按钮时）
+        if (shouldFocus) {
+          this.highlightCurrentMatch();
+        }
       }
     } catch (e) {
       // 无效正则，忽略
@@ -271,7 +275,7 @@ class EditorSearchReplace {
     if (this.matches.length === 0) return;
     
     this.currentMatchIndex = (this.currentMatchIndex + 1) % this.matches.length;
-    this.highlightCurrentMatch();
+    this.highlightCurrentMatch(); // 导航时需要高亮和聚焦
     this.updateMatchInfo();
   }
   
@@ -279,7 +283,7 @@ class EditorSearchReplace {
     if (this.matches.length === 0) return;
     
     this.currentMatchIndex = (this.currentMatchIndex - 1 + this.matches.length) % this.matches.length;
-    this.highlightCurrentMatch();
+    this.highlightCurrentMatch(); // 导航时需要高亮和聚焦
     this.updateMatchInfo();
   }
   
@@ -372,7 +376,8 @@ class EditorSearchReplace {
     
     if (selectedText && selectedText.length < 100) {
       this.searchInput.value = selectedText;
-      this.performSearch();
+      // 打开时不自动聚焦到匹配项，保持搜索框焦点
+      this.performSearch(false);
     }
     
     if (focusReplace) {
