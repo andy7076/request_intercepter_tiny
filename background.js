@@ -230,11 +230,11 @@ async function applyRules() {
       
       netRequestRules.push({
         id: ruleId,
-        priority: rule.priority || 1,
+        priority: 1,
         action: action,
         condition: {
           urlFilter: rule.urlPattern,
-          resourceTypes: rule.resourceTypes || ['main_frame', 'sub_frame', 'xmlhttprequest', 'script', 'stylesheet', 'image', 'font', 'object', 'ping', 'csp_report', 'media', 'websocket', 'other']
+          resourceTypes: ['main_frame', 'sub_frame', 'xmlhttprequest', 'script', 'stylesheet', 'image', 'font', 'object', 'ping', 'csp_report', 'media', 'websocket', 'other']
         }
       });
     }
@@ -243,14 +243,14 @@ async function applyRules() {
     if (rule.type === 'redirect' && rule.redirectUrl) {
       netRequestRules.push({
         id: ruleId,
-        priority: rule.priority || 1,
+        priority: 1,
         action: {
           type: 'redirect',
           redirect: { url: rule.redirectUrl }
         },
         condition: {
           urlFilter: rule.urlPattern,
-          resourceTypes: rule.resourceTypes || ['main_frame', 'sub_frame', 'xmlhttprequest']
+          resourceTypes: ['main_frame', 'sub_frame', 'xmlhttprequest']
         }
       });
     }
@@ -259,11 +259,11 @@ async function applyRules() {
     if (rule.type === 'block') {
       netRequestRules.push({
         id: ruleId,
-        priority: rule.priority || 1,
+        priority: 1,
         action: { type: 'block' },
         condition: {
           urlFilter: rule.urlPattern,
-          resourceTypes: rule.resourceTypes || ['main_frame', 'sub_frame', 'xmlhttprequest', 'script', 'stylesheet', 'image', 'font', 'object', 'ping', 'csp_report', 'media', 'websocket', 'other']
+          resourceTypes: ['main_frame', 'sub_frame', 'xmlhttprequest', 'script', 'stylesheet', 'image', 'font', 'object', 'ping', 'csp_report', 'media', 'websocket', 'other']
         }
       });
     }
@@ -278,14 +278,14 @@ async function applyRules() {
         
         netRequestRules.push({
           id: ruleId,
-          priority: rule.priority || 1,
+          priority: 1,
           action: {
             type: 'redirect',
             redirect: { url: dataUrl }
           },
           condition: {
             urlFilter: rule.urlPattern,
-            resourceTypes: rule.resourceTypes || ['main_frame', 'sub_frame', 'xmlhttprequest', 'script', 'stylesheet', 'image', 'font', 'object', 'ping', 'csp_report', 'media', 'websocket', 'other']
+            resourceTypes: ['main_frame', 'sub_frame', 'xmlhttprequest', 'script', 'stylesheet', 'image', 'font', 'object', 'ping', 'csp_report', 'media', 'websocket', 'other']
           }
         });
       } catch (e) {

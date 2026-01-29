@@ -268,7 +268,6 @@ async function handleEdit(ruleId) {
   document.getElementById('rule-name').value = rule.name;
   document.getElementById('url-pattern').value = rule.urlPattern;
   document.getElementById('rule-type').value = rule.type;
-  document.getElementById('priority').value = rule.priority || 1;
   
   handleRuleTypeChange();
   
@@ -296,11 +295,6 @@ async function handleEdit(ruleId) {
     document.getElementById('response-body').value = rule.responseBody || '';
   }
   
-  // 填充资源类型
-  document.querySelectorAll('input[name="resourceType"]').forEach(cb => {
-    cb.checked = rule.resourceTypes && rule.resourceTypes.includes(cb.value);
-  });
-  
   switchTab('add');
 }
 
@@ -320,8 +314,7 @@ async function handleFormSubmit(e) {
   const rule = {
     name: document.getElementById('rule-name').value.trim(),
     urlPattern: document.getElementById('url-pattern').value.trim(),
-    type: document.getElementById('rule-type').value,
-    priority: parseInt(document.getElementById('priority').value) || 1
+    type: document.getElementById('rule-type').value
   };
   
   // 收集Header配置
@@ -359,11 +352,6 @@ async function handleFormSubmit(e) {
     }
   }
   
-  // 收集资源类型
-  const resourceTypeCheckboxes = document.querySelectorAll('input[name="resourceType"]:checked');
-  if (resourceTypeCheckboxes.length > 0) {
-    rule.resourceTypes = Array.from(resourceTypeCheckboxes).map(cb => cb.value);
-  }
   
   if (editingRuleId) {
     await sendMessage({ type: 'UPDATE_RULE', ruleId: editingRuleId, rule });
@@ -385,10 +373,6 @@ function resetForm() {
   headersList.innerHTML = '';
   document.getElementById('rule-type').value = 'mockResponse';
   document.getElementById('response-body').value = '';
-  // 清空资源类型复选框
-  document.querySelectorAll('input[name="resourceType"]').forEach(cb => {
-    cb.checked = false;
-  });
   handleRuleTypeChange();
 }
 
