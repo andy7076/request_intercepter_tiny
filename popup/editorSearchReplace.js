@@ -16,15 +16,58 @@ class EditorSearchReplace {
     this.caseSensitive = false;
     this.useRegex = false;
     this.wholeWord = false;
+    this.highlightOverlay = null;
     
     this.init();
   }
   
   init() {
+    // 创建高亮覆盖层
+    this.createHighlightOverlay();
     // 创建搜索替换 UI
     this.createSearchUI();
     // 绑定快捷键
     this.bindKeyboardShortcuts();
+  }
+  
+  createHighlightOverlay() {
+    // 获取 textarea 的父容器
+    const textareaParent = this.textarea.parentElement;
+    
+    // 创建包装器
+    const wrapper = document.createElement('div');
+    wrapper.className = 'textarea-highlight-wrapper';
+    
+    // 创建高亮层背景
+    const backdrop = document.createElement('div');
+    backdrop.className = 'textarea-highlight-backdrop';
+    backdrop.id = 'highlight-backdrop';
+    
+    // 创建高亮内容层
+    const highlights = document.createElement('div');
+    highlights.className = 'textarea-highlights';
+    highlights.id = 'highlight-layer';
+    
+    backdrop.appendChild(highlights);
+    
+    // 将 textarea 包装起来
+    textareaParent.insertBefore(wrapper, this.textarea);
+    wrapper.appendChild(backdrop);
+    wrapper.appendChild(this.textarea);
+    
+    this.highlightOverlay = highlights;
+    this.highlightBackdrop = backdrop;
+    this.textareaWrapper = wrapper;
+    
+    // 同步滚动
+    this.textarea.addEventListener('scroll', () => {
+      this.syncScroll();
+    });
+    
+    // 监听内容变化
+    this.textarea.addEventListener('input', () => {
+      this.updateHighlights();
+    });
   }
   
   createSearchUI() {
@@ -213,7 +256,7 @@ class EditorSearchReplace {
       
       if (this.matches.length > 0) {
         this.currentMatchIndex = 0;
-        // 只在需要聚焦时才高亮（例如点击导航按钮时）
+        // 只在需要聚焦时才跳转到匹配位置
         if (shouldFocus) {
           this.highlightCurrentMatch();
         }
@@ -224,6 +267,8 @@ class EditorSearchReplace {
     }
     
     this.updateMatchInfo();
+    // 更新高亮显示
+    this.updateHighlights();
   }
   
   updateMatchInfo() {
@@ -275,16 +320,18 @@ class EditorSearchReplace {
     if (this.matches.length === 0) return;
     
     this.currentMatchIndex = (this.currentMatchIndex + 1) % this.matches.length;
-    this.highlightCurrentMatch(); // 导航时需要高亮和聚焦
+    this.highlightCurrentMatch(); // 导航时需要聚焦到匹配位置
     this.updateMatchInfo();
+    this.updateHighlights(); // 更新高亮以显示当前匹配
   }
   
   goToPrevMatch() {
     if (this.matches.length === 0) return;
     
     this.currentMatchIndex = (this.currentMatchIndex - 1 + this.matches.length) % this.matches.length;
-    this.highlightCurrentMatch(); // 导航时需要高亮和聚焦
+    this.highlightCurrentMatch(); // 导航时需要聚焦到匹配位置
     this.updateMatchInfo();
+    this.updateHighlights(); // 更新高亮以显示当前匹配
   }
   
   replaceCurrent() {
@@ -391,7 +438,67 @@ class EditorSearchReplace {
   hide() {
     this.widget.classList.remove('active');
     this.isVisible = false;
+    // 清除高亮
+    this.clearHighlights();
     this.textarea.focus();
+  }
+  
+  // 更新高亮显示
+  updateHighlights() {
+    if (!this.highlightOverlay) return;
+    
+    const content = this.textarea.value;
+    const searchText = this.searchInput ? this.searchInput.value : '';
+    
+    if (!searchText || this.matches.length === 0) {
+      this.clearHighlights();
+      return;
+    }
+    
+    // 构建带高亮的 HTML
+    let html = '';
+    let lastIndex = 0;
+    
+    this.matches.forEach((match, index) => {
+      // 添加匹配前的文本
+      html += this.escapeHtml(content.substring(lastIndex, match.start));
+      // 添加高亮的匹配文本
+      const isCurrentMatch = index === this.currentMatchIndex;
+      const highlightClass = isCurrentMatch ? 'highlight current' : 'highlight';
+      html += `<mark class="${highlightClass}">${this.escapeHtml(match.text)}</mark>`;
+      lastIndex = match.end;
+    });
+    
+    // 添加最后一段文本
+    html += this.escapeHtml(content.substring(lastIndex));
+    
+    // 保留换行符和空格
+    html = html.replace(/\n/g, '<br>');
+    
+    this.highlightOverlay.innerHTML = html;
+    this.syncScroll();
+  }
+  
+  // 清除所有高亮
+  clearHighlights() {
+    if (this.highlightOverlay) {
+      this.highlightOverlay.innerHTML = '';
+    }
+  }
+  
+  // 同步 textarea 和高亮层的滚动
+  syncScroll() {
+    if (this.highlightBackdrop && this.textarea) {
+      this.highlightBackdrop.scrollTop = this.textarea.scrollTop;
+      this.highlightBackdrop.scrollLeft = this.textarea.scrollLeft;
+    }
+  }
+  
+  // HTML 转义
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
   
   // 更新 textarea 引用（用于模态框切换时）
