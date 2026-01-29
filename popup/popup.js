@@ -200,6 +200,24 @@ function renderRules(rules) {
   rulesList.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', () => handleDelete(btn.dataset.id));
   });
+  
+  // 绑定展开/收起按钮事件
+  rulesList.querySelectorAll('.btn-expand-preview').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const ruleId = btn.dataset.ruleId;
+      const content = document.querySelector(`.response-content[data-content-id="${ruleId}"]`);
+      const icon = btn.querySelector('.expand-icon');
+      const text = btn.querySelector('.expand-text');
+      
+      if (content) {
+        const isCollapsed = content.classList.contains('collapsed');
+        content.classList.toggle('collapsed', !isCollapsed);
+        icon.textContent = isCollapsed ? '▼' : '▶';
+        text.textContent = isCollapsed ? '收起' : '展开';
+      }
+    });
+  });
 }
 
 // 渲染规则详情
@@ -223,13 +241,25 @@ function renderRuleDetails(rule) {
   }
   
   if (rule.type === 'mockResponse' && rule.responseBody) {
-    const preview = rule.responseBody.length > 100 
-      ? rule.responseBody.substring(0, 100) + '...' 
+    const preview = rule.responseBody.length > 60 
+      ? rule.responseBody.substring(0, 60) + '...' 
       : rule.responseBody;
+    const fullContent = rule.responseBody;
+    const needsExpand = rule.responseBody.length > 60;
+    
     return `
-      <div class="rule-details" style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
-        <div>Content-Type: ${escapeHtml(rule.contentType || 'application/json')}</div>
-        <div style="margin-top: 4px; padding: 4px 6px; background: var(--bg-input); border-radius: 4px; font-family: Monaco, Consolas, monospace; white-space: pre-wrap; word-break: break-all;">${escapeHtml(preview)}</div>
+      <div class="rule-details response-preview" data-rule-id="${rule.id}">
+        <div class="response-header">
+          <span class="content-type-label">Content-Type: ${escapeHtml(rule.contentType || 'application/json')}</span>
+          ${needsExpand ? `<button type="button" class="btn-expand-preview" data-rule-id="${rule.id}">
+            <span class="expand-icon">▶</span>
+            <span class="expand-text">展开</span>
+          </button>` : ''}
+        </div>
+        <div class="response-content collapsed" data-content-id="${rule.id}">
+          <div class="response-preview-text">${escapeHtml(preview)}</div>
+          <div class="response-full-text">${escapeHtml(fullContent)}</div>
+        </div>
       </div>
     `;
   }
