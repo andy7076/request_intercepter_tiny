@@ -10,7 +10,8 @@
     "declarativeNetRequestFeedback",
     "scripting",
     "activeTab",
-    "sidePanel"
+    "sidePanel",
+    "tabs"
   ],
   "host_permissions": ["<all_urls>"],
   "background": {
@@ -46,4 +47,3 @@
     "128": "icons/icon128.png"
   }
 }
-

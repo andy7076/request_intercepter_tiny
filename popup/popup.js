@@ -80,6 +80,14 @@ function setupEventListeners() {
       closeEditorModal();
     }
   });
+  
+  // 在新标签页打开
+  const openInTabBtn = document.getElementById('open-in-tab-btn');
+  if (openInTabBtn) {
+    openInTabBtn.addEventListener('click', () => {
+      chrome.tabs.create({ url: chrome.runtime.getURL('popup/popup.html') });
+    });
+  }
 }
 
 // 切换Tab
