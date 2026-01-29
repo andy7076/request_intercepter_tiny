@@ -179,131 +179,22 @@ async function toggleRule(ruleId) {
   return null;
 }
 
-// 将用户的 URL 模式转换为 declarativeNetRequest 的 urlFilter 格式
-function convertPatternToUrlFilter(pattern) {
-  // 移除协议部分的通配符（declarativeNetRequest 不支持）
-  let urlFilter = pattern;
-  
-  // 如果模式以 http:// 或 https:// 开头，保留它
-  // 否则添加 || 表示匹配任意协议
-  if (!urlFilter.startsWith('http://') && !urlFilter.startsWith('https://')) {
-    // 如果以 * 开头，移除它
-    if (urlFilter.startsWith('*')) {
-      urlFilter = urlFilter.substring(1);
-    }
-    // 添加 || 前缀表示匹配域名开始
-    if (!urlFilter.startsWith('||')) {
-      urlFilter = '||' + urlFilter;
-    }
-  }
-  
-  return urlFilter;
-}
-
-// 将响应体编码为 data: URL
-function createDataUrl(body, contentType = 'application/json') {
-  try {
-    // 使用 base64 编码以支持任意内容
-    const base64 = btoa(unescape(encodeURIComponent(body)));
-    return `data:${contentType};base64,${base64}`;
-  } catch (e) {
-    console.error('[Request Interceptor Tiny] 编码响应体失败:', e);
-    return null;
-  }
-}
-
-// 应用规则到 declarativeNetRequest
-// 使用 redirect 规则将请求重定向到 data: URL，实现网络层面的 mock
+// 应用规则到declarativeNetRequest
+// 注意：mockResponse (JSON) 规则由 content script 处理，这里主要是清理旧规则
 async function applyRules() {
-  const rules = await getRules();
-  const enabledMockRules = rules.filter(r => r.enabled && r.type === 'mockResponse');
-  
   // 获取现有的动态规则
   const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
   const existingRuleIds = existingRules.map(r => r.id);
   
-  // 移除所有现有规则
+  // 移除所有现有规则（清理可能存在的旧规则）
   if (existingRuleIds.length > 0) {
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: existingRuleIds
     });
   }
   
-  // 如果没有启用的 mock 规则，直接返回
-  if (enabledMockRules.length === 0) {
-    console.log('[Request Interceptor Tiny] 没有启用的 mock 规则');
-    return;
-  }
-  
-  // 创建 declarativeNetRequest 规则
-  const dnrRules = [];
-  
-  for (let i = 0; i < enabledMockRules.length; i++) {
-    const rule = enabledMockRules[i];
-    const ruleId = i + 1; // declarativeNetRequest 规则 ID 必须是正整数
-    
-    // 创建 data: URL
-    const dataUrl = createDataUrl(
-      rule.responseBody || '{}',
-      rule.contentType || 'application/json'
-    );
-    
-    if (!dataUrl) {
-      console.warn(`[Request Interceptor Tiny] 跳过规则 "${rule.name}"：无法创建 data URL`);
-      continue;
-    }
-    
-    // 检查 data URL 长度（Chrome 限制）
-    if (dataUrl.length > 8192) {
-      console.warn(`[Request Interceptor Tiny] 规则 "${rule.name}" 的响应体过大，可能无法生效`);
-    }
-    
-    const urlFilter = convertPatternToUrlFilter(rule.urlPattern);
-    
-    dnrRules.push({
-      id: ruleId,
-      priority: 1,
-      action: {
-        type: 'redirect',
-        redirect: {
-          url: dataUrl
-        }
-      },
-      condition: {
-        urlFilter: urlFilter,
-        resourceTypes: [
-          'xmlhttprequest',
-          'main_frame',
-          'sub_frame',
-          'script',
-          'stylesheet',
-          'image',
-          'font',
-          'object',
-          'ping',
-          'media',
-          'websocket',
-          'webtransport',
-          'webbundle',
-          'other'
-        ]
-      }
-    });
-    
-    console.log(`[Request Interceptor Tiny] 添加规则 #${ruleId}: "${rule.name}" -> ${urlFilter}`);
-  }
-  
-  // 添加新规则
-  if (dnrRules.length > 0) {
-    try {
-      await chrome.declarativeNetRequest.updateDynamicRules({
-        addRules: dnrRules
-      });
-      console.log(`[Request Interceptor Tiny] ✅ 已应用 ${dnrRules.length} 条 declarativeNetRequest 规则`);
-    } catch (e) {
-      console.error('[Request Interceptor Tiny] ❌ 应用规则失败:', e);
-    }
-  }
+  // mockResponse 规则由 content script 处理，不需要添加 declarativeNetRequest 规则
+  console.log('[Request Interceptor Tiny] 规则已清理，mockResponse 由 content script 处理');
 }
 
 // 启动时应用规则
