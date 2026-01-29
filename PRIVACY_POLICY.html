@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>隐私权政策 - Request Interceptor Tiny</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --text-color: #1f2937;
+            --bg-color: #f9fafb;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 10px;
+        }
+
+        .last-updated {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        h2:first-child {
+            margin-top: 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        ul {
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 40px;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .content {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>隐私权政策</h1>
+            <div class="last-updated">最后更新日期：2026年1月29日</div>
+        </header>
+
+        <div class="content">
+            <h2>简介</h2>
+            <p><strong>Request Interceptor Tiny</strong>（以下简称"本扩展"或"我们"）非常重视您的隐私。本隐私权政策旨在向您说明我们如何处理您的数据。</p>
+            <p>简而言之：<strong>我们不收集、不存储、也不发送您的任何个人数据到外部服务器。</strong>所有数据处理均在您的本地设备上完成。</p>
+
+            <h2>数据收集与使用</h2>
+            <p>本扩展作为一个开发辅助工具，其核心功能是拦截和模拟网络请求。为了实现这一功能，它是按以下方式工作的：</p>
+            <ul>
+                <li><strong>本地存储 (Local Storage)</strong>：您创建的拦截规则（Mock Rules）和请求日志均存储在您浏览器的 <code>chrome.storage.local</code> 中。这些数据仅用于扩展功能的正常运行，不会上传到任何云端服务器。</li>
+                <li><strong>无追踪 (No Tracking)</strong>：我们不使用任何第三方分析工具（如 Google Analytics），也不会追踪您的浏览历史。</li>
+                <li><strong>无账户系统 (No Accounts)</strong>：本扩展不需要您注册账户或登录即可使用，因此我们不持有您的任何个人身份信息。</li>
+            </ul>
+
+            <h2>权限说明</h2>
+            <p>为了提供核心功能，本扩展需要以下权限，我们仅在必要范围内使用它们：</p>
+            <ul>
+                <li><strong>访问所有网站的数据 (Host Permissions / &lt;all_urls&gt;)</strong>：
+                    <p>这是实现拦截和模拟请求功能的必要权限。扩展需要向页面注入脚本（<code>content.js</code> 和 <code>injected.js</code>）来代理 <code>fetch</code> 和 <code>XMLHttpRequest</code>，从而实现对任意网站接口的 Mock。我们不会读取您的网页内容用于其他目的（如广告或数据挖掘）。</p>
+                </li>
+                <li><strong>declarativeNetRequest / declarativeNetRequestWithHostAccess</strong>：用于在网络层级拦截或修改请求。</li>
+                <li><strong>storage</strong>：用于在您的本地设备上保存您的 Mock 规则配置。</li>
+            </ul>
+
+            <h2>数据安全</h2>
+            <p>由于所有数据都存储在您的本地浏览器环境中，数据的安全性主要取决于您对自己设备和浏览器的安全管理。我们建议您不要在 Mock 规则中直接硬编码敏感信息（如真实的生产环境 Passwords 或 Tokens），尽管这些数据只在本地，但遵循最小权限原则是良好的开发习惯。</p>
+
+            <h2>政策更新</h2>
+            <p>我们可能会不时更新本隐私权政策。如果有重大变更，我们会通过扩展程序的更新说明通知您。继续使用本扩展即表示您同意最新的隐私权政策。</p>
+
+            <h2>联系我们</h2>
+            <p>如果您对本隐私权政策有任何疑问，或者对扩展有任何建议，欢迎通过 Chrome 网上应用店的支持页面与开发者联系。</p>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Request Interceptor Tiny. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>
