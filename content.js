@@ -95,44 +95,6 @@ function isContextValid() {
   }
 }
 
-// 请求 background.js 注入拦截脚本（使用 chrome.scripting.executeScript 绕过 CSP）
-function injectInterceptor() {
-  try {
-    chrome.runtime.sendMessage({
-      type: 'INJECT_INTERCEPTOR'
-    }, (response) => {
-      if (chrome.runtime.lastError) {
-        console.error('[Request Interceptor Tiny] 注入脚本通信失败:', chrome.runtime.lastError.message);
-        // 如果通过 background 注入失败，尝试传统方式作为后备
-        fallbackInject();
-      } else if (response && response.success) {
-        console.log('[Request Interceptor Tiny] ✅ 脚本已通过 chrome.scripting 注入');
-      } else {
-        console.warn('[Request Interceptor Tiny] 注入返回失败，尝试后备方式');
-        fallbackInject();
-      }
-    });
-  } catch (e) {
-    console.error('[Request Interceptor Tiny] 注入请求失败:', e);
-    fallbackInject();
-  }
-}
-
-// 传统注入方式（作为后备，用于不支持 chrome.scripting 的情况）
-function fallbackInject() {
-  try {
-    const script = document.createElement('script');
-    script.src = chrome.runtime.getURL('injected.js');
-    script.onload = function() {
-      this.remove();
-    };
-    (document.head || document.documentElement).appendChild(script);
-    console.log('[Request Interceptor Tiny] 使用传统方式注入脚本');
-  } catch (e) {
-    console.error('[Request Interceptor Tiny] 传统注入也失败:', e);
-  }
-}
-
 // 监听来自注入脚本的消息
 window.addEventListener('message', (event) => {
   if (event.source !== window) return;
@@ -190,5 +152,6 @@ window.addEventListener('message', (event) => {
   }
 });
 
-// 注入拦截脚本
-injectInterceptor();
+// 注意：injected.js 现在由 manifest.json 直接注入到 MAIN world，无需动态注入
+console.log('[Request Interceptor Tiny] 📦 Content script 就绪，等待来自 injected.js 的消息');
+
