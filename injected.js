@@ -10,6 +10,25 @@
     return `req_${Date.now()}_${++requestIdCounter}`;
   }
   
+  // 将相对URL转换为绝对URL
+  function toAbsoluteUrl(url) {
+    if (!url) return url;
+    // 如果已经是绝对URL，直接返回
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) {
+      // 处理 // 开头的协议相对URL
+      if (url.startsWith('//')) {
+        return window.location.protocol + url;
+      }
+      return url;
+    }
+    // 使用URL构造函数将相对路径转换为绝对路径
+    try {
+      return new URL(url, window.location.href).href;
+    } catch (e) {
+      return url;
+    }
+  }
+  
   // 存储待处理的请求
   const pendingRequests = new Map();
   
@@ -73,7 +92,9 @@
   const originalFetch = window.fetch;
   
   window.fetch = async function(input, init) {
-    const url = typeof input === 'string' ? input : input.url;
+    const rawUrl = typeof input === 'string' ? input : input.url;
+    // 将相对URL转换为绝对URL，以便与用户配置的完整URL匹配
+    const url = toAbsoluteUrl(rawUrl);
     
     try {
       // 检查是否有匹配的 mock 规则
@@ -126,11 +147,14 @@
   
   XHR.prototype.send = function(body) {
     const xhr = this;
-    const url = this._interceptorUrl;
+    const rawUrl = this._interceptorUrl;
     
-    if (!url) {
+    if (!rawUrl) {
       return originalXHRSend.apply(this, arguments);
     }
+    
+    // 将相对URL转换为绝对URL，以便与用户配置的完整URL匹配
+    const url = toAbsoluteUrl(rawUrl);
     
     // 对于同步请求，不进行拦截（因为无法异步检查规则）
     if (!this._interceptorAsync) {

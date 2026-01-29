@@ -68,15 +68,38 @@ function matchUrl(pattern, url) {
     return url.toLowerCase().includes(pattern.toLowerCase());
   }
   
+  // 检查pattern的开头和结尾是否有通配符
+  const startsWithWildcard = pattern.startsWith('*');
+  const endsWithWildcard = pattern.endsWith('*');
+  
   // 将通配符模式转换为正则表达式
   const regexPattern = pattern
     .replace(/[.+?^${}()|[\]\\]/g, '\\$&') // 转义特殊字符
     .replace(/\*/g, '.*'); // 将 * 转换为 .*
   
   try {
-    const regex = new RegExp(`^${regexPattern}$`, 'i');
+    // 智能锚定策略：
+    // - 如果pattern以*开头，则不锚定开头（允许URL前面有任意内容）
+    // - 如果pattern以*结尾，则不锚定结尾（允许URL后面有任意内容，如查询参数）
+    // - 如果pattern中间有*但两端没有，则锚定两端进行完全匹配
+    let finalPattern = regexPattern;
+    
+    // 只有当pattern不以*开头时才锚定开头
+    if (!startsWithWildcard) {
+      finalPattern = '^' + finalPattern;
+    }
+    
+    // 只有当pattern不以*结尾时才锚定结尾
+    // 但为了兼容性，即使不以*结尾也允许末尾有查询参数
+    if (!endsWithWildcard) {
+      // 允许末尾有可选的查询参数(?...)或hash(#...)
+      finalPattern = finalPattern + '(\\?.*|#.*)?$';
+    }
+    
+    const regex = new RegExp(finalPattern, 'i');
     return regex.test(url);
   } catch (e) {
+    console.warn('[Request Interceptor Tiny] URL匹配正则错误:', e.message);
     return false;
   }
 }
