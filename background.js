@@ -58,6 +58,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     clearAllRules().then(sendResponse);
     return true;
   }
+
+  if (message.type === 'DISABLE_ALL_RULES') {
+    disableAllRules().then(sendResponse);
+    return true;
+  }
   
   // Content Script 请求获取 mock 规则
   if (message.type === 'GET_MOCK_RULES') {
@@ -175,6 +180,17 @@ async function clearAllRules() {
   await notifyMockRulesUpdated();
   return true;
 }
+
+// 禁用所有规则
+async function disableAllRules() {
+  const rules = await getRules();
+  const updatedRules = rules.map(rule => ({ ...rule, enabled: false }));
+  await chrome.storage.local.set({ [RULES_STORAGE_KEY]: updatedRules });
+  await applyRules();
+  await notifyMockRulesUpdated();
+  return true;
+}
+
 
 // 切换规则启用状态
 async function toggleRule(ruleId) {

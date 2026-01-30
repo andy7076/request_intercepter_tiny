@@ -12,6 +12,7 @@ const logsList = document.getElementById('logs-list');
 const logCount = document.getElementById('log-count');
 const clearLogsBtn = document.getElementById('clear-logs-btn');
 const clearRulesBtn = document.getElementById('clear-rules-btn');
+const disableRulesBtn = document.getElementById('disable-rules-btn');
 
 // 响应内容编辑器相关
 const responseBody = document.getElementById('response-body');
@@ -74,6 +75,11 @@ function setupEventListeners() {
   // 清空规则按钮
   if (clearRulesBtn) {
     clearRulesBtn.addEventListener('click', handleClearRules);
+  }
+
+  // 禁用所有规则按钮
+  if (disableRulesBtn) {
+    disableRulesBtn.addEventListener('click', handleDisableRules);
   }
   
   // JSON 实时验证
@@ -692,4 +698,25 @@ async function handleClearRules() {
   await sendMessage({ type: 'CLEAR_ALL_RULES' });
   loadRules();
   showToast('所有规则已清空');
+}
+
+// 禁用所有规则
+async function handleDisableRules() {
+  const rules = await sendMessage({ type: 'GET_RULES' });
+  if (rules.length === 0) {
+    showToast('暂无规则', true);
+    return;
+  }
+  
+  const hasEnabled = rules.some(r => r.enabled);
+  if (!hasEnabled) {
+    showToast('所有规则已处于关闭状态', true);
+    return;
+  }
+
+  if (!confirm('确定要关闭所有规则吗？')) return;
+  
+  await sendMessage({ type: 'DISABLE_ALL_RULES' });
+  loadRules();
+  showToast('所有规则已关闭');
 }
