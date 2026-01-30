@@ -239,15 +239,15 @@ body {
 
 .rules-actions {
   display: flex;
-  gap: 10px;
+  gap: 6px;
 }
 
 .btn-icon {
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
   transition: var(--transition);
   display: flex;
@@ -265,8 +265,8 @@ body {
 }
 
 .btn-icon svg {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   transition: var(--transition);
 }
 
@@ -294,7 +294,7 @@ body {
 }
 
 .global-tooltip::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 100%;
   left: 50%;
@@ -489,8 +489,6 @@ body {
   border-color: var(--primary) !important;
   color: white;
 }
-
-
 
 .btn-icon-small {
   width: 24px;
@@ -1014,7 +1012,7 @@ body {
   bottom: 0;
   background-color: var(--bg-dark);
   border: 1px solid var(--border);
-  transition: .4s;
+  transition: 0.4s;
 }
 
 .slider:before {
@@ -1025,7 +1023,7 @@ body {
   left: 2px;
   bottom: 2px;
   background-color: var(--text-secondary);
-  transition: .4s;
+  transition: 0.4s;
 }
 
 .slider.round {
@@ -1050,7 +1048,6 @@ input:checked + .slider:before {
 input:focus + .slider {
   box-shadow: 0 0 1px var(--primary);
 }
-
 
 .header-item select,
 .header-item input {
@@ -1319,7 +1316,6 @@ input:focus + .slider {
   color: #fff;
 }
 
-
 .editor-modal-footer {
   padding: 12px 20px;
   background: var(--bg-dark);
@@ -1474,7 +1470,7 @@ input:focus + .slider {
   border-radius: 8px;
   color: var(--text-primary);
   font-size: 13px;
-  font-family: 'JetBrains Mono', 'Monaco', monospace;
+  font-family: "JetBrains Mono", "Monaco", monospace;
   transition: var(--transition);
 }
 
@@ -1529,7 +1525,7 @@ input:focus + .slider {
   align-items: center;
   justify-content: center;
   transition: var(--transition);
-  font-family: 'JetBrains Mono', 'Monaco', monospace;
+  font-family: "JetBrains Mono", "Monaco", monospace;
 }
 
 .option-btn:hover {
@@ -1645,7 +1641,7 @@ input:focus + .slider {
   pointer-events: none;
   z-index: 1;
   padding: 20px;
-  font-family: 'JetBrains Mono', 'Monaco', monospace;
+  font-family: "JetBrains Mono", "Monaco", monospace;
   font-size: 14px;
   line-height: 1.6;
   white-space: pre-wrap;
@@ -1693,4 +1689,3 @@ input:focus + .slider {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
