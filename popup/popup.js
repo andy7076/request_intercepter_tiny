@@ -13,6 +13,12 @@ const logCount = document.getElementById('log-count');
 const clearLogsBtn = document.getElementById('clear-logs-btn');
 const clearRulesBtn = document.getElementById('clear-rules-btn');
 const disableRulesBtn = document.getElementById('disable-rules-btn');
+const rulesSearchInput = document.getElementById('rules-search-input');
+const clearSearchBtn = document.getElementById('clear-search-btn');
+
+// 搜索状态
+let searchQuery = '';
+let allRules = []; // 缓存所有规则用于搜索
 
 // 响应内容编辑器相关
 const responseBody = document.getElementById('response-body');
@@ -151,6 +157,20 @@ function setupEventListeners() {
   // 关闭所有规则按钮
   if (disableRulesBtn) {
     disableRulesBtn.addEventListener('click', handleDisableRules);
+  }
+  
+  // 搜索功能
+  if (rulesSearchInput) {
+    rulesSearchInput.addEventListener('input', handleSearchInput);
+    rulesSearchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        clearSearch();
+      }
+    });
+  }
+  
+  if (clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', clearSearch);
   }
   
   // JSON 实时验证
@@ -351,21 +371,74 @@ function closeEditorModal() {
 // 加载规则列表
 async function loadRules() {
   const rules = await sendMessage({ type: 'GET_RULES' });
-  renderRules(rules);
+  allRules = rules; // 缓存规则
+  filterAndRenderRules();
+}
+
+// 根据搜索过滤并渲染规则
+function filterAndRenderRules() {
+  if (!searchQuery) {
+    renderRules(allRules);
+    return;
+  }
+  
+  const query = searchQuery.toLowerCase();
+  const filteredRules = allRules.filter(rule => {
+    const nameMatch = rule.name.toLowerCase().includes(query);
+    const urlMatch = rule.urlPattern.toLowerCase().includes(query);
+    return nameMatch || urlMatch;
+  });
+  
+  renderRules(filteredRules, searchQuery);
+}
+
+// 处理搜索输入
+function handleSearchInput(e) {
+  searchQuery = e.target.value.trim();
+  
+  // 显示/隐藏清除按钮
+  if (clearSearchBtn) {
+    clearSearchBtn.classList.toggle('visible', searchQuery.length > 0);
+  }
+  
+  filterAndRenderRules();
+}
+
+// 清除搜索
+function clearSearch() {
+  searchQuery = '';
+  if (rulesSearchInput) {
+    rulesSearchInput.value = '';
+  }
+  if (clearSearchBtn) {
+    clearSearchBtn.classList.remove('visible');
+  }
+  filterAndRenderRules();
 }
 
 // 渲染规则列表
-function renderRules(rules) {
+function renderRules(rules, highlightQuery = '') {
   ruleCount.textContent = rules.length;
   
   if (rules.length === 0) {
-    rulesList.innerHTML = `
-      <div class="empty-state">
-        <span class="empty-icon">📂</span>
-        <p>暂无拦截规则</p>
-        <p class="hint">点击下方或顶部的"添加规则"开启高效调试</p>
-      </div>
-    `;
+    // 区分是搜索无结果还是真的没有规则
+    if (highlightQuery && allRules.length > 0) {
+      rulesList.innerHTML = `
+        <div class="no-search-results">
+          <span class="empty-icon">🔍</span>
+          <p>未找到匹配的规则</p>
+          <p>搜索: <span class="search-query">"${escapeHtml(highlightQuery)}"</span></p>
+        </div>
+      `;
+    } else {
+      rulesList.innerHTML = `
+        <div class="empty-state">
+          <span class="empty-icon">📂</span>
+          <p>暂无拦截规则</p>
+          <p class="hint">点击下方或顶部的"添加规则"开启高效调试</p>
+        </div>
+      `;
+    }
     return;
   }
   
@@ -373,7 +446,7 @@ function renderRules(rules) {
     <div class="rule-card ${rule.enabled ? '' : 'disabled'}" data-id="${rule.id}">
       <div class="rule-header">
         <div class="rule-toggle ${rule.enabled ? 'active' : ''}" data-id="${rule.id}"></div>
-        <span class="rule-name">${escapeHtml(rule.name)}</span>
+        <span class="rule-name">${highlightText(escapeHtml(rule.name), highlightQuery)}</span>
         <button class="btn-icon-small btn-export-icon" data-id="${rule.id}" title="导出规则">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
@@ -382,7 +455,7 @@ function renderRules(rules) {
           </svg>
         </button>
       </div>
-      <div class="rule-url">${escapeHtml(rule.urlPattern)}</div>
+      <div class="rule-url">${highlightText(escapeHtml(rule.urlPattern), highlightQuery)}</div>
       ${renderRuleDetails(rule)}
       <div class="rule-actions">
         <button class="btn-edit" data-id="${rule.id}">编辑</button>
@@ -596,6 +669,15 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+// 高亮搜索匹配文本
+function highlightText(text, query) {
+  if (!query) return text;
+  
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escapedQuery})`, 'gi');
+  return text.replace(regex, '<span class="highlight">$1</span>');
 }
 
 
