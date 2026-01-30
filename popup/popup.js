@@ -11,6 +11,7 @@ const importFile = document.getElementById('import-file');
 const logsList = document.getElementById('logs-list');
 const logCount = document.getElementById('log-count');
 const clearLogsBtn = document.getElementById('clear-logs-btn');
+const clearRulesBtn = document.getElementById('clear-rules-btn');
 
 // 响应内容编辑器相关
 const responseBody = document.getElementById('response-body');
@@ -67,7 +68,13 @@ function setupEventListeners() {
   importFile.addEventListener('change', handleImport);
   
   // 清空日志按钮
+  // 清空日志按钮
   clearLogsBtn.addEventListener('click', handleClearLogs);
+  
+  // 清空规则按钮
+  if (clearRulesBtn) {
+    clearRulesBtn.addEventListener('click', handleClearRules);
+  }
   
   // JSON 实时验证
   responseBody.addEventListener('input', validateJsonRealtime);
@@ -604,3 +611,18 @@ setInterval(() => {
     loadLogs();
   }
 }, 3000);
+
+// 清空所有规则
+async function handleClearRules() {
+  const rules = await sendMessage({ type: 'GET_RULES' });
+  if (rules.length === 0) {
+    showToast('暂无规则可清空', true);
+    return;
+  }
+  
+  if (!confirm('确定要清空所有规则吗？此操作无法撤销。')) return;
+  
+  await sendMessage({ type: 'CLEAR_ALL_RULES' });
+  loadRules();
+  showToast('所有规则已清空');
+}

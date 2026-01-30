@@ -54,6 +54,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
   
+  if (message.type === 'CLEAR_ALL_RULES') {
+    clearAllRules().then(sendResponse);
+    return true;
+  }
+  
   // Content Script 请求获取 mock 规则
   if (message.type === 'GET_MOCK_RULES') {
     getMockRules().then(sendResponse);
@@ -159,6 +164,15 @@ async function deleteRule(ruleId) {
   if (deletedRule && deletedRule.type === 'mockResponse') {
     await notifyMockRulesUpdated();
   }
+  return true;
+}
+
+
+// 清空所有规则
+async function clearAllRules() {
+  await chrome.storage.local.set({ [RULES_STORAGE_KEY]: [] });
+  await applyRules();
+  await notifyMockRulesUpdated();
   return true;
 }
 
