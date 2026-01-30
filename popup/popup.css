@@ -273,6 +273,7 @@ body {
 .rules-list {
   max-height: calc(100vh - 220px);
   overflow-y: auto;
+  padding-right: 4px;
 }
 
 .rules-list::-webkit-scrollbar {
