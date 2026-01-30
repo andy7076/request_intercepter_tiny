@@ -84,6 +84,28 @@ function setupEventListeners() {
     validateJsonRealtime();
   });
   
+  // 处理 Tab 键输入缩进
+  const handleTabKey = (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      
+      const start = e.target.selectionStart;
+      const end = e.target.selectionEnd;
+      
+      // 插入两个空格作为缩进
+      e.target.value = e.target.value.substring(0, start) + '  ' + e.target.value.substring(end);
+      
+      // 移动光标位置
+      e.target.selectionStart = e.target.selectionEnd = start + 2;
+      
+      // 触发 input 事件以更新验证
+      e.target.dispatchEvent(new Event('input'));
+    }
+  };
+
+  responseBody.addEventListener('keydown', handleTabKey);
+  modalTextarea.addEventListener('keydown', handleTabKey);
+  
   // 放大编辑器
   expandEditor.addEventListener('click', openEditorModal);
   modalClose.addEventListener('click', closeEditorModal);
