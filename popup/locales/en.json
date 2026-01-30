@@ -1,0 +1,116 @@
+{
+  "title": "Cassini - Request Interceptor",
+  "subtitle": "Lightweight Mock Development Tool",
+  "tabs": {
+    "rules": "Rules",
+    "logs": "Logs",
+    "add": "Add Rule"
+  },
+  "rules": {
+    "title": "Rule Management",
+    "count_label": "Total: ",
+    "add_btn": "Add Rule",
+    "clear_all": "Clear All",
+    "disable_all": "Disable All",
+    "import": "Import",
+    "export": "Export",
+    "empty": {
+      "title": "No Rules",
+      "hint": "Click \"Add Rule\" to start mocks"
+    },
+    "card": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "export_title": "Export Rule",
+      "expand": "Expand",
+      "collapse": "Collapse",
+      "mock_tag": "Mock"
+    },
+    "confirm_delete": "Are you sure you want to delete this rule?",
+    "confirm_clear_all": "Are you sure you want to clear all rules? This cannot be undone.",
+    "confirm_disable_all": "Are you sure you want to disable all rules?",
+    "confirm_import": "Are you sure you want to import {count} rules?\nThey will be added to your current rules.",
+    "status": {
+      "updated": "Rule status updated",
+      "deleted": "Rule deleted",
+      "added": "Rule added",
+      "updated_full": "Rule updated",
+      "cleared": "All rules cleared",
+      "disabled": "All rules disabled",
+      "no_rules_clear": "No rules to clear",
+      "no_rules_disable": "All rules already disabled",
+      "no_rules_export": "No rules to export",
+      "import_success": "Imported {count} rules",
+      "import_failed": "Import failed: {error}",
+      "export_success": "Exported {count} rules",
+      "export_single_success": "Exported rule: {name}",
+      "rule_not_found": "Rule not found"
+    }
+  },
+  "logs": {
+    "title": "Network Logs",
+    "count_label": "Total: ",
+    "clear_btn": "Clear Logs",
+    "empty": {
+      "title": "No Logs",
+      "hint": "Matched requests will appear here in real-time"
+    },
+    "confirm_clear": "Are you sure you want to clear all logs?",
+    "status": {
+      "cleared": "Logs cleared"
+    }
+  },
+  "form": {
+    "add_title": "Add Mock Rule",
+    "edit_title": "Edit Mock Rule",
+    "name_label": "Rule Name",
+    "name_placeholder": "e.g., Get User Info",
+    "url_label": "URL Pattern (Supports * wildcard)",
+    "url_placeholder": "e.g., https://api.example.com/user/*",
+    "url_hint": "Supports * wildcard to match any characters",
+    "response_label": "Response Content (JSON)",
+    "response_hint": "Input JSON response content",
+    "submit_add": "Add Rule",
+    "submit_update": "Update Rule",
+    "cancel": "Cancel",
+    "validation": {
+      "json_valid": "✓ JSON format is valid",
+      "json_invalid_type": "✗ JSON object {} or array [] required",
+      "json_invalid_pos": "✗ JSON format error (position {pos})",
+      "json_invalid": "✗ JSON format error",
+      "enter_json": "Please enter valid JSON format",
+      "enter_content": "Please enter response content"
+    },
+    "expand_editor": "Expand Editor",
+    "search_replace": "Search & Replace (Ctrl+F)",
+    "close": "Close (Esc)"
+  },
+  "settings": {
+    "title": "Settings",
+    "console_log": "Enable Console Logs",
+    "console_log_desc": "Show debug info in browser console",
+    "language": "Language",
+    "language_desc": "Select Interface Language",
+    "status": {
+      "log_enabled": "Console logs enabled",
+      "log_disabled": "Console logs disabled"
+    }
+  },
+  "common": {
+    "open_in_tab": "Open in New Tab"
+  },
+  "search": {
+    "placeholder": "Search...",
+    "replace_placeholder": "Replace...",
+    "match_case": "Match Case (Alt+C)",
+    "match_word": "Match Whole Word (Alt+W)",
+    "match_regex": "Use Regular Expression (Alt+R)",
+    "prev": "Previous Match (Shift+Enter)",
+    "next": "Next Match (Enter)",
+    "close": "Close (Esc)",
+    "replace": "Replace",
+    "replace_all": "Replace All",
+    "no_results": "No results",
+    "replaced_count": "Replaced {count} occurrences"
+  }
+}
