@@ -181,7 +181,7 @@ async function clearAllRules() {
   return true;
 }
 
-// 禁用所有规则
+// 关闭所有规则
 async function disableAllRules() {
   const rules = await getRules();
   const updatedRules = rules.map(rule => ({ ...rule, enabled: false }));

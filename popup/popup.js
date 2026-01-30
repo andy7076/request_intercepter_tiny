@@ -42,7 +42,78 @@ document.addEventListener('DOMContentLoaded', () => {
   loadLogs();
   loadSettings();
   setupEventListeners();
+  initGlobalTooltip();
 });
+
+// 初始化全局悬浮提示
+function initGlobalTooltip() {
+  // 创建提示元素
+  let tooltip = document.getElementById('global-tooltip');
+  if (!tooltip) {
+    tooltip = document.createElement('div');
+    tooltip.id = 'global-tooltip';
+    tooltip.className = 'global-tooltip';
+    document.body.appendChild(tooltip);
+  }
+
+  // 事件委托处理鼠标悬停
+  document.body.addEventListener('mouseover', (e) => {
+    // 查找最近的带有 title 或 data-tooltip 的目标元素
+    // 同时必须是指定的按钮类型
+    const target = e.target.closest('.btn-icon, .btn-icon-small, .btn-open-tab, .rule-toggle');
+    
+    if (!target) return;
+
+    // 处理 title 属性（防止原生提示并获取内容）
+    let text = target.getAttribute('data-tooltip');
+    if (!text && target.hasAttribute('title')) {
+      text = target.getAttribute('title');
+      target.setAttribute('data-tooltip', text);
+      target.removeAttribute('title');
+    }
+
+    if (text) {
+      const rect = target.getBoundingClientRect();
+      
+      tooltip.textContent = text;
+      
+      // Determine position (default top, switch to bottom if too close to top edge)
+      const spaceAbove = rect.top;
+      const isTooCloseToTop = spaceAbove < 40; // Threshold for switching direction
+      
+      if (isTooCloseToTop) {
+        tooltip.classList.add('bottom');
+        // Position below
+        const left = rect.left + rect.width / 2;
+        const top = rect.bottom;
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+      } else {
+        tooltip.classList.remove('bottom');
+        // Position above
+        const left = rect.left + rect.width / 2;
+        const top = rect.top;
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+      }
+      
+      tooltip.classList.add('visible');
+    }
+  });
+
+  // 鼠标移出时隐藏
+  document.body.addEventListener('mouseout', (e) => {
+    const target = e.target.closest('.btn-icon, .btn-icon-small, .btn-open-tab, .rule-toggle');
+    if (target) {
+      tooltip.classList.remove('visible');
+    }
+  });
+  
+  // 滚动时隐藏，防止位置错乱
+  document.addEventListener('scroll', () => {
+    tooltip.classList.remove('visible');
+  }, true);
+}
 
 // 设置事件监听
 function setupEventListeners() {
@@ -77,7 +148,7 @@ function setupEventListeners() {
     clearRulesBtn.addEventListener('click', handleClearRules);
   }
 
-  // 禁用所有规则按钮
+  // 关闭所有规则按钮
   if (disableRulesBtn) {
     disableRulesBtn.addEventListener('click', handleDisableRules);
   }
@@ -700,7 +771,7 @@ async function handleClearRules() {
   showToast('所有规则已清空');
 }
 
-// 禁用所有规则
+// 关闭所有规则
 async function handleDisableRules() {
   const rules = await sendMessage({ type: 'GET_RULES' });
   if (rules.length === 0) {
