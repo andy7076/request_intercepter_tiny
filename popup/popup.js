@@ -275,6 +275,13 @@ function renderRules(rules) {
       <div class="rule-header">
         <div class="rule-toggle ${rule.enabled ? 'active' : ''}" data-id="${rule.id}"></div>
         <span class="rule-name">${escapeHtml(rule.name)}</span>
+        <button class="btn-icon-small btn-export-icon" data-id="${rule.id}" title="导出规则">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+            <polyline points="16 6 12 2 8 6"></polyline>
+            <line x1="12" y1="2" x2="12" y2="15"></line>
+          </svg>
+        </button>
       </div>
       <div class="rule-url">${escapeHtml(rule.urlPattern)}</div>
       ${renderRuleDetails(rule)}
@@ -296,6 +303,13 @@ function renderRules(rules) {
   
   rulesList.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', () => handleDelete(btn.dataset.id));
+  });
+
+  rulesList.querySelectorAll('.btn-export-icon').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent toggling rule when clicking export
+      handleExportRule(btn.dataset.id);
+    });
   });
   
   // 绑定展开/收起按钮事件
@@ -511,6 +525,37 @@ async function handleExport() {
   
   URL.revokeObjectURL(url);
   showToast(`已导出 ${rules.length} 条规则`);
+}
+
+// 导出单条规则
+async function handleExportRule(ruleId) {
+  const rules = await sendMessage({ type: 'GET_RULES' });
+  const rule = rules.find(r => r.id === ruleId);
+  
+  if (!rule) {
+    showToast('规则不存在', true);
+    return;
+  }
+  
+  // 保持与整体导出相同的格式，但只包含一条规则
+  const exportData = {
+    version: '1.0.0',
+    exportedAt: new Date().toISOString(),
+    rules: [rule]
+  };
+  
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement('a');
+  a.href = url;
+  // 文件名包含规则名称，对其进行清理以作为合法文件名
+  const safeName = rule.name.replace(/[\\/:*?"<>|]/g, '_').substring(0, 30);
+  a.download = `rule-${safeName}-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  
+  URL.revokeObjectURL(url);
+  showToast(`已导出规则: ${rule.name}`);
 }
 
 // 导入规则

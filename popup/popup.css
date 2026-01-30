@@ -445,6 +445,28 @@ body {
   color: white;
 }
 
+
+
+.btn-icon-small {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.btn-icon-small:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--primary);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
 .btn-delete {
   background: var(--danger-bg);
   color: var(--danger);
