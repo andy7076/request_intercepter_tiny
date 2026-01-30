@@ -226,20 +226,27 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  gap: 12px;
 }
 
 .rules-count {
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 12px;
   background: var(--bg-card);
-  padding: 4px 12px;
+  padding: 6px 12px;
   border-radius: 20px;
   border: 1px solid var(--border);
+  white-space: nowrap;
+  flex-shrink: 0;
+  height: 30px;
+  display: flex;
+  align-items: center;
 }
 
 .rules-actions {
   display: flex;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 /* Rules Search */
@@ -248,8 +255,7 @@ body {
   display: flex;
   align-items: center;
   flex: 1;
-  max-width: 220px;
-  margin: 0 12px;
+  min-width: 0;
 }
 
 .rules-search .search-icon {
@@ -262,7 +268,8 @@ body {
 
 .rules-search input {
   width: 100%;
-  padding: 6px 30px 6px 32px;
+  height: 30px;
+  padding: 0 30px 0 32px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 20px;
