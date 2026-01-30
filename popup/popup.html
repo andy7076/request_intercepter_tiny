@@ -29,6 +29,12 @@
               </svg>
               <span>完整视图</span>
             </button>
+            <button type="button" id="settings-btn" class="btn-icon-header" title="设置">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+            </button>
           </div>
         </div>
       </header>
@@ -210,6 +216,28 @@
         <div class="json-status">
           <span id="modal-json-status-indicator" class="json-status-indicator"></span>
           <span id="modal-json-status-text" class="hint">输入要返回的 JSON 响应内容</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 设置模态框 -->
+    <div id="settings-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>⚙️ 设置</h3>
+          <button type="button" id="settings-close" class="btn-modal-close" title="关闭">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-title">控制台日志</span>
+              <span class="setting-desc">在浏览器控制台中显示请求拦截的调试信息</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="setting-console-log">
+              <span class="slider round"></span>
+            </label>
+          </div>
         </div>
       </div>
     </div>

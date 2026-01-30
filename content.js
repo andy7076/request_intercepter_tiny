@@ -1,5 +1,15 @@
 // Content Script - 拦截和修改网络请求响应
 
+
+// 日志控制
+let consoleLogsEnabled = false;
+
+function log(...args) {
+  if (consoleLogsEnabled) {
+    console.log(...args);
+  }
+}
+
 // 存储 mock 规则
 let mockRules = [];
 let isInitialized = false;
@@ -16,9 +26,9 @@ function loadMockRules() {
       const allRules = result.interceptRules || [];
       // 过滤出启用的规则
       mockRules = allRules.filter(r => r.enabled);
-      console.log('[Request Interceptor Tiny] ✅ 已加载 mock 规则:', mockRules.length);
+      log('[Request Interceptor Tiny] ✅ 已加载 mock 规则:', mockRules.length);
       if (mockRules.length > 0) {
-        console.log('[Request Interceptor Tiny] 📋 规则列表:', mockRules.map(r => ({
+        log('[Request Interceptor Tiny] 📋 规则列表:', mockRules.map(r => ({
           name: r.name,
           pattern: r.urlPattern
         })));
@@ -29,11 +39,26 @@ function loadMockRules() {
   });
 }
 
-// 初始化加载规则
-console.log('[Request Interceptor Tiny] 🚀 Content Script 开始初始化...');
+// 加载设置
+function loadSettings() {
+  chrome.storage.local.get(['consoleLogs'], (result) => {
+    // 更新本地状态
+    consoleLogsEnabled = result.consoleLogs || false;
+    
+    // 通知注入脚本
+    window.postMessage({
+      type: 'CONSOLE_LOGS_UPDATED',
+      enabled: consoleLogsEnabled
+    }, '*');
+  });
+}
+
+// 初始化加载规则和设置
+log('[Request Interceptor Tiny] 🚀 Content Script 开始初始化...');
 loadMockRules().then(() => {
-  console.log('[Request Interceptor Tiny] ✨ 初始化完成,准备拦截请求');
+  log('[Request Interceptor Tiny] ✨ 初始化完成,准备拦截请求');
 });
+loadSettings();
 
 // 监听 storage 变化 - 规则更新时自动重新加载
 chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -41,13 +66,25 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     const allRules = changes['interceptRules'].newValue || [];
     // 过滤出启用的规则
     mockRules = allRules.filter(r => r.enabled);
-    console.log('[Request Interceptor Tiny] 规则已更新:', mockRules.length);
-    console.log('[Request Interceptor Tiny] 当前启用的规则:', mockRules.map(r => r.name));
+    log('[Request Interceptor Tiny] 规则已更新:', mockRules.length);
+    log('[Request Interceptor Tiny] 当前启用的规则:', mockRules.map(r => r.name));
     
     // 通知页面规则已更新
     window.postMessage({
       type: 'REQUEST_INTERCEPTOR_RULES_UPDATED',
       rulesCount: mockRules.length
+    }, '*');
+  }
+
+
+  if (areaName === 'local' && changes['consoleLogs']) {
+    const enabled = changes['consoleLogs'].newValue;
+    // 更新本地状态
+    consoleLogsEnabled = enabled;
+    
+    window.postMessage({
+      type: 'CONSOLE_LOGS_UPDATED',
+      enabled: enabled
     }, '*');
   }
 });
@@ -56,7 +93,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'MOCK_RULES_UPDATED') {
     mockRules = message.rules || [];
-    console.log('[Request Interceptor Tiny] 收到规则更新消息:', mockRules.length);
+    log('[Request Interceptor Tiny] 收到规则更新消息:', mockRules.length);
   }
 });
 
@@ -131,8 +168,8 @@ window.addEventListener('message', (event) => {
   if (event.data.type === 'REQUEST_INTERCEPTOR_CHECK') {
     const { url, requestId } = event.data;
     
-    console.log('[Request Interceptor Tiny] 检查URL:', url);
-    console.log('[Request Interceptor Tiny] 当前规则数量:', mockRules.length);
+    log('[Request Interceptor Tiny] 检查URL:', url);
+    log('[Request Interceptor Tiny] 当前规则数量:', mockRules.length);
     
     // 检查扩展上下文是否有效
     if (!isContextValid()) {
@@ -145,7 +182,7 @@ window.addEventListener('message', (event) => {
     }
     
     const mockRule = findMockRule(url);
-    console.log('[Request Interceptor Tiny] 匹配结果:', mockRule ? `匹配到规则: ${mockRule.name}` : '无匹配规则');
+    log('[Request Interceptor Tiny] 匹配结果:', mockRule ? `匹配到规则: ${mockRule.name}` : '无匹配规则');
     
     if (mockRule) {
       // 发送 mock 响应

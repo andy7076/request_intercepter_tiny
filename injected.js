@@ -4,6 +4,15 @@
 (function() {
   'use strict';
   
+  // 日志控制
+  let consoleLogsEnabled = false;
+  
+  function log(...args) {
+    if (consoleLogsEnabled) {
+      console.log(...args);
+    }
+  }
+  
   // 生成唯一 ID
   let requestIdCounter = 0;
   function generateRequestId() {
@@ -56,8 +65,16 @@
     
     // 监听规则更新通知
     if (event.data.type === 'REQUEST_INTERCEPTOR_RULES_UPDATED') {
-      console.log(`[Request Interceptor Tiny] 🔄 规则已更新! 当前启用规则数: ${event.data.rulesCount}`);
-      console.log('[Request Interceptor Tiny] 💡 新的请求将使用更新后的规则');
+      log(`[Request Interceptor Tiny] 🔄 规则已更新! 当前启用规则数: ${event.data.rulesCount}`);
+      log('[Request Interceptor Tiny] 💡 新的请求将使用更新后的规则');
+    }
+    
+    // 监听日志设置更新
+    if (event.data.type === 'CONSOLE_LOGS_UPDATED') {
+      consoleLogsEnabled = event.data.enabled;
+      if (consoleLogsEnabled) {
+        log('[Request Interceptor Tiny] 📝 控制台日志已开启');
+      }
     }
   });
   
@@ -101,7 +118,7 @@
       const mockResponse = await checkMockRule(url);
       
       if (mockResponse) {
-        console.log('[Request Interceptor Tiny] 🎭 Will mock fetch response:', url);
+        log('[Request Interceptor Tiny] 🎭 Will mock fetch response:', url);
         
         // 发出真实请求（Network 面板显示原始请求和响应）
         const realResponse = await originalFetch.apply(this, arguments);
@@ -121,7 +138,7 @@
           type: { value: realResponse.type }
         });
         
-        console.log('[Request Interceptor Tiny] ✅ Response mocked for:', url);
+        log('[Request Interceptor Tiny] ✅ Response mocked for:', url);
         
         return mockedResponse;
       }
@@ -164,7 +181,7 @@
     // 异步检查 mock 规则
     checkMockRule(url).then(mockResponse => {
       if (mockResponse) {
-        console.log('[Request Interceptor Tiny] 🎭 Will mock XHR response:', url);
+        log('[Request Interceptor Tiny] 🎭 Will mock XHR response:', url);
         
         // 保存原始的事件处理器
         const originalOnReadyStateChange = xhr.onreadystatechange;
@@ -178,7 +195,7 @@
         xhr.onreadystatechange = function() {
           if (xhr.readyState === 4 && xhr._mockResponse) {
             // 在请求完成后，覆盖响应属性（Network 面板显示原始响应，代码读取 mock 数据）
-            console.log('[Request Interceptor Tiny] ✅ Response mocked for XHR:', url);
+            log('[Request Interceptor Tiny] ✅ Response mocked for XHR:', url);
             const mock = xhr._mockResponse;
             
             try {
@@ -257,5 +274,5 @@
     });
   };
   
-  console.log('[Request Interceptor Tiny] 🚀 Injected script loaded - Network shows original responses, page displays mocked content');
+  log('[Request Interceptor Tiny] 🚀 Injected script loaded - Network shows original responses, page displays mocked content');
 })();

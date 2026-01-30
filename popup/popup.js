@@ -28,10 +28,17 @@ let editorSearchReplace = null;
 
 let editingRuleId = null;
 
-// 初始化
+// Settings elements
+const settingsBtn = document.getElementById('settings-btn');
+const settingsModal = document.getElementById('settings-modal');
+const settingsClose = document.getElementById('settings-close');
+const settingConsoleLog = document.getElementById('setting-console-log');
+
+// Init
 document.addEventListener('DOMContentLoaded', () => {
   loadRules();
   loadLogs();
+  loadSettings();
   setupEventListeners();
 });
 
@@ -101,6 +108,47 @@ function setupEventListeners() {
       chrome.tabs.create({ url: chrome.runtime.getURL('popup/popup.html') });
     });
   }
+
+  // Settings Modal
+  if (settingsBtn) {
+    settingsBtn.addEventListener('click', () => {
+      settingsModal.classList.add('active');
+    });
+  }
+
+  if (settingsClose) {
+    settingsClose.addEventListener('click', () => {
+      settingsModal.classList.remove('active');
+    });
+  }
+
+  // Close modal when clicking outside
+  if (settingsModal) {
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target === settingsModal) {
+        settingsModal.classList.remove('active');
+      }
+    });
+  }
+
+  // Console Log Toggle
+  if (settingConsoleLog) {
+    settingConsoleLog.addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      chrome.storage.local.set({ consoleLogs: enabled }, () => {
+        showToast(enabled ? '控制台日志已开启' : '控制台日志已关闭');
+      });
+    });
+  }
+}
+
+// Load Settings
+function loadSettings() {
+  chrome.storage.local.get(['consoleLogs'], (result) => {
+    if (settingConsoleLog) {
+      settingConsoleLog.checked = result.consoleLogs || false;
+    }
+  });
 }
 
 // 切换Tab
