@@ -1849,3 +1849,125 @@ input:focus + .slider {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* ========================================
+   Renderjson Theme Styles
+   ======================================== */
+.renderjson {
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: "JetBrains Mono", "Monaco", Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  background: transparent;
+}
+
+/* Disclosure icons (expand/collapse) */
+.renderjson a.disclosure {
+  text-decoration: none;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: bold;
+  padding: 0 4px;
+  cursor: pointer;
+  transition: var(--transition);
+  border-radius: 3px;
+}
+
+.renderjson a.disclosure:hover {
+  background: rgba(99, 102, 241, 0.2);
+  color: var(--primary-light);
+}
+
+/* Clickable placeholder for collapsed content */
+.renderjson a:not(.disclosure) {
+  text-decoration: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-style: italic;
+  transition: var(--transition);
+}
+
+.renderjson a:not(.disclosure):hover {
+  color: var(--primary-light);
+  text-decoration: underline;
+}
+
+/* Syntax elements: braces, brackets, colons, commas */
+.renderjson .syntax {
+  color: var(--text-secondary);
+}
+
+.renderjson .object.syntax,
+.renderjson .array.syntax {
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+/* String values */
+.renderjson .string {
+  color: #86efac;
+}
+
+/* Number values */
+.renderjson .number {
+  color: #fbbf24;
+}
+
+/* Boolean values */
+.renderjson .boolean {
+  color: #c084fc;
+  font-weight: 600;
+}
+
+/* Object keys */
+.renderjson .key {
+  color: #7dd3fc;
+}
+
+/* Keywords: null, undefined */
+.renderjson .keyword {
+  color: #f472b6;
+  font-weight: 600;
+  font-style: italic;
+}
+
+/* Response content container with renderjson */
+.response-content .renderjson-container {
+  max-height: 300px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) rgba(0, 0, 0, 0.2);
+}
+
+.response-content .renderjson-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.response-content .renderjson-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.response-content .renderjson-container::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 3px;
+}
+
+/* Collapsed state hides renderjson container */
+.response-content.collapsed .renderjson-container {
+  display: none;
+}
+
+.response-content:not(.collapsed) .renderjson-container {
+  display: block;
+}
+
+/* JSON parse error fallback styling */
+.json-error-fallback {
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-all;
+}

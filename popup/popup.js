@@ -607,6 +607,13 @@ function renderRules(rules, highlightQuery = '') {
       }
     });
   });
+  
+  // 初始化 renderjson 渲染每个规则的 JSON
+  rules.forEach(rule => {
+    if (rule.responseBody) {
+      initRenderjson(rule);
+    }
+  });
 }
 
 // 渲染规则详情
@@ -615,7 +622,6 @@ function renderRuleDetails(rule) {
     const preview = rule.responseBody.length > 60 
       ? rule.responseBody.substring(0, 60) + '...' 
       : rule.responseBody;
-    const fullContent = rule.responseBody;
     const needsExpand = rule.responseBody.length > 60;
     
     return `
@@ -629,13 +635,33 @@ function renderRuleDetails(rule) {
         </div>
         <div class="response-content collapsed" data-content-id="${rule.id}">
           <div class="response-preview-text">${escapeHtml(preview)}</div>
-          <div class="response-full-text">${escapeHtml(fullContent)}</div>
+          <div class="renderjson-container" data-json-id="${rule.id}"></div>
         </div>
       </div>
     `;
   }
   
   return '';
+}
+
+// 初始化 renderjson 渲染
+function initRenderjson(rule) {
+  const container = document.querySelector(`.renderjson-container[data-json-id="${rule.id}"]`);
+  if (!container) return;
+  
+  try {
+    const jsonData = JSON.parse(rule.responseBody);
+    // 配置 renderjson
+    renderjson.set_show_to_level(1); // 默认展开第一层
+    renderjson.set_max_string_length(100); // 长字符串截断
+    renderjson.set_sort_objects(false);
+    
+    const rendered = renderjson(jsonData);
+    container.appendChild(rendered);
+  } catch (e) {
+    // JSON 解析失败，显示纯文本
+    container.innerHTML = `<pre class="json-error-fallback">${escapeHtml(rule.responseBody)}</pre>`;
+  }
 }
 
 
