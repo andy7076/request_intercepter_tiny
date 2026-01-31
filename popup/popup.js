@@ -590,24 +590,6 @@ function renderRules(rules, highlightQuery = '') {
     });
   });
   
-  // 绑定展开/收起按钮事件
-  rulesList.querySelectorAll('.btn-expand-preview').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const ruleId = btn.dataset.ruleId;
-      const content = document.querySelector(`.response-content[data-content-id="${ruleId}"]`);
-      const icon = btn.querySelector('.expand-icon');
-      const text = btn.querySelector('.expand-text');
-      
-      if (content) {
-        const isCollapsed = content.classList.contains('collapsed');
-        content.classList.toggle('collapsed', !isCollapsed);
-        icon.textContent = isCollapsed ? '▼' : '▶';
-        text.textContent = isCollapsed ? window.i18n.t('collapse') : window.i18n.t('expand');
-      }
-    });
-  });
-  
   // 初始化 renderjson 渲染每个规则的 JSON
   rules.forEach(rule => {
     if (rule.responseBody) {
@@ -619,22 +601,12 @@ function renderRules(rules, highlightQuery = '') {
 // 渲染规则详情
 function renderRuleDetails(rule) {
   if (rule.responseBody) {
-    const preview = rule.responseBody.length > 60 
-      ? rule.responseBody.substring(0, 60) + '...' 
-      : rule.responseBody;
-    const needsExpand = rule.responseBody.length > 60;
-    
     return `
       <div class="rule-details response-preview" data-rule-id="${rule.id}">
         <div class="response-header">
           <span class="content-type-label">application/json</span>
-          ${needsExpand ? `<button type="button" class="btn-expand-preview" data-rule-id="${rule.id}">
-            <span class="expand-icon">▶</span>
-            <span class="expand-text">${window.i18n.t('expand')}</span>
-          </button>` : ''}
         </div>
-        <div class="response-content collapsed" data-content-id="${rule.id}">
-          <div class="response-preview-text">${escapeHtml(preview)}</div>
+        <div class="response-content" data-content-id="${rule.id}">
           <div class="renderjson-container" data-json-id="${rule.id}"></div>
         </div>
       </div>

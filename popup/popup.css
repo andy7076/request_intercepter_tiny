@@ -633,7 +633,7 @@ body {
   color: white;
 }
 
-/* Response Preview - Collapsible */
+/* Response Preview */
 .response-preview {
   font-size: 12px;
   color: var(--text-muted);
@@ -652,32 +652,6 @@ body {
   font-size: 11px;
 }
 
-.btn-expand-preview {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  background: rgba(99, 102, 241, 0.1);
-  border: 1px solid rgba(99, 102, 241, 0.3);
-  border-radius: 6px;
-  color: var(--primary-light);
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.btn-expand-preview:hover {
-  background: rgba(99, 102, 241, 0.2);
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-.expand-icon {
-  font-size: 8px;
-  transition: transform 0.2s ease;
-}
-
 .response-content {
   padding: 10px 12px;
   background: rgba(0, 0, 0, 0.3);
@@ -687,42 +661,24 @@ body {
   line-height: 1.5;
   border: 1px solid rgba(255, 255, 255, 0.05);
   overflow: hidden;
-  transition: max-height 0.3s ease;
-}
-
-.response-content.collapsed .response-preview-text {
-  display: block;
-}
-
-.response-content.collapsed .response-full-text {
-  display: none;
-}
-
-.response-content:not(.collapsed) .response-preview-text {
-  display: none;
-}
-
-.response-content:not(.collapsed) .response-full-text {
-  display: block;
-  white-space: pre-wrap;
-  word-break: break-all;
   max-height: 300px;
   overflow-y: auto;
 }
 
-.response-content:not(.collapsed) .response-full-text::-webkit-scrollbar {
+.response-content::-webkit-scrollbar {
   width: 6px;
 }
 
-.response-content:not(.collapsed) .response-full-text::-webkit-scrollbar-track {
+.response-content::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 3px;
 }
 
-.response-content:not(.collapsed) .response-full-text::-webkit-scrollbar-thumb {
+.response-content::-webkit-scrollbar-thumb {
   background: var(--primary);
   border-radius: 3px;
 }
+
 
 /* Form Styles */
 #rule-form {
@@ -1954,15 +1910,6 @@ input:focus + .slider {
 .response-content .renderjson-container::-webkit-scrollbar-thumb {
   background: var(--primary);
   border-radius: 3px;
-}
-
-/* Collapsed state hides renderjson container */
-.response-content.collapsed .renderjson-container {
-  display: none;
-}
-
-.response-content:not(.collapsed) .renderjson-container {
-  display: block;
 }
 
 /* JSON parse error fallback styling */
