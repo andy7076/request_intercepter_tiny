@@ -11,6 +11,9 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="popup.css" />
+    <!-- CodeMirror 样式 -->
+    <link rel="stylesheet" href="lib/codemirror/codemirror.css" />
+    <link rel="stylesheet" href="lib/codemirror/addon/fold/foldgutter.css" />
   </head>
   <body>
     <div class="container">
@@ -474,6 +477,12 @@
     </div>
 
     <script src="lib/renderjson.js"></script>
+    <!-- CodeMirror 核心和插件 -->
+    <script src="lib/codemirror/codemirror.js"></script>
+    <script src="lib/codemirror/mode/javascript/javascript.js"></script>
+    <script src="lib/codemirror/addon/fold/foldcode.js"></script>
+    <script src="lib/codemirror/addon/fold/foldgutter.js"></script>
+    <script src="lib/codemirror/addon/fold/brace-fold.js"></script>
     <script src="i18n.js"></script>
     <script src="editorSearchReplace.js"></script>
     <script src="popup.js"></script>

@@ -35,6 +35,10 @@ const editorModalContent = document.getElementById('editor-modal-content');
 // 搜索替换实例
 let editorSearchReplace = null;
 
+// CodeMirror 编辑器实例
+let formCodeMirror = null;
+let modalCodeMirror = null;
+
 let editingRuleId = null;
 let currentEditingRuleData = null; // Store original data for restore
 
@@ -57,6 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
   initGlobalTooltip();
   initLanguageSelector();
+  initCodeMirrorEditors(); // 初始化 CodeMirror 编辑器
   checkViewMode();
 });
 
@@ -89,6 +94,137 @@ function initLanguageSelector() {
       loadLogs();
     });
   }
+}
+
+// 初始化 CodeMirror 编辑器
+function initCodeMirrorEditors() {
+  // 检查 CodeMirror 是否加载成功
+  if (typeof CodeMirror === 'undefined') {
+    console.warn('[Request Interceptor Tiny]', 'CodeMirror not loaded, falling back to textarea');
+    return;
+  }
+
+  // CodeMirror 通用配置
+  const commonConfig = {
+    mode: { name: 'javascript', json: true },
+    lineNumbers: true,
+    lineWrapping: true,
+    matchBrackets: true,
+    autoCloseBrackets: true,
+    foldGutter: true,
+    gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
+    indentUnit: 2,
+    tabSize: 2,
+    indentWithTabs: false,
+    extraKeys: {
+      'Tab': (cm) => {
+        cm.replaceSelection('  ', 'end');
+      }
+    }
+  };
+
+  // 初始化表单内的 CodeMirror 编辑器
+  initFormCodeMirror(commonConfig);
+}
+
+// 初始化表单内的 CodeMirror
+function initFormCodeMirror(config) {
+  const textarea = document.getElementById('response-body');
+  if (!textarea || formCodeMirror) return;
+
+  // 创建包装容器
+  const wrapper = document.createElement('div');
+  wrapper.className = 'codemirror-wrapper';
+  textarea.parentNode.insertBefore(wrapper, textarea);
+  
+  // 隐藏原始 textarea
+  textarea.classList.add('cm-hidden');
+  
+  // 初始化 CodeMirror
+  formCodeMirror = CodeMirror(wrapper, {
+    ...config,
+    value: textarea.value || '',
+    placeholder: textarea.placeholder
+  });
+
+  // 同步内容到隐藏的 textarea
+  formCodeMirror.on('change', (cm) => {
+    textarea.value = cm.getValue();
+    validateJsonRealtime();
+  });
+}
+
+// 初始化全屏模态框的 CodeMirror
+function initModalCodeMirror() {
+  if (typeof CodeMirror === 'undefined') return null;
+
+  const modalContent = document.getElementById('editor-modal-content');
+  const modalTextarea = document.getElementById('modal-textarea');
+  if (!modalContent || !modalTextarea) return null;
+
+  // 创建包装容器
+  const wrapper = document.createElement('div');
+  wrapper.className = 'codemirror-wrapper';
+  wrapper.id = 'modal-codemirror-wrapper';
+  
+  // 将包装容器插入到搜索组件之后、textarea 之前
+  modalContent.insertBefore(wrapper, modalTextarea);
+  
+  // 隐藏原始 textarea
+  modalTextarea.classList.add('cm-hidden');
+
+  // 初始化 CodeMirror
+  const cm = CodeMirror(wrapper, {
+    mode: { name: 'javascript', json: true },
+    lineNumbers: true,
+    lineWrapping: true,
+    matchBrackets: true,
+    autoCloseBrackets: true,
+    foldGutter: true,
+    gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
+    indentUnit: 2,
+    tabSize: 2,
+    indentWithTabs: false,
+    value: '',
+    extraKeys: {
+      'Tab': (cm) => {
+        cm.replaceSelection('  ', 'end');
+      },
+      'Ctrl-F': () => {
+        // 打开搜索替换
+        if (editorSearchReplace) {
+          editorSearchReplace.show();
+        }
+      },
+      'Cmd-F': () => {
+        // Mac 支持
+        if (editorSearchReplace) {
+          editorSearchReplace.show();
+        }
+      }
+    }
+  });
+
+  // 同步内容到隐藏的 textarea 和表单
+  cm.on('change', (editor) => {
+    const value = editor.getValue();
+    modalTextarea.value = value;
+    
+    // 同步到表单编辑器
+    const responseBody = document.getElementById('response-body');
+    if (responseBody) {
+      responseBody.value = value;
+    }
+    
+    // 同步到表单的 CodeMirror
+    if (formCodeMirror && formCodeMirror.getValue() !== value) {
+      formCodeMirror.setValue(value);
+    }
+    
+    validateJsonRealtime();
+  });
+
+  return cm;
 }
 
 // 初始化全局悬浮提示
@@ -213,6 +349,10 @@ function setupEventListeners() {
         document.getElementById('rule-name').value = currentEditingRuleData.name;
         document.getElementById('url-pattern').value = currentEditingRuleData.urlPattern;
         document.getElementById('response-body').value = currentEditingRuleData.responseBody || '';
+        // 同步到 CodeMirror 编辑器
+        if (formCodeMirror) {
+          formCodeMirror.setValue(currentEditingRuleData.responseBody || '');
+        }
         validateJsonRealtime();
         showToast(window.i18n.t('resetDone'));
       } else {
@@ -255,15 +395,20 @@ function setupEventListeners() {
     clearSearchBtn.addEventListener('click', clearSearch);
   }
   
-  // JSON 实时验证
+  // JSON 实时验证（CodeMirror 有自己的 change 事件处理，这里作为回退）
   responseBody.addEventListener('input', validateJsonRealtime);
   modalTextarea.addEventListener('input', () => {
-    // 同步到主输入框并验证
-    responseBody.value = modalTextarea.value;
+    // 同步到主输入框并验证（如果没有使用 CodeMirror）
+    if (!modalCodeMirror) {
+      responseBody.value = modalTextarea.value;
+      if (formCodeMirror) {
+        formCodeMirror.setValue(modalTextarea.value);
+      }
+    }
     validateJsonRealtime();
   });
   
-  // 处理 Tab 键输入缩进
+  // 处理 Tab 键输入缩进（CodeMirror 有自己的 Tab 处理，这里作为回退）
   const handleTabKey = (e) => {
     if (e.key === 'Tab') {
       e.preventDefault();
@@ -404,7 +549,8 @@ function validateJsonRealtime() {
   if (mainIndicator && mainStatusText) targets.push({ indicator: mainIndicator, text: mainStatusText });
   if (modalIndicator && modalStatusText) targets.push({ indicator: modalIndicator, text: modalStatusText });
   
-  const value = responseBody.value.trim();
+  // 优先从 CodeMirror 获取内容
+  const value = (formCodeMirror ? formCodeMirror.getValue() : responseBody.value).trim();
   
   if (!value) {
     // 空内容时重置为默认状态
@@ -450,12 +596,32 @@ function validateJsonRealtime() {
 
 // 打开全屏编辑器
 function openEditorModal() {
-  modalTextarea.value = responseBody.value;
-  editorModal.classList.add('active');
-  modalTextarea.focus();
+  // 获取当前表单内容
+  const currentValue = formCodeMirror ? formCodeMirror.getValue() : responseBody.value;
   
-  // 初始化搜索替换功能
-  if (!editorSearchReplace && window.EditorSearchReplace) {
+  // 初始化模态框的 CodeMirror（如果还没有初始化）
+  if (!modalCodeMirror) {
+    modalCodeMirror = initModalCodeMirror();
+  }
+  
+  // 设置模态框编辑器内容
+  if (modalCodeMirror) {
+    modalCodeMirror.setValue(currentValue);
+    editorModal.classList.add('active');
+    // 延迟刷新和聚焦，确保模态框显示后再操作
+    setTimeout(() => {
+      modalCodeMirror.refresh();
+      modalCodeMirror.focus();
+    }, 100);
+  } else {
+    // 回退到 textarea 方式
+    modalTextarea.value = currentValue;
+    editorModal.classList.add('active');
+    modalTextarea.focus();
+  }
+  
+  // 初始化搜索替换功能（如果使用 textarea）
+  if (!modalCodeMirror && !editorSearchReplace && window.EditorSearchReplace) {
     editorSearchReplace = new EditorSearchReplace('modal-textarea', 'editor-modal-content');
   }
 }
@@ -466,9 +632,18 @@ function closeEditorModal() {
   if (editorSearchReplace) {
     editorSearchReplace.hide();
   }
-  // 同步内容回原来的输入框
-  responseBody.value = modalTextarea.value;
+  
+  // 获取模态框编辑器内容
+  const modalValue = modalCodeMirror ? modalCodeMirror.getValue() : modalTextarea.value;
+  
+  // 同步内容回表单编辑器
+  if (formCodeMirror) {
+    formCodeMirror.setValue(modalValue);
+  }
+  responseBody.value = modalValue;
+  
   editorModal.classList.remove('active');
+  
   // 验证 JSON 格式
   validateJsonRealtime();
 }
@@ -660,6 +835,11 @@ async function handleEdit(ruleId) {
   document.getElementById('url-pattern').value = rule.urlPattern;
   document.getElementById('response-body').value = rule.responseBody || '';
   
+  // 同步到 CodeMirror 编辑器
+  if (formCodeMirror) {
+    formCodeMirror.setValue(rule.responseBody || '');
+  }
+  
   // 更新 Tab UI
   const addTabBtn = document.querySelector('.tab-btn[data-tab="add"]');
   if (addTabBtn) {
@@ -693,11 +873,12 @@ async function handleDelete(ruleId) {
 async function handleFormSubmit(e) {
   e.preventDefault();
   
-  const responseBody = document.getElementById('response-body').value;
+  // 优先从 CodeMirror 获取内容
+  const responseBodyValue = formCodeMirror ? formCodeMirror.getValue() : document.getElementById('response-body').value;
   
   // 验证 JSON 格式（必须是对象或数组）
   try {
-    const parsed = JSON.parse(responseBody);
+    const parsed = JSON.parse(responseBodyValue);
     if (typeof parsed !== 'object' || parsed === null) {
       showToast(window.i18n.t('needJsonObjectOrArray'), true);
       return;
@@ -712,7 +893,7 @@ async function handleFormSubmit(e) {
     urlPattern: document.getElementById('url-pattern').value.trim(),
     type: 'mockResponse',
     contentType: 'application/json',
-    responseBody: responseBody
+    responseBody: responseBodyValue
   };
   
   if (!rule.responseBody) {
@@ -740,6 +921,11 @@ function resetForm() {
   ruleForm.reset();
   document.getElementById('response-body').value = '';
   
+  // 清空 CodeMirror 编辑器
+  if (formCodeMirror) {
+    formCodeMirror.setValue('');
+  }
+  
   // 恢复 Tab UI
   const addTabBtn = document.querySelector('.tab-btn[data-tab="add"]');
   if (addTabBtn) {
@@ -755,7 +941,8 @@ function resetForm() {
 function checkFormDirty() {
   const currentName = document.getElementById('rule-name').value.trim();
   const currentUrl = document.getElementById('url-pattern').value.trim();
-  const currentResponse = document.getElementById('response-body').value; // 不trim，保留格式
+  // 优先从 CodeMirror 获取内容
+  const currentResponse = formCodeMirror ? formCodeMirror.getValue() : document.getElementById('response-body').value;
   
   if (editingRuleId && currentEditingRuleData) {
     // 编辑模式：对比原始数据
