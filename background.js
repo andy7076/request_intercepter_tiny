@@ -10,6 +10,8 @@ let currentLang = DEFAULT_LANGUAGE;
 async function loadI18nMessages(lang) {
   try {
     const url = chrome.runtime.getURL(`_locales/${lang}/messages.json`);
+    // 检查 URL 是否有效
+    if (!url || url.includes('invalid')) return {};
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Failed to load ${lang}`);
     return await response.json();

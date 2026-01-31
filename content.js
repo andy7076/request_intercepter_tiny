@@ -22,11 +22,14 @@ async function loadI18nMessages(lang) {
   if (!isExtensionContextValid()) return {};
   try {
     const url = chrome.runtime.getURL(`_locales/${lang}/messages.json`);
+    // 检查 URL 是否有效（上下文失效时会返回 chrome-extension://invalid/）
+    if (!url || url.includes('invalid')) return {};
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Failed to load ${lang}`);
     return await response.json();
   } catch (e) {
-    if (lang !== DEFAULT_LANGUAGE) {
+    // 如果加载失败且不是默认语言，尝试加载默认语言
+    if (lang !== DEFAULT_LANGUAGE && isExtensionContextValid()) {
       return loadI18nMessages(DEFAULT_LANGUAGE);
     }
     return {};
