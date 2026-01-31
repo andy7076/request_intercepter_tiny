@@ -318,15 +318,34 @@ class EditorSearchReplace {
   }
   
   scrollToSelection() {
+    // 尝试通过高亮层测量精确位置（解决自动换行导致的计算偏差）
+    if (this.highlightOverlay) {
+      const currentMark = this.highlightOverlay.querySelector('.highlight.current');
+      
+      if (currentMark) {
+        const containerHeight = this.textarea.clientHeight;
+        const markTop = currentMark.offsetTop;
+        const markHeight = currentMark.offsetHeight;
+        
+        // 计算居中滚动位置
+        // 目标位置 = 元素顶部位置 - (容器高度的一半) + (元素高度的一半)
+        let targetScroll = markTop - (containerHeight / 2) + (markHeight / 2);
+        
+        this.textarea.scrollTop = Math.max(0, targetScroll);
+        // 同步背景层的滚动已经在 textarea 的 scroll 事件中处理了，但为了平滑，这里也可以顺手做一下
+        // this.highlightBackdrop.scrollTop = this.textarea.scrollTop; 
+        return;
+      }
+    }
+
+    // 后备方案：如果找不到高亮元素（极少数情况），回退到估算
     const textarea = this.textarea;
     const text = textarea.value;
     const selectionStart = textarea.selectionStart;
     
-    // 计算行号
     const textBeforeSelection = text.substring(0, selectionStart);
     const lineNumber = textBeforeSelection.split('\n').length;
     
-    // 估算滚动位置
     const lineHeight = parseInt(getComputedStyle(textarea).lineHeight) || 22;
     const visibleLines = textarea.clientHeight / lineHeight;
     const targetScroll = (lineNumber - visibleLines / 2) * lineHeight;
