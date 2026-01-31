@@ -97,6 +97,12 @@
   "saveRule": {
     "message": "Save Rule"
   },
+  "reset": {
+    "message": "Reset"
+  },
+  "resetDone": {
+    "message": "Reset done"
+  },
   "recentMatchRecords": {
     "message": "Recent $COUNT$ match records",
     "placeholders": {

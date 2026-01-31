@@ -97,6 +97,12 @@
   "saveRule": {
     "message": "保存规则"
   },
+  "reset": {
+    "message": "重置"
+  },
+  "resetDone": {
+    "message": "重置完成"
+  },
   "recentMatchRecords": {
     "message": "最近 $COUNT$ 条匹配记录",
     "placeholders": {

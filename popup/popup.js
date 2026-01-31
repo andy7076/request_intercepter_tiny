@@ -4,6 +4,7 @@ const panels = document.querySelectorAll('.panel');
 const rulesList = document.getElementById('rules-list');
 const ruleCount = document.getElementById('rules-count-text');
 const ruleForm = document.getElementById('rule-form');
+const resetBtn = document.getElementById('reset-btn');
 const cancelBtn = document.getElementById('cancel-btn');
 const importBtn = document.getElementById('import-btn');
 const exportBtn = document.getElementById('export-btn');
@@ -162,6 +163,14 @@ function setupEventListeners() {
     resetForm();
     switchTab('rules');
   });
+
+  // 重置按钮
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      resetForm();
+      showToast(window.i18n.t('resetDone') || 'Reset done');
+    });
+  }
   
   // 导入导出按钮
   importBtn.addEventListener('click', () => importFile.click());
