@@ -462,8 +462,8 @@ function openEditorModal() {
 
 // 关闭全屏编辑器
 function closeEditorModal() {
-  // 先隐藏搜索替换组件
-  if (editorSearchReplace && editorSearchReplace.isVisible) {
+  // 先隐藏搜索替换组件（并重置内容）
+  if (editorSearchReplace) {
     editorSearchReplace.hide();
   }
   // 同步内容回原来的输入框

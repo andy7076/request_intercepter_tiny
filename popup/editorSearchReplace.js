@@ -443,6 +443,18 @@ class EditorSearchReplace {
   hide() {
     this.widget.classList.remove('active');
     this.isVisible = false;
+    
+    // 清空输入框内容
+    if (this.searchInput) this.searchInput.value = '';
+    if (this.replaceInput) this.replaceInput.value = '';
+    if (this.matchInfo) {
+      this.matchInfo.textContent = '';
+      this.matchInfo.classList.remove('no-results');
+    }
+    
+    this.matches = [];
+    this.currentMatchIndex = -1;
+    
     // 清除高亮
     this.clearHighlights();
     this.textarea.focus();
