@@ -1,17 +1,6 @@
 // Content Script - 拦截和修改网络请求响应
 
-// ========== i18n 模块（使用 Chrome 内置 API）==========
-// 获取翻译文本（静默处理所有错误）
-function t(key) {
-  try {
-    // 直接使用 Chrome i18n API，它会根据浏览器语言自动选择
-    const msg = chrome.i18n.getMessage(key);
-    return msg || key;
-  } catch (e) {
-    // 上下文失效时返回 key 本身
-    return key;
-  }
-}
+
 
 // 检查扩展上下文是否有效
 function isExtensionContextValid() {
