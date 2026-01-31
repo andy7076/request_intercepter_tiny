@@ -256,6 +256,9 @@
   "allRulesAlreadyDisabled": {
     "message": "All rules are already disabled"
   },
+  "confirmDiscardChanges": {
+    "message": "You have unsaved changes. Are you sure you want to discard them?"
+  },
   "confirmDisableAllRules": {
     "message": "Are you sure you want to disable all rules?"
   },

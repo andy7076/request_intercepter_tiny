@@ -151,14 +151,33 @@ function setupEventListeners() {
   // Tab切换
   tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      const tab = btn.dataset.tab;
+      const targetTab = btn.dataset.tab;
       
-      // 如果点击的是规则列表，且当前处于编辑模式，则重置表单（视为放弃编辑）
-      if (tab === 'rules' && editingRuleId) {
+      // 获取当前激活的 Tab
+      const currentActiveBtn = document.querySelector('.tab-btn.active');
+      const currentTab = currentActiveBtn ? currentActiveBtn.dataset.tab : 'rules';
+
+      // 如果点击的是当前 Tab，不做任何操作
+      if (targetTab === currentTab) return;
+
+      // 如果当前是在"添加/编辑"页面，检查是否有未保存的修改
+      if (currentTab === 'add') {
+        const isDirty = checkFormDirty();
+        
+        if (isDirty) {
+          // 有修改，弹出确认
+          if (!confirm(window.i18n.t('confirmDiscardChanges'))) {
+            // 用户选择取消，停留在当前页面
+            return;
+          }
+        }
+        
+        // 用户确认放弃，或者没有修改 -> 重置表单
         resetForm();
       }
       
-      switchTab(tab);
+      // 切换到目标 Tab
+      switchTab(targetTab);
     });
   });
 
@@ -706,6 +725,25 @@ function resetForm() {
   
   // 重置 JSON 验证状态
   validateJsonRealtime();
+}
+
+// 检查表单是否有修改
+function checkFormDirty() {
+  const currentName = document.getElementById('rule-name').value.trim();
+  const currentUrl = document.getElementById('url-pattern').value.trim();
+  const currentResponse = document.getElementById('response-body').value; // 不trim，保留格式
+  
+  if (editingRuleId && currentEditingRuleData) {
+    // 编辑模式：对比原始数据
+    const isNameChanged = currentName !== currentEditingRuleData.name;
+    const isUrlChanged = currentUrl !== currentEditingRuleData.urlPattern;
+    const isResponseChanged = currentResponse !== (currentEditingRuleData.responseBody || '');
+    
+    return isNameChanged || isUrlChanged || isResponseChanged;
+  } else {
+    // 新建模式：检查是否有任何输入
+    return currentName !== '' || currentUrl !== '' || currentResponse !== '';
+  }
 }
 
 // 发送消息给background

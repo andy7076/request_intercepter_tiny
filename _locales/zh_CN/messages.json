@@ -256,6 +256,9 @@
   "allRulesAlreadyDisabled": {
     "message": "所有规则已处于关闭状态"
   },
+  "confirmDiscardChanges": {
+    "message": "当前有未保存的修改，确定要放弃吗？"
+  },
   "confirmDisableAllRules": {
     "message": "确定要关闭所有规则吗？"
   },
