@@ -1,5 +1,7 @@
 # Request Interceptor Tiny
 
+**中文 | [English](./README_EN.md)**
+
 **轻量级接口模拟工具**
 
 Request Interceptor Tiny 是一款专为开发者设计的 Chrome 扩展，旨在提供简单、高效的接口数据模拟（Mock）功能。它可以拦截浏览器的 XHR 和 Fetch 请求，并将其响应替换为自定义的 JSON 数据，帮助前端开发者在后端接口未就绪或需要特定测试场景时进行开发和调试。
