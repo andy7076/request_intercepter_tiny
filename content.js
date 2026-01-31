@@ -8,8 +8,18 @@ const LANG_STORAGE_KEY = 'preferredLanguage';
 let i18nMessages = {};
 let currentLang = DEFAULT_LANGUAGE;
 
+// 检查扩展上下文是否有效
+function isExtensionContextValid() {
+  try {
+    return !!chrome.runtime?.id;
+  } catch (e) {
+    return false;
+  }
+}
+
 // 加载语言消息
 async function loadI18nMessages(lang) {
+  if (!isExtensionContextValid()) return {};
   try {
     const url = chrome.runtime.getURL(`_locales/${lang}/messages.json`);
     const response = await fetch(url);
@@ -27,19 +37,36 @@ async function loadI18nMessages(lang) {
 function t(key) {
   const entry = i18nMessages[key];
   if (entry) return entry.message;
-  // 回退到 Chrome 内置 API
-  return t(key) || key;
+  // 回退到 Chrome 内置 API（如果上下文有效）
+  if (isExtensionContextValid()) {
+    try {
+      const msg = chrome.i18n.getMessage(key);
+      if (msg) return msg;
+    } catch (e) {
+      // 忽略
+    }
+  }
+  return key;
 }
 
 // 初始化 i18n
 async function initI18n() {
+  if (!isExtensionContextValid()) return;
   return new Promise((resolve) => {
-    chrome.storage.local.get(LANG_STORAGE_KEY, async (result) => {
-      const savedLang = result[LANG_STORAGE_KEY];
-      currentLang = savedLang && SUPPORTED_LANGUAGES.includes(savedLang) ? savedLang : DEFAULT_LANGUAGE;
-      i18nMessages = await loadI18nMessages(currentLang);
+    try {
+      chrome.storage.local.get(LANG_STORAGE_KEY, async (result) => {
+        if (chrome.runtime.lastError) {
+          resolve();
+          return;
+        }
+        const savedLang = result[LANG_STORAGE_KEY];
+        currentLang = savedLang && SUPPORTED_LANGUAGES.includes(savedLang) ? savedLang : DEFAULT_LANGUAGE;
+        i18nMessages = await loadI18nMessages(currentLang);
+        resolve();
+      });
+    } catch (e) {
       resolve();
-    });
+    }
   });
 }
 
@@ -62,9 +89,11 @@ let isInitialized = false;
 
 // 从 storage 直接获取规则（不依赖 background）
 function loadMockRules() {
+  if (!isExtensionContextValid()) return Promise.resolve([]);
   return new Promise((resolve) => {
-    chrome.storage.local.get('interceptRules', (result) => {
-      if (chrome.runtime.lastError) {
+    try {
+      chrome.storage.local.get('interceptRules', (result) => {
+        if (chrome.runtime.lastError) {
         console.error('[Request Interceptor Tiny]', t('logLoadRulesFailed'), chrome.runtime.lastError.message);
         resolve([]);
         return;
@@ -80,14 +109,20 @@ function loadMockRules() {
         })));
       }
       isInitialized = true;
-      resolve(mockRules);
-    });
+        resolve(mockRules);
+      });
+    } catch (e) {
+      resolve([]);
+    }
   });
 }
 
 // 加载设置
 function loadSettings() {
-  chrome.storage.local.get(['consoleLogs'], (result) => {
+  if (!isExtensionContextValid()) return;
+  try {
+    chrome.storage.local.get(['consoleLogs'], (result) => {
+      if (chrome.runtime.lastError) return;
     // 更新本地状态
     consoleLogsEnabled = result.consoleLogs || false;
     
@@ -96,7 +131,10 @@ function loadSettings() {
       type: 'CONSOLE_LOGS_UPDATED',
       enabled: consoleLogsEnabled
     }, '*');
-  });
+    });
+  } catch (e) {
+    // 忽略错误
+  }
 }
 
 // 初始化加载规则和设置
@@ -108,6 +146,9 @@ loadSettings();
 
 // 监听 storage 变化 - 规则更新时自动重新加载
 chrome.storage.onChanged.addListener((changes, areaName) => {
+  // 如果扩展上下文失效，提前返回
+  if (!isExtensionContextValid()) return;
+  
   if (areaName === 'local' && changes['interceptRules']) {
     const allRules = changes['interceptRules'].newValue || [];
     // 过滤出启用的规则
@@ -208,16 +249,6 @@ function findMockRule(url) {
   return null;
 }
 
-// 检查扩展上下文是否有效
-function isContextValid() {
-  try {
-    // 尝试访问 chrome.runtime.id，如果上下文失效会抛出异常
-    return !!chrome.runtime?.id;
-  } catch (e) {
-    return false;
-  }
-}
-
 // 监听来自注入脚本的消息
 window.addEventListener('message', (event) => {
   if (event.source !== window) return;
@@ -229,7 +260,7 @@ window.addEventListener('message', (event) => {
     log('[Request Interceptor Tiny]', t('logCurrentRulesCount'), mockRules.length);
     
     // 检查扩展上下文是否有效
-    if (!isContextValid()) {
+    if (!isExtensionContextValid()) {
       // 上下文失效，让请求正常通过
       window.postMessage({
         type: 'REQUEST_INTERCEPTOR_PASSTHROUGH',
