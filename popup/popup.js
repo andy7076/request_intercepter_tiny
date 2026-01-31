@@ -90,6 +90,7 @@ function initLanguageSelector() {
       // Reload rules list to apply translations to dynamically generated content
       loadRules();
       loadLogs();
+      validateJsonRealtime();
     });
   }
 }
