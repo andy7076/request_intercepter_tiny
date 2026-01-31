@@ -228,6 +228,7 @@ class EditorSearchReplace {
     
     if (!searchText) {
       this.updateMatchInfo();
+      this.clearHighlights();
       return;
     }
     
