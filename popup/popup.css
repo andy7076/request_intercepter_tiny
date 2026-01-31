@@ -1303,19 +1303,20 @@ input:focus + .slider {
   gap: 12px;
   justify-content: flex-end;
   /* margin-top: 10px; */
-  padding: 16px 20px;
+  padding: 12px 20px; /* Reduced vertical padding */
   border-top: 1px solid var(--border);
-  background: var(--bg-main); /* Ensure background covers content */
-  flex-shrink: 0; /* Fixed footer */
+  background: var(--bg-main);
+  flex-shrink: 0;
 }
 
 .btn-primary {
   background: var(--primary);
   color: white;
-  padding: 12px 24px;
-  border-radius: 10px;
+  padding: 8px 16px; /* Reduced button padding */
+  border-radius: 8px; /* Slightly smaller radius */
   border: none;
-  font-weight: 700;
+  font-size: 13px; /* Smaller text */
+  font-weight: 600; /* Adjusted weight */
   cursor: pointer;
   transition: var(--transition);
   box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);
@@ -1323,17 +1324,18 @@ input:focus + .slider {
 
 .btn-primary:hover {
   background: var(--primary-dark);
-  transform: translateY(-2px);
+  transform: translateY(-1px); /* More subtle lift */
   box-shadow: var(--shadow-glow);
 }
 
 .btn-secondary {
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
-  padding: 12px 24px;
-  border-radius: 10px;
+  padding: 8px 16px; /* Reduced button padding */
+  border-radius: 8px;
   border: 1px solid var(--border);
-  font-weight: 600;
+  font-size: 13px; /* Smaller text */
+  font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
 }
