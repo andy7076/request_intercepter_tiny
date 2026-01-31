@@ -357,18 +357,26 @@ class EditorSearchReplace {
     if (this.matches.length === 0) return;
     
     this.currentMatchIndex = (this.currentMatchIndex + 1) % this.matches.length;
-    this.highlightCurrentMatch(keepFocus); // 导航时需要聚焦到匹配位置
+    
+    // 必须先更新高亮层 DOM，确保 .current 类名被移动到正确的元素上
+    this.updateHighlights(); 
     this.updateMatchInfo();
-    this.updateHighlights(); // 更新高亮以显示当前匹配
+    
+    // 然后再执行滚动（此时 scrollToSelection 才能在 DOM 中找到正确的新位置）
+    this.highlightCurrentMatch(keepFocus); 
   }
   
   goToPrevMatch(keepFocus = false) {
     if (this.matches.length === 0) return;
     
     this.currentMatchIndex = (this.currentMatchIndex - 1 + this.matches.length) % this.matches.length;
-    this.highlightCurrentMatch(keepFocus); // 导航时需要聚焦到匹配位置
+    
+    // 必须先更新高亮层 DOM
+    this.updateHighlights(); 
     this.updateMatchInfo();
-    this.updateHighlights(); // 更新高亮以显示当前匹配
+    
+    // 然后再执行滚动
+    this.highlightCurrentMatch(keepFocus); 
   }
   
   replaceCurrent() {
