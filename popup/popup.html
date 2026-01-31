@@ -247,65 +247,67 @@
       <!-- Add Rule Panel -->
       <div id="add-panel" class="panel">
         <form id="rule-form">
-          <div class="form-group">
-            <label for="rule-name" data-i18n="ruleName">Rule Name</label>
-            <input
-              type="text"
-              id="rule-name"
-              data-i18n-placeholder="ruleNamePlaceholder"
-              placeholder="e.g., Config Modify API"
-              required
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="url-pattern" data-i18n="urlPattern"
-              >URL Match Pattern</label
-            >
-            <input
-              type="text"
-              id="url-pattern"
-              data-i18n-placeholder="urlPatternPlaceholder"
-              placeholder="e.g., *://api.example.com/*"
-              required
-            />
-            <span class="hint" data-i18n="urlPatternHint"
-              >Supports wildcard * to match any characters</span
-            >
-          </div>
-
-          <!-- Mock Response Config -->
-          <div id="mock-config" class="config-section">
+          <div class="form-content">
             <div class="form-group">
-              <div class="response-label-row">
-                <label for="response-body" data-i18n="responseContent"
-                  >Response Content (JSON)</label
-                >
-                <button
-                  type="button"
-                  id="expand-editor"
-                  class="btn-expand"
-                  data-i18n-title="expandEdit"
-                >
-                  ⛶
-                </button>
-              </div>
-              <textarea
-                id="response-body"
-                rows="10"
-                placeholder='{"success": true, "data": {}}'
-              ></textarea>
-              <div class="json-status">
-                <span
-                  id="json-status-indicator"
-                  class="json-status-indicator"
-                ></span>
-                <span
-                  id="json-status-text"
-                  class="hint"
-                  data-i18n="responseContentHint"
-                  >Enter JSON response content to return</span
-                >
+              <label for="rule-name" data-i18n="ruleName">Rule Name</label>
+              <input
+                type="text"
+                id="rule-name"
+                data-i18n-placeholder="ruleNamePlaceholder"
+                placeholder="e.g., Config Modify API"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="url-pattern" data-i18n="urlPattern"
+                >URL Match Pattern</label
+              >
+              <input
+                type="text"
+                id="url-pattern"
+                data-i18n-placeholder="urlPatternPlaceholder"
+                placeholder="e.g., *://api.example.com/*"
+                required
+              />
+              <span class="hint" data-i18n="urlPatternHint"
+                >Supports wildcard * to match any characters</span
+              >
+            </div>
+
+            <!-- Mock Response Config -->
+            <div id="mock-config" class="config-section">
+              <div class="form-group">
+                <div class="response-label-row">
+                  <label for="response-body" data-i18n="responseContent"
+                    >Response Content (JSON)</label
+                  >
+                  <button
+                    type="button"
+                    id="expand-editor"
+                    class="btn-expand"
+                    data-i18n-title="expandEdit"
+                  >
+                    ⛶
+                  </button>
+                </div>
+                <textarea
+                  id="response-body"
+                  rows="10"
+                  placeholder='{"success": true, "data": {}}'
+                ></textarea>
+                <div class="json-status">
+                  <span
+                    id="json-status-indicator"
+                    class="json-status-indicator"
+                  ></span>
+                  <span
+                    id="json-status-text"
+                    class="hint"
+                    data-i18n="responseContentHint"
+                    >Enter JSON response content to return</span
+                  >
+                </div>
               </div>
             </div>
           </div>
