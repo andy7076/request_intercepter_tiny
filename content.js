@@ -1,6 +1,52 @@
 // Content Script - 拦截和修改网络请求响应
 
+// ========== i18n 模块 ==========
+const SUPPORTED_LANGUAGES = ['en', 'zh_CN'];
+const DEFAULT_LANGUAGE = 'en';
+const LANG_STORAGE_KEY = 'preferredLanguage';
 
+let i18nMessages = {};
+let currentLang = DEFAULT_LANGUAGE;
+
+// 加载语言消息
+async function loadI18nMessages(lang) {
+  try {
+    const url = chrome.runtime.getURL(`_locales/${lang}/messages.json`);
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Failed to load ${lang}`);
+    return await response.json();
+  } catch (e) {
+    if (lang !== DEFAULT_LANGUAGE) {
+      return loadI18nMessages(DEFAULT_LANGUAGE);
+    }
+    return {};
+  }
+}
+
+// 获取翻译文本
+function t(key) {
+  const entry = i18nMessages[key];
+  if (entry) return entry.message;
+  // 回退到 Chrome 内置 API
+  return t(key) || key;
+}
+
+// 初始化 i18n
+async function initI18n() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(LANG_STORAGE_KEY, async (result) => {
+      const savedLang = result[LANG_STORAGE_KEY];
+      currentLang = savedLang && SUPPORTED_LANGUAGES.includes(savedLang) ? savedLang : DEFAULT_LANGUAGE;
+      i18nMessages = await loadI18nMessages(currentLang);
+      resolve();
+    });
+  });
+}
+
+// 启动时初始化 i18n
+initI18n();
+
+// ========== 日志控制 ==========
 // 日志控制
 let consoleLogsEnabled = false;
 
@@ -19,16 +65,16 @@ function loadMockRules() {
   return new Promise((resolve) => {
     chrome.storage.local.get('interceptRules', (result) => {
       if (chrome.runtime.lastError) {
-        console.error('[Request Interceptor Tiny]', chrome.i18n.getMessage('logLoadRulesFailed'), chrome.runtime.lastError.message);
+        console.error('[Request Interceptor Tiny]', t('logLoadRulesFailed'), chrome.runtime.lastError.message);
         resolve([]);
         return;
       }
       const allRules = result.interceptRules || [];
       // 过滤出启用的规则
       mockRules = allRules.filter(r => r.enabled);
-      log('[Request Interceptor Tiny] ✅', chrome.i18n.getMessage('logMockRulesLoaded'), mockRules.length);
+      log('[Request Interceptor Tiny] ✅', t('logMockRulesLoaded'), mockRules.length);
       if (mockRules.length > 0) {
-        log('[Request Interceptor Tiny] 📋', chrome.i18n.getMessage('logRulesList'), mockRules.map(r => ({
+        log('[Request Interceptor Tiny] 📋', t('logRulesList'), mockRules.map(r => ({
           name: r.name,
           pattern: r.urlPattern
         })));
@@ -54,9 +100,9 @@ function loadSettings() {
 }
 
 // 初始化加载规则和设置
-log('[Request Interceptor Tiny] 🚀', chrome.i18n.getMessage('logContentScriptInitStart'));
+log('[Request Interceptor Tiny] 🚀', t('logContentScriptInitStart'));
 loadMockRules().then(() => {
-  log('[Request Interceptor Tiny] ✨', chrome.i18n.getMessage('logInitComplete'));
+  log('[Request Interceptor Tiny] ✨', t('logInitComplete'));
 });
 loadSettings();
 
@@ -66,8 +112,8 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     const allRules = changes['interceptRules'].newValue || [];
     // 过滤出启用的规则
     mockRules = allRules.filter(r => r.enabled);
-    log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logRulesUpdated'), mockRules.length);
-    log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logCurrentEnabledRules'), mockRules.map(r => r.name));
+    log('[Request Interceptor Tiny]', t('logRulesUpdated'), mockRules.length);
+    log('[Request Interceptor Tiny]', t('logCurrentEnabledRules'), mockRules.map(r => r.name));
     
     // 通知页面规则已更新
     window.postMessage({
@@ -87,13 +133,24 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
       enabled: enabled
     }, '*');
   }
+
+  // 监听语言变化
+  if (areaName === 'local' && changes[LANG_STORAGE_KEY]) {
+    const newLang = changes[LANG_STORAGE_KEY].newValue;
+    if (newLang && SUPPORTED_LANGUAGES.includes(newLang)) {
+      currentLang = newLang;
+      loadI18nMessages(newLang).then(msgs => {
+        i18nMessages = msgs;
+      });
+    }
+  }
 });
 
 // 监听规则更新消息（作为额外保障）
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'MOCK_RULES_UPDATED') {
     mockRules = message.rules || [];
-    log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logReceivedRulesUpdateMessage'), mockRules.length);
+    log('[Request Interceptor Tiny]', t('logReceivedRulesUpdateMessage'), mockRules.length);
   }
 });
 
@@ -136,7 +193,7 @@ function matchUrl(pattern, url) {
     const regex = new RegExp(finalPattern, 'i');
     return regex.test(url);
   } catch (e) {
-    console.warn('[Request Interceptor Tiny]', chrome.i18n.getMessage('logURLMatchRegexError'), e.message);
+    console.warn('[Request Interceptor Tiny]', t('logURLMatchRegexError'), e.message);
     return false;
   }
 }
@@ -168,8 +225,8 @@ window.addEventListener('message', (event) => {
   if (event.data.type === 'REQUEST_INTERCEPTOR_CHECK') {
     const { url, requestId } = event.data;
     
-    log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logCheckingURL'), url);
-    log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logCurrentRulesCount'), mockRules.length);
+    log('[Request Interceptor Tiny]', t('logCheckingURL'), url);
+    log('[Request Interceptor Tiny]', t('logCurrentRulesCount'), mockRules.length);
     
     // 检查扩展上下文是否有效
     if (!isContextValid()) {
@@ -182,7 +239,7 @@ window.addEventListener('message', (event) => {
     }
     
     const mockRule = findMockRule(url);
-    log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logMatchResult'), mockRule ? (chrome.i18n.getMessage('logMatchedRule') + ': ' + mockRule.name) : chrome.i18n.getMessage('logNoMatchingRule'));
+    log('[Request Interceptor Tiny]', t('logMatchResult'), mockRule ? (t('logMatchedRule') + ': ' + mockRule.name) : t('logNoMatchingRule'));
     
     if (mockRule) {
       // 发送 mock 响应
@@ -219,5 +276,5 @@ window.addEventListener('message', (event) => {
 });
 
 // 注意：injected.js 现在由 manifest.json 直接注入到 MAIN world，无需动态注入
-console.log('[Request Interceptor Tiny] 📦', chrome.i18n.getMessage('logContentScriptReady'));
+console.log('[Request Interceptor Tiny] 📦', t('logContentScriptReady'));
 

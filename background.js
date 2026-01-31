@@ -1,3 +1,59 @@
+// ========== i18n 模块 ==========
+const SUPPORTED_LANGUAGES = ['en', 'zh_CN'];
+const DEFAULT_LANGUAGE = 'en';
+const LANG_STORAGE_KEY = 'preferredLanguage';
+
+let i18nMessages = {};
+let currentLang = DEFAULT_LANGUAGE;
+
+// 加载语言消息
+async function loadI18nMessages(lang) {
+  try {
+    const url = chrome.runtime.getURL(`_locales/${lang}/messages.json`);
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Failed to load ${lang}`);
+    return await response.json();
+  } catch (e) {
+    if (lang !== DEFAULT_LANGUAGE) {
+      return loadI18nMessages(DEFAULT_LANGUAGE);
+    }
+    return {};
+  }
+}
+
+// 获取翻译文本
+function t(key) {
+  const entry = i18nMessages[key];
+  if (entry) return entry.message;
+  // 回退到 Chrome 内置 API
+  return chrome.i18n.getMessage(key) || key;
+}
+
+// 初始化 i18n
+async function initI18n() {
+  const result = await chrome.storage.local.get(LANG_STORAGE_KEY);
+  const savedLang = result[LANG_STORAGE_KEY];
+  currentLang = savedLang && SUPPORTED_LANGUAGES.includes(savedLang) ? savedLang : DEFAULT_LANGUAGE;
+  i18nMessages = await loadI18nMessages(currentLang);
+}
+
+// 监听语言变化
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === 'local' && changes[LANG_STORAGE_KEY]) {
+    const newLang = changes[LANG_STORAGE_KEY].newValue;
+    if (newLang && SUPPORTED_LANGUAGES.includes(newLang)) {
+      currentLang = newLang;
+      loadI18nMessages(newLang).then(msgs => {
+        i18nMessages = msgs;
+      });
+    }
+  }
+});
+
+// 启动时初始化 i18n
+initI18n();
+
+// ========== 规则存储 ==========
 // 存储规则的键名
 const RULES_STORAGE_KEY = 'interceptRules';
 const LOGS_STORAGE_KEY = 'requestLogs';
@@ -9,7 +65,7 @@ chrome.runtime.onInstalled.addListener(async () => {
   if (!result[RULES_STORAGE_KEY]) {
     await chrome.storage.local.set({ [RULES_STORAGE_KEY]: [] });
   }
-  console.log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logExtensionInstalled'));
+  console.log('[Request Interceptor Tiny]', t('logExtensionInstalled'));
 });
 
 // 点击扩展图标时打开 Side Panel
@@ -117,7 +173,7 @@ async function notifyMockRulesUpdated() {
       }
     }
   } catch (e) {
-    console.error('[Request Interceptor Tiny]', chrome.i18n.getMessage('logFailedToNotifyTabs'), e);
+    console.error('[Request Interceptor Tiny]', t('logFailedToNotifyTabs'), e);
   }
 }
 
@@ -224,7 +280,7 @@ async function applyRules() {
   }
   
   // mockResponse 规则由 content script 处理，不需要添加 declarativeNetRequest 规则
-  console.log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logRulesCleanedUp'));
+  console.log('[Request Interceptor Tiny]', t('logRulesCleanedUp'));
 }
 
 // 启动时应用规则
@@ -278,8 +334,8 @@ try {
       });
     }
   });
-  console.log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logRequestLoggingEnabled'));
+  console.log('[Request Interceptor Tiny]', t('logRequestLoggingEnabled'));
 } catch (e) {
   // onRuleMatchedDebug 只在开发模式下可用
-  console.log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logRequestLoggingNotAvailable'));
+  console.log('[Request Interceptor Tiny]', t('logRequestLoggingNotAvailable'));
 }
