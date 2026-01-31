@@ -374,29 +374,7 @@
           📝 <span data-i18n="responseEditor">Response Content Editor</span>
         </h3>
         <div class="editor-modal-actions">
-          <button
-            type="button"
-            id="modal-search-btn"
-            class="btn-modal-action"
-            data-i18n-title="searchReplaceCtrlF"
-            title="Search & Replace (Ctrl+F)"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <span data-i18n="searchReplace">Search & Replace</span>
-          </button>
+
           <button
             type="button"
             id="modal-close"
@@ -409,7 +387,7 @@
         </div>
       </div>
       <div class="editor-modal-content" id="editor-modal-content">
-        <!-- Search/Replace widget will be dynamically inserted here -->
+
         <textarea
           id="modal-textarea"
           placeholder='{"success": true, "data": {}}'
@@ -484,7 +462,6 @@
     <script src="lib/codemirror/addon/fold/foldgutter.js"></script>
     <script src="lib/codemirror/addon/fold/brace-fold.js"></script>
     <script src="i18n.js"></script>
-    <script src="editorSearchReplace.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>
