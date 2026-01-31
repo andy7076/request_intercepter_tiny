@@ -157,10 +157,11 @@ class EditorSearchReplace {
     this.searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
+        // 保持焦点在输入框，方便连续按 Enter 搜索
         if (e.shiftKey) {
-          this.goToPrevMatch();
+          this.goToPrevMatch(true);
         } else {
-          this.goToNextMatch();
+          this.goToNextMatch(true);
         }
       } else if (e.key === 'Escape') {
         this.hide();
@@ -291,17 +292,28 @@ class EditorSearchReplace {
     }
   }
   
-  highlightCurrentMatch() {
+  highlightCurrentMatch(keepFocus = false) {
     if (this.currentMatchIndex < 0 || this.currentMatchIndex >= this.matches.length) {
       return;
     }
     
     const match = this.matches[this.currentMatchIndex];
-    this.textarea.focus();
+    
+    // 只有在非 keepFocus 模式下才切换焦点到 textarea
+    // 但无论如何都要设置选区以触发滚动
+    if (!keepFocus) {
+      this.textarea.focus();
+    }
+    
     this.textarea.setSelectionRange(match.start, match.end);
     
     // 滚动到可见区域
     this.scrollToSelection();
+    
+    // 如果需要保持焦点在输入框，重新聚焦回去（因为 setSelectionRange 在某些浏览器可能会转移焦点）
+    if (keepFocus && this.searchInput) {
+      this.searchInput.focus();
+    }
   }
   
   scrollToSelection() {
@@ -321,20 +333,20 @@ class EditorSearchReplace {
     textarea.scrollTop = Math.max(0, targetScroll);
   }
   
-  goToNextMatch() {
+  goToNextMatch(keepFocus = false) {
     if (this.matches.length === 0) return;
     
     this.currentMatchIndex = (this.currentMatchIndex + 1) % this.matches.length;
-    this.highlightCurrentMatch(); // 导航时需要聚焦到匹配位置
+    this.highlightCurrentMatch(keepFocus); // 导航时需要聚焦到匹配位置
     this.updateMatchInfo();
     this.updateHighlights(); // 更新高亮以显示当前匹配
   }
   
-  goToPrevMatch() {
+  goToPrevMatch(keepFocus = false) {
     if (this.matches.length === 0) return;
     
     this.currentMatchIndex = (this.currentMatchIndex - 1 + this.matches.length) % this.matches.length;
-    this.highlightCurrentMatch(); // 导航时需要聚焦到匹配位置
+    this.highlightCurrentMatch(keepFocus); // 导航时需要聚焦到匹配位置
     this.updateMatchInfo();
     this.updateHighlights(); // 更新高亮以显示当前匹配
   }
