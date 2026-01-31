@@ -305,7 +305,8 @@ class EditorSearchReplace {
       this.textarea.focus();
     }
     
-    this.textarea.setSelectionRange(match.start, match.end);
+    // 只移动光标到匹配位置开头，不选中范围（避免蓝色背景遮挡自定义高亮）
+    this.textarea.setSelectionRange(match.start, match.start);
     
     // 滚动到可见区域
     this.scrollToSelection();
