@@ -1823,7 +1823,16 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   display: none;
 }
 
+
 /* 全屏模态框中隐藏 textarea */
 .editor-modal-content textarea.cm-hidden {
   display: none;
 }
+
+/* JSON Validation Error Highlight */
+.cm-json-error {
+  background-color: rgba(239, 68, 68, 0.2);
+  border-bottom: 2px wavy var(--danger);
+  border-radius: 2px;
+}
+

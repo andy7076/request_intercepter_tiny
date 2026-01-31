@@ -532,10 +532,11 @@ function validateJsonRealtime() {
   if (mainIndicator && mainStatusText) targets.push({ indicator: mainIndicator, text: mainStatusText });
   if (modalIndicator && modalStatusText) targets.push({ indicator: modalIndicator, text: modalStatusText });
   
-  // 优先从 CodeMirror 获取内容
-  const value = (formCodeMirror ? formCodeMirror.getValue() : responseBody.value).trim();
+  // 优先从 CodeMirror 获取内容 (保留原始空白符以计算准确位置)
+  const rawValue = formCodeMirror ? formCodeMirror.getValue() : responseBody.value;
+  const trimmedValue = rawValue.trim();
   
-  if (!value) {
+  if (!trimmedValue) {
     // 空内容时重置为默认状态
     targets.forEach(({ indicator, text }) => {
       indicator.className = 'json-status-indicator';
@@ -546,7 +547,7 @@ function validateJsonRealtime() {
   }
   
   try {
-    const parsed = JSON.parse(value);
+    const parsed = JSON.parse(rawValue);
     // 检查是否为对象或数组（API 响应通常是这两种格式）
     if (typeof parsed !== 'object' || parsed === null) {
       targets.forEach(({ indicator, text }) => {
@@ -555,6 +556,14 @@ function validateJsonRealtime() {
         text.textContent = window.i18n.t('needJsonObjectOrArray');
       });
       return false;
+    }
+    
+    // 清除错误标记（如果有）
+    if (formCodeMirror) {
+      formCodeMirror.getAllMarks().forEach(mark => mark.clear());
+    }
+    if (modalCodeMirror) {
+      modalCodeMirror.getAllMarks().forEach(mark => mark.clear());
     }
     
     targets.forEach(({ indicator, text }) => {
@@ -566,7 +575,68 @@ function validateJsonRealtime() {
   } catch (err) {
     // 提取错误位置信息
     const match = err.message.match(/position (\d+)/);
-    const errorMsg = match ? window.i18n.t('jsonErrorAtPosition', match[1]) : window.i18n.t('jsonError');
+    let errorMsg = window.i18n.t('jsonError');
+    let errorLine = -1;
+    let errorCol = -1;
+
+    if (match) {
+      const position = parseInt(match[1], 10);
+      // 计算行号和列号
+      const lines = rawValue.substring(0, position).split('\n');
+      errorLine = lines.length;
+      errorCol = lines[lines.length - 1].length + 1;
+      
+      errorMsg = window.i18n.t('jsonErrorDetailed', errorLine, errorCol);
+    } else if (err.message.match(/Unexpected end of JSON input/)) {
+      // JSON 意外结束（通常在最后）
+      if (formCodeMirror) {
+        const pos = formCodeMirror.posFromIndex(rawValue.length);
+        errorLine = pos.line + 1;
+        errorCol = pos.ch + 1;
+      } else {
+        const lines = rawValue.split('\n');
+        errorLine = lines.length;
+        errorCol = lines[lines.length - 1].length + 1;
+      }
+      errorMsg = window.i18n.t('jsonErrorDetailed', errorLine, errorCol);
+    }
+    
+    // 在 CodeMirror 中标记错误
+    if (errorLine > 0) {
+      const markError = (cm) => {
+        // 清除旧标记
+        cm.getAllMarks().forEach(mark => mark.clear());
+        
+        const lineIndex = errorLine - 1;
+        const colIndex = errorCol - 1;
+        
+        // 标记精确字符
+        let from = { line: lineIndex, ch: colIndex };
+        let to = { line: lineIndex, ch: colIndex + 1 };
+        
+        // 处理行尾/文件尾情况
+        const lineContent = cm.getLine(lineIndex) || "";
+        if (colIndex >= lineContent.length) {
+           if (lineContent.length > 0) {
+             // 如果在行尾，标记最后一个字符
+             from.ch = lineContent.length - 1;
+             to.ch = lineContent.length;
+           } else {
+             // 空行的情况，标记开头即可 (虽然看不见，但逻辑闭环)
+             from.ch = 0;
+             to.ch = 1; 
+           }
+        }
+        
+        cm.markText(from, to, { className: "cm-json-error" });
+        
+        // 滚动到错误位置 (可选，优化体验)
+        // cm.scrollIntoView(from, 20); 
+      };
+
+      if (formCodeMirror) markError(formCodeMirror);
+      if (modalCodeMirror) markError(modalCodeMirror);
+    }
     
     targets.forEach(({ indicator, text }) => {
       indicator.className = 'json-status-indicator invalid';

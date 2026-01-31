@@ -282,6 +282,17 @@
       }
     }
   },
+  "jsonErrorDetailed": {
+    "message": "✗ JSON 格式错误 (第 $LINE$ 行, 第 $COL$ 列)",
+    "placeholders": {
+      "line": {
+        "content": "$1"
+      },
+      "col": {
+        "content": "$2"
+      }
+    }
+  },
   "jsonError": {
     "message": "✗ JSON 格式错误"
   },

@@ -275,10 +275,21 @@
     "message": "✓ JSON format valid"
   },
   "jsonErrorAtPosition": {
-    "message": "✗ JSON format error (position $POS$)",
+    "message": "✗ JSON format error (Start: $POS$)",
     "placeholders": {
       "pos": {
         "content": "$1"
+      }
+    }
+  },
+  "jsonErrorDetailed": {
+    "message": "✗ JSON format error (Line $LINE$, Column $COL$)",
+    "placeholders": {
+      "line": {
+        "content": "$1"
+      },
+      "col": {
+        "content": "$2"
       }
     }
   },
