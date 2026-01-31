@@ -104,6 +104,9 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 
   if (areaName === 'local' && changes['consoleLogs']) {
     const enabled = changes['consoleLogs'].newValue;
+    // 防止重复通知
+    if (consoleLogsEnabled === enabled) return;
+    
     // 更新本地状态
     consoleLogsEnabled = enabled;
     
@@ -122,6 +125,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     log('[Request Interceptor Tiny]', 'Received rules update message, count:', mockRules.length);
   } else if (message.type === 'CONSOLE_LOGS_UPDATED') {
     const enabled = message.enabled;
+    // 防止重复通知
+    if (consoleLogsEnabled === enabled) return;
+    
     consoleLogsEnabled = enabled;
     
     // 通知注入脚本
@@ -130,10 +136,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       enabled: enabled
     }, '*');
     
-    // 强制输出一条日志表明状态已更新（即使当前 consoleLogsEnabled 为 true 也输出）
-    if (enabled) {
-      console.log('[Request Interceptor Tiny] 📝 Console logs enabled (via message)');
-    }
+    // Removed redundant console.log to avoid duplicates
   }
 });
 
