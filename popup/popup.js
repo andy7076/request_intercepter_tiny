@@ -2,14 +2,14 @@
 const tabBtns = document.querySelectorAll('.tab-btn');
 const panels = document.querySelectorAll('.panel');
 const rulesList = document.getElementById('rules-list');
-const ruleCount = document.getElementById('rule-count');
+const ruleCount = document.getElementById('rules-count-text');
 const ruleForm = document.getElementById('rule-form');
 const cancelBtn = document.getElementById('cancel-btn');
 const importBtn = document.getElementById('import-btn');
 const exportBtn = document.getElementById('export-btn');
 const importFile = document.getElementById('import-file');
 const logsList = document.getElementById('logs-list');
-const logCount = document.getElementById('log-count');
+const logCount = document.getElementById('logs-count-text');
 const clearLogsBtn = document.getElementById('clear-logs-btn');
 const clearRulesBtn = document.getElementById('clear-rules-btn');
 const disableRulesBtn = document.getElementById('disable-rules-btn');
@@ -43,13 +43,36 @@ const settingsClose = document.getElementById('settings-close');
 const settingConsoleLog = document.getElementById('setting-console-log');
 
 // Init
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Initialize i18n first
+  if (window.i18n && window.i18n.init) {
+    await window.i18n.init();
+  }
+  
   loadRules();
   loadLogs();
   loadSettings();
   setupEventListeners();
   initGlobalTooltip();
+  initLanguageSelector();
 });
+
+// Initialize language selector
+function initLanguageSelector() {
+  const languageSelect = document.getElementById('setting-language');
+  if (languageSelect && window.i18n) {
+    // Set current language
+    languageSelect.value = window.i18n.getCurrentLanguage();
+    
+    // Handle language change
+    languageSelect.addEventListener('change', async (e) => {
+      await window.i18n.setLanguage(e.target.value);
+      // Reload rules list to apply translations to dynamically generated content
+      loadRules();
+      loadLogs();
+    });
+  }
+}
 
 // 初始化全局悬浮提示
 function initGlobalTooltip() {
@@ -262,7 +285,7 @@ function setupEventListeners() {
     settingConsoleLog.addEventListener('change', (e) => {
       const enabled = e.target.checked;
       chrome.storage.local.set({ consoleLogs: enabled }, () => {
-        showToast(enabled ? '控制台日志已开启' : '控制台日志已关闭');
+        showToast(enabled ? window.i18n.t('consoleLogsEnabled') : window.i18n.t('consoleLogsDisabled'));
       });
     });
   }
@@ -306,7 +329,7 @@ function validateJsonRealtime() {
     targets.forEach(({ indicator, text }) => {
       indicator.className = 'json-status-indicator';
       text.className = 'hint';
-      text.textContent = '输入要返回的 JSON 响应内容';
+      text.textContent = window.i18n.t('responseContentHint');
     });
     return false;
   }
@@ -318,7 +341,7 @@ function validateJsonRealtime() {
       targets.forEach(({ indicator, text }) => {
         indicator.className = 'json-status-indicator invalid';
         text.className = 'hint invalid';
-        text.textContent = '✗ 需要 JSON 对象 {} 或数组 []';
+        text.textContent = window.i18n.t('needJsonObjectOrArray');
       });
       return false;
     }
@@ -326,13 +349,13 @@ function validateJsonRealtime() {
     targets.forEach(({ indicator, text }) => {
       indicator.className = 'json-status-indicator valid';
       text.className = 'hint valid';
-      text.textContent = '✓ JSON 格式有效';
+      text.textContent = window.i18n.t('jsonValid');
     });
     return true;
   } catch (err) {
     // 提取错误位置信息
     const match = err.message.match(/position (\d+)/);
-    const errorMsg = match ? `✗ JSON 格式错误 (位置 ${match[1]})` : '✗ JSON 格式错误';
+    const errorMsg = match ? window.i18n.t('jsonErrorAtPosition', match[1]) : window.i18n.t('jsonError');
     
     targets.forEach(({ indicator, text }) => {
       indicator.className = 'json-status-indicator invalid';
@@ -418,7 +441,8 @@ function clearSearch() {
 
 // 渲染规则列表
 function renderRules(rules, highlightQuery = '') {
-  ruleCount.textContent = rules.length;
+  ruleCount.textContent = window.i18n.t('rulesCount', rules.length);
+  
   
   if (rules.length === 0) {
     // 区分是搜索无结果还是真的没有规则
@@ -426,16 +450,16 @@ function renderRules(rules, highlightQuery = '') {
       rulesList.innerHTML = `
         <div class="no-search-results">
           <span class="empty-icon">🔍</span>
-          <p>未找到匹配的规则</p>
-          <p>搜索: <span class="search-query">"${escapeHtml(highlightQuery)}"</span></p>
+          <p>${window.i18n.t('noSearchResults')}</p>
+          <p>${window.i18n.t('searchFor')} <span class="search-query">"${escapeHtml(highlightQuery)}"</span></p>
         </div>
       `;
     } else {
       rulesList.innerHTML = `
         <div class="empty-state">
           <span class="empty-icon">📂</span>
-          <p>暂无拦截规则</p>
-          <p class="hint">点击下方或顶部的"添加规则"开启高效调试</p>
+          <p>${window.i18n.t('noRulesYet')}</p>
+          <p class="hint">${window.i18n.t('noRulesAdvancedHint')}</p>
         </div>
       `;
     }
@@ -447,7 +471,7 @@ function renderRules(rules, highlightQuery = '') {
       <div class="rule-header">
         <div class="rule-toggle ${rule.enabled ? 'active' : ''}" data-id="${rule.id}"></div>
         <span class="rule-name">${highlightText(escapeHtml(rule.name), highlightQuery)}</span>
-        <button class="btn-icon-small btn-export-icon" data-id="${rule.id}" title="导出规则">
+        <button class="btn-icon-small btn-export-icon" data-id="${rule.id}" title="${window.i18n.t('exportRule')}">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
             <polyline points="16 6 12 2 8 6"></polyline>
@@ -458,8 +482,8 @@ function renderRules(rules, highlightQuery = '') {
       <div class="rule-url">${highlightText(escapeHtml(rule.urlPattern), highlightQuery)}</div>
       ${renderRuleDetails(rule)}
       <div class="rule-actions">
-        <button class="btn-edit" data-id="${rule.id}">编辑</button>
-        <button class="btn-delete" data-id="${rule.id}">删除</button>
+        <button class="btn-edit" data-id="${rule.id}">${window.i18n.t('edit')}</button>
+        <button class="btn-delete" data-id="${rule.id}">${window.i18n.t('delete')}</button>
       </div>
     </div>
   `).join('');
@@ -497,7 +521,7 @@ function renderRules(rules, highlightQuery = '') {
         const isCollapsed = content.classList.contains('collapsed');
         content.classList.toggle('collapsed', !isCollapsed);
         icon.textContent = isCollapsed ? '▼' : '▶';
-        text.textContent = isCollapsed ? '收起' : '展开';
+        text.textContent = isCollapsed ? window.i18n.t('collapse') : window.i18n.t('expand');
       }
     });
   });
@@ -518,7 +542,7 @@ function renderRuleDetails(rule) {
           <span class="content-type-label">application/json</span>
           ${needsExpand ? `<button type="button" class="btn-expand-preview" data-rule-id="${rule.id}">
             <span class="expand-icon">▶</span>
-            <span class="expand-text">展开</span>
+            <span class="expand-text">${window.i18n.t('expand')}</span>
           </button>` : ''}
         </div>
         <div class="response-content collapsed" data-content-id="${rule.id}">
@@ -538,7 +562,7 @@ function renderRuleDetails(rule) {
 async function handleToggle(ruleId) {
   await sendMessage({ type: 'TOGGLE_RULE', ruleId });
   loadRules();
-  showToast('规则状态已更新');
+  showToast(window.i18n.t('ruleStatusUpdated'));
 }
 
 // 处理编辑
@@ -563,11 +587,11 @@ async function handleEdit(ruleId) {
 
 // 处理删除
 async function handleDelete(ruleId) {
-  if (!confirm('确定要删除这条规则吗？')) return;
+  if (!confirm(window.i18n.t('confirmDeleteRule'))) return;
   
   await sendMessage({ type: 'DELETE_RULE', ruleId });
   loadRules();
-  showToast('规则已删除');
+  showToast(window.i18n.t('ruleDeleted'));
 }
 
 // 处理表单提交
@@ -580,11 +604,11 @@ async function handleFormSubmit(e) {
   try {
     const parsed = JSON.parse(responseBody);
     if (typeof parsed !== 'object' || parsed === null) {
-      showToast('需要 JSON 对象 {} 或数组 []', true);
+      showToast(window.i18n.t('needJsonObjectOrArray'), true);
       return;
     }
   } catch (err) {
-    showToast('请输入有效的 JSON 格式', true);
+    showToast(window.i18n.t('pleaseEnterValidJson'), true);
     return;
   }
   
@@ -597,16 +621,16 @@ async function handleFormSubmit(e) {
   };
   
   if (!rule.responseBody) {
-    showToast('请输入响应内容', true);
+    showToast(window.i18n.t('pleaseEnterResponseContent'), true);
     return;
   }
   
   if (editingRuleId) {
     await sendMessage({ type: 'UPDATE_RULE', ruleId: editingRuleId, rule });
-    showToast('规则已更新');
+    showToast(window.i18n.t('ruleUpdated'));
   } else {
     await sendMessage({ type: 'ADD_RULE', rule });
-    showToast('规则已添加');
+    showToast(window.i18n.t('ruleAdded'));
   }
   
   resetForm();
@@ -686,7 +710,7 @@ async function handleExport() {
   const rules = await sendMessage({ type: 'GET_RULES' });
   
   if (rules.length === 0) {
-    showToast('没有可导出的规则', true);
+    showToast(window.i18n.t('noRulesToExport'), true);
     return;
   }
   
@@ -705,7 +729,7 @@ async function handleExport() {
   a.click();
   
   URL.revokeObjectURL(url);
-  showToast(`已导出 ${rules.length} 条规则`);
+  showToast(window.i18n.t('exportedRules', rules.length));
 }
 
 // 导出单条规则
@@ -714,7 +738,7 @@ async function handleExportRule(ruleId) {
   const rule = rules.find(r => r.id === ruleId);
   
   if (!rule) {
-    showToast('规则不存在', true);
+    showToast(window.i18n.t('ruleNotExist'), true);
     return;
   }
   
@@ -736,7 +760,7 @@ async function handleExportRule(ruleId) {
   a.click();
   
   URL.revokeObjectURL(url);
-  showToast(`已导出规则: ${rule.name}`);
+  showToast(window.i18n.t('exportedRule', rule.name));
 }
 
 // 导入规则
@@ -749,10 +773,10 @@ async function handleImport(e) {
     const data = JSON.parse(text);
     
     if (!data.rules || !Array.isArray(data.rules)) {
-      throw new Error('无效的规则文件格式');
+      throw new Error(window.i18n.t('invalidRuleFileFormat'));
     }
     
-    const confirmMsg = `确定要导入 ${data.rules.length} 条规则吗？\n这将添加到现有规则中。`;
+    const confirmMsg = window.i18n.t('confirmImportRules', data.rules.length);
     if (!confirm(confirmMsg)) {
       importFile.value = '';
       return;
@@ -768,10 +792,10 @@ async function handleImport(e) {
     }
     
     loadRules();
-    showToast(`成功导入 ${imported} 条规则`);
+    showToast(window.i18n.t('importedRules', imported));
   } catch (error) {
     console.error('Import error:', error);
-    showToast(`导入失败: ${error.message}`, true);
+    showToast(window.i18n.t('importFailed', error.message), true);
   }
   
   // 重置文件输入
@@ -786,21 +810,22 @@ async function loadLogs() {
 
 // 渲染日志列表
 function renderLogs(logs) {
-  logCount.textContent = logs.length;
+  logCount.textContent = window.i18n.t('recentMatchRecords', logs.length);
   
   if (logs.length === 0) {
     logsList.innerHTML = `
       <div class="empty-state">
         <span class="empty-icon">📉</span>
-        <p>暂无网络日志</p>
-        <p class="hint">开启规则后，匹配到的请求将在此实时展示</p>
+        <p>${window.i18n.t('noNetworkLogs')}</p>
+        <p class="hint">${window.i18n.t('noNetworkLogsHint')}</p>
       </div>
     `;
     return;
   }
   
   logsList.innerHTML = logs.map(log => {
-    const time = new Date(log.timestamp).toLocaleString('zh-CN', {
+    const locale = window.i18n && window.i18n.getCurrentLanguage() === 'zh_CN' ? 'zh-CN' : 'en-US';
+    const time = new Date(log.timestamp).toLocaleString(locale, {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit'
@@ -823,11 +848,11 @@ function renderLogs(logs) {
 
 // 清空日志
 async function handleClearLogs() {
-  if (!confirm('确定要清空所有日志吗？')) return;
+  if (!confirm(window.i18n.t('confirmClearLogs'))) return;
   
   await sendMessage({ type: 'CLEAR_LOGS' });
   loadLogs();
-  showToast('日志已清空');
+  showToast(window.i18n.t('logsCleared'));
 }
 
 // 定时刷新日志（在日志面板激活时）
@@ -842,34 +867,34 @@ setInterval(() => {
 async function handleClearRules() {
   const rules = await sendMessage({ type: 'GET_RULES' });
   if (rules.length === 0) {
-    showToast('暂无规则可清空', true);
+    showToast(window.i18n.t('noRulesToClear'), true);
     return;
   }
   
-  if (!confirm('确定要清空所有规则吗？此操作无法撤销。')) return;
+  if (!confirm(window.i18n.t('confirmClearAllRules'))) return;
   
   await sendMessage({ type: 'CLEAR_ALL_RULES' });
   loadRules();
-  showToast('所有规则已清空');
+  showToast(window.i18n.t('allRulesCleared'));
 }
 
 // 关闭所有规则
 async function handleDisableRules() {
   const rules = await sendMessage({ type: 'GET_RULES' });
   if (rules.length === 0) {
-    showToast('暂无规则', true);
+    showToast(window.i18n.t('noRulesAvailable'), true);
     return;
   }
   
   const hasEnabled = rules.some(r => r.enabled);
   if (!hasEnabled) {
-    showToast('所有规则已处于关闭状态', true);
+    showToast(window.i18n.t('allRulesAlreadyDisabled'), true);
     return;
   }
 
-  if (!confirm('确定要关闭所有规则吗？')) return;
+  if (!confirm(window.i18n.t('confirmDisableAllRules'))) return;
   
   await sendMessage({ type: 'DISABLE_ALL_RULES' });
   loadRules();
-  showToast('所有规则已关闭');
+  showToast(window.i18n.t('allRulesDisabled'));
 }
