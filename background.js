@@ -1,3 +1,15 @@
+// ========== i18n 模块（使用 Chrome 内置 API）==========
+// 获取翻译文本
+function t(key) {
+  try {
+    // 直接使用 Chrome i18n API
+    const msg = chrome.i18n.getMessage(key);
+    return msg || key;
+  } catch (e) {
+    return key;
+  }
+}
+
 // ========== 规则存储 ==========
 // 存储规则的键名
 const RULES_STORAGE_KEY = 'interceptRules';
