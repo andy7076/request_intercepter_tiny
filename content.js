@@ -126,10 +126,25 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 });
 
 // 监听规则更新消息（作为额外保障）
+// 监听消息（规则更新或设置更新）
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'MOCK_RULES_UPDATED') {
     mockRules = message.rules || [];
     log('[Request Interceptor Tiny]', 'Received rules update message, count:', mockRules.length);
+  } else if (message.type === 'CONSOLE_LOGS_UPDATED') {
+    const enabled = message.enabled;
+    consoleLogsEnabled = enabled;
+    
+    // 通知注入脚本
+    window.postMessage({
+      type: 'CONSOLE_LOGS_UPDATED',
+      enabled: enabled
+    }, '*');
+    
+    // 强制输出一条日志表明状态已更新（即使当前 consoleLogsEnabled 为 true 也输出）
+    if (enabled) {
+      console.log('[Request Interceptor Tiny] 📝 Console logs enabled (via message)');
+    }
   }
 });
 

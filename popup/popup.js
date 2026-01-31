@@ -286,6 +286,18 @@ function setupEventListeners() {
       const enabled = e.target.checked;
       chrome.storage.local.set({ consoleLogs: enabled }, () => {
         showToast(enabled ? window.i18n.t('consoleLogsEnabled') : window.i18n.t('consoleLogsDisabled'));
+        
+        // Directly notify the content script in the active tab to ensure immediate update
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          if (tabs && tabs[0]) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+              type: 'CONSOLE_LOGS_UPDATED',
+              enabled: enabled
+            }).catch(() => {
+              // Ignore errors (e.g., if content script context is invalid or script not present)
+            });
+          }
+        });
       });
     });
   }

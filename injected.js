@@ -74,6 +74,9 @@
       consoleLogsEnabled = event.data.enabled;
       if (consoleLogsEnabled) {
         log('[Request Interceptor Tiny] 📝 Console logs enabled');
+      } else {
+        // 使用原生 console.log 确保这一条能显示出来，因为 log() 函数已被禁用
+        console.log('[Request Interceptor Tiny] 📝 Console logs disabled');
       }
     }
   });
