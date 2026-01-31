@@ -57,7 +57,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
   initGlobalTooltip();
   initLanguageSelector();
+  checkViewMode();
 });
+
+// Check if running in full tab mode and hide button
+function checkViewMode() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('type') === 'tab') {
+    const openInTabBtn = document.getElementById('open-in-tab-btn');
+    if (openInTabBtn) {
+      openInTabBtn.style.display = 'none';
+      
+      // Add a class to body for specific tab styling if needed
+      document.body.classList.add('full-tab-view');
+    }
+  }
+}
 
 // Initialize language selector
 function initLanguageSelector() {
@@ -308,7 +323,7 @@ function setupEventListeners() {
         }
       }
 
-      chrome.tabs.create({ url: chrome.runtime.getURL('popup/popup.html') });
+      chrome.tabs.create({ url: chrome.runtime.getURL('popup/popup.html?type=tab') });
       window.close(); // Close the popup
     });
   }
