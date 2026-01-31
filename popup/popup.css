@@ -1381,6 +1381,9 @@ input:focus + .slider {
 .editor-modal-content {
   flex: 1;
   padding: 20px;
+  overflow: hidden; /* Prevent overflow */
+  display: flex;
+  flex-direction: column;
 }
 
 .editor-modal-content textarea {
@@ -1920,212 +1923,209 @@ input:focus + .slider {
 }
 
 /* ==========================================
-   CodeMirror 浅色主题定制 (高清晰度版)
+   CodeMirror 深色主题定制
    ========================================== */
 
 /* 表单内嵌的 CodeMirror 容器 */
 .codemirror-wrapper {
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
-  position: relative;
-  background: #ffffff; /* 明确的白色背景 */
-  transition: all 0.2s ease;
-}
-
-.codemirror-wrapper:hover {
-  border-color: var(--primary-light);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: var(--transition);
 }
 
 .codemirror-wrapper:focus-within {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-glow);
+  box-shadow: 0 0 0 4px var(--primary-glow);
 }
 
-/* CodeMirror 基础样式 */
+/* CodeMirror 基础样式覆盖 */
 .CodeMirror {
-  /* 修复高度和滚动问题：必须使用固定高度 */
-  height: 300px !important; 
-  /* max-height: 300px;  不需要 max-height，固定高度即可 */
-  background: #ffffff !important;
-  color: #1e293b !important; /* 深蓝灰色文字，对比度极高 */
-  font-family: "JetBrains Mono", "Consolas", monospace;
+  height: 200px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-family: "JetBrains Mono", "Monaco", Consolas, monospace;
   font-size: 13px;
-  line-height: 1.5;
-  padding: 8px 0;
+  line-height: 1.6;
+  border-radius: 10px;
 }
 
 .CodeMirror-scroll {
-  /* 确保滚动区域填满容器 */
-  height: 100%;
-  min-height: 100%;
-  padding-bottom: 20px;
+  min-height: 150px;
 }
 
 /* 行号栏样式 */
 .CodeMirror-gutters {
-  background: #f1f5f9 !important; /* 浅灰色行号背景 */
-  border-right: 1px solid #e2e8f0;
-  padding-right: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-right: 1px solid var(--border);
+  padding-right: 4px;
 }
 
 .CodeMirror-linenumber {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 11px;
-  padding: 0 8px 0 8px;
-  min-width: 32px;
-  text-align: right;
+  padding: 0 8px 0 4px;
+  min-width: 28px;
 }
 
-/* 激活行行号 */
-.CodeMirror-activeline .CodeMirror-linenumber {
-  color: #475569;
-  font-weight: bold;
-}
-
-/* 当前行高亮 */
-.CodeMirror-activeline-background {
-  background: #f8fafc;
-}
-
-/* 折叠槽 */
+/* 折叠槽样式 */
 .CodeMirror-foldgutter {
   width: 16px;
-  background: #f1f5f9;
 }
 
 .CodeMirror-foldgutter-open,
 .CodeMirror-foldgutter-folded {
-  color: #64748b;
+  color: var(--text-secondary);
   cursor: pointer;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.CodeMirror-foldgutter-open:hover,
+.CodeMirror-foldgutter-folded:hover {
+  color: var(--primary-light);
 }
 
 .CodeMirror-foldgutter-open:after {
   content: "▼";
-  font-size: 10px;
 }
 
 .CodeMirror-foldgutter-folded:after {
   content: "▶";
-  font-size: 10px;
-  color: var(--primary);
 }
 
-/* 折叠标记（行内） */
+/* 折叠标记样式 */
 .CodeMirror-foldmarker {
   color: var(--primary);
-  background: #e0e7ff;
-  border: 1px solid #c7d2fe;
-  padding: 0 4px;
-  border-radius: 4px;
   text-shadow: none;
   font-family: inherit;
   font-size: 11px;
-  margin: 0 2px;
   cursor: pointer;
+  padding: 0 4px;
+  background: rgba(99, 102, 241, 0.2);
+  border-radius: 4px;
+  margin: 0 2px;
 }
 
-/* 光标 */
+.CodeMirror-foldmarker:hover {
+  background: rgba(99, 102, 241, 0.4);
+}
+
+/* 光标样式 */
 .CodeMirror-cursor {
-  border-left: 2px solid #0f172a;
+  border-left: 2px solid var(--primary-light);
 }
 
-/* 选中文本 */
+/* 选中文本样式 */
 .CodeMirror-selected {
-  background: #bae6fd !important; /* 清新的浅蓝色选区 */
+  background: rgba(99, 102, 241, 0.2) !important;
 }
 
 .CodeMirror-focused .CodeMirror-selected {
-  background: #7dd3fc !important;
+  background: rgba(99, 102, 241, 0.3) !important;
+}
+
+/* 当前行高亮 */
+.CodeMirror-activeline-background {
+  background: rgba(255, 255, 255, 0.03);
 }
 
 /* 匹配括号 */
 div.CodeMirror span.CodeMirror-matchingbracket {
-  color: #0f172a;
-  background-color: #ffd700; /* 黄色背景高亮 */
-  font-weight: bold;
+  color: var(--success);
+  font-weight: 700;
+  text-decoration: underline;
 }
 
 div.CodeMirror span.CodeMirror-nonmatchingbracket {
-  color: #ef4444;
-  background-color: #fee2e2;
+  color: var(--danger);
 }
 
-/* 
-   JSON 语法高亮 - 浅色主题适配
-   清晰、多彩但不过于刺眼
-*/
+/* JSON 语法高亮 - 深色主题 */
 .cm-s-default .cm-property {
-  color: #0284c7; /* 深天蓝 */
-  font-weight: 600;
+  color: #7dd3fc; /* 属性名 - 天蓝色 */
 }
 
 .cm-s-default .cm-string {
-  color: #16a34a; /* 绿色 */
+  color: #a5d6a7; /* 字符串 - 柔和绿色 */
 }
 
 .cm-s-default .cm-number {
-  color: #d97706; /* 琥珀色 */
+  color: #ffa726; /* 数字 - 橙色 */
 }
 
 .cm-s-default .cm-atom {
-  color: #7c3aed; /* 紫色 (true/false/null) */
+  color: #f472b6; /* true/false/null - 粉色 */
 }
 
 .cm-s-default .cm-keyword {
-  color: #db2777; /* 粉红 (keywords) */
+  color: #f472b6; /* 关键字 */
 }
 
-.cm-s-default .cm-bracket,
+.cm-s-default .cm-bracket {
+  color: var(--text-secondary); /* 括号 */
+}
+
 .cm-s-default .cm-punctuation {
-  color: #64748b; /* 灰色标点 */
+  color: var(--text-secondary); /* 标点 */
 }
 
 .cm-s-default .cm-error {
-  color: #dc2626;
-  background: #fecaca;
-  border-bottom: 1px dotted #dc2626;
+  color: var(--danger);
+  background: var(--danger-bg);
+  border-radius: 2px;
 }
 
-/* 滚动条优化 (浅色版) */
+/* 滚动条样式 */
+.CodeMirror-vscrollbar,
+.CodeMirror-hscrollbar {
+  outline: none;
+}
+
 .CodeMirror-vscrollbar::-webkit-scrollbar,
 .CodeMirror-hscrollbar::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 .CodeMirror-vscrollbar::-webkit-scrollbar-track,
 .CodeMirror-hscrollbar::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
 }
 
 .CodeMirror-vscrollbar::-webkit-scrollbar-thumb,
 .CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 5px;
-  border: 2px solid #f1f5f9;
-  background-clip: padding-box;
+  background: linear-gradient(180deg, var(--primary-light), var(--primary));
+  border-radius: 4px;
 }
 
 .CodeMirror-vscrollbar::-webkit-scrollbar-thumb:hover,
 .CodeMirror-hscrollbar::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-  border: 2px solid #f1f5f9;
+  background: linear-gradient(180deg, var(--primary), var(--primary-dark));
 }
 
-/* 全屏模态框特殊处理 */
+/* 全屏编辑器中的 CodeMirror */
 .editor-modal-content .codemirror-wrapper {
-  background: #ffffff; /* 模态框里也保持亮色背景，保证清晰度 */
+  flex: 1;
+  height: 100%; /* Fallback */
+  border-radius: 12px;
 }
 
 .editor-modal-content .CodeMirror {
-  height: 100% !important; /* 全屏模式占满 */
+  height: 100%;
+  max-height: none;
+  min-height: 100%;
+  background: var(--bg-dark);
   font-size: 14px;
 }
 
-/* 隐藏原始 textarea */
-.form-group textarea.cm-hidden,
+/* 隐藏原始 textarea，CodeMirror 使用时 */
+.form-group textarea.cm-hidden {
+  display: none;
+}
+
+/* 全屏模态框中隐藏 textarea */
 .editor-modal-content textarea.cm-hidden {
   display: none;
 }
