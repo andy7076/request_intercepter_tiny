@@ -536,6 +536,15 @@ function switchTab(tab) {
   panels.forEach(panel => {
     panel.classList.toggle('active', panel.id === `${tab}-panel`);
   });
+
+  // 如果切换到添加/编辑页面，且 CodeMirror 已初始化，则刷新编辑器
+  // 这是因为 CodeMirror 在 display: none 的容器中无法正确计算尺寸
+  if (tab === 'add' && formCodeMirror) {
+    // 使用 setTimeout 确保 DOM 更新（display: block 生效）后再刷新
+    setTimeout(() => {
+      formCodeMirror.refresh();
+    }, 50);
+  }
 }
 
 // 实时验证 JSON 格式
