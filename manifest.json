@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Request Interceptor Tiny",
+  "name": "__MSG_extName__",
   "version": "1.0.0",
-  "description": "轻量级接口模拟工具",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
   "permissions": [
     "storage",
     "declarativeNetRequest",
