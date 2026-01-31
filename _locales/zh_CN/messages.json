@@ -23,6 +23,9 @@
   "tabAddRule": {
     "message": "添加规则"
   },
+  "tabEditRule": {
+    "message": "编辑规则"
+  },
   "tabRequestLogs": {
     "message": "请求日志"
   },

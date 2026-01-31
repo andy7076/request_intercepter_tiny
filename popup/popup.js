@@ -36,6 +36,7 @@ const editorModalContent = document.getElementById('editor-modal-content');
 let editorSearchReplace = null;
 
 let editingRuleId = null;
+let currentEditingRuleData = null; // Store original data for restore
 
 // Settings elements
 const settingsBtn = document.getElementById('settings-btn');
@@ -167,8 +168,17 @@ function setupEventListeners() {
   // 重置按钮
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
-      resetForm();
-      showToast(window.i18n.t('resetDone') || 'Reset done');
+      // 智能重置：如果是编辑模式，恢复原值；如果是新建模式，清空
+      if (editingRuleId && currentEditingRuleData) {
+        document.getElementById('rule-name').value = currentEditingRuleData.name;
+        document.getElementById('url-pattern').value = currentEditingRuleData.urlPattern;
+        document.getElementById('response-body').value = currentEditingRuleData.responseBody || '';
+        validateJsonRealtime();
+        showToast(window.i18n.t('resetDone'));
+      } else {
+        resetForm();
+        showToast(window.i18n.t('resetDone'));
+      }
     });
   }
   
@@ -594,11 +604,20 @@ async function handleEdit(ruleId) {
   if (!rule) return;
   
   editingRuleId = ruleId;
+  currentEditingRuleData = JSON.parse(JSON.stringify(rule)); // Deep copy
   
   // 填充表单
   document.getElementById('rule-name').value = rule.name;
   document.getElementById('url-pattern').value = rule.urlPattern;
   document.getElementById('response-body').value = rule.responseBody || '';
+  
+  // 更新 Tab UI
+  const addTabBtn = document.querySelector('.tab-btn[data-tab="add"]');
+  if (addTabBtn) {
+    // 更改图标和文本
+    addTabBtn.querySelector('span:nth-child(1)').textContent = '✏️';
+    addTabBtn.querySelector('span:nth-child(2)').textContent = window.i18n.t('tabEditRule');
+  }
   
   // 验证 JSON 格式
   validateJsonRealtime();
@@ -609,6 +628,12 @@ async function handleEdit(ruleId) {
 // 处理删除
 async function handleDelete(ruleId) {
   if (!confirm(window.i18n.t('confirmDeleteRule'))) return;
+  
+  // 如果正在编辑这条规则，先重置表单
+  if (editingRuleId === ruleId) {
+    resetForm();
+    switchTab('rules');
+  }
   
   await sendMessage({ type: 'DELETE_RULE', ruleId });
   loadRules();
@@ -662,8 +687,17 @@ async function handleFormSubmit(e) {
 // 重置表单
 function resetForm() {
   editingRuleId = null;
+  currentEditingRuleData = null;
   ruleForm.reset();
   document.getElementById('response-body').value = '';
+  
+  // 恢复 Tab UI
+  const addTabBtn = document.querySelector('.tab-btn[data-tab="add"]');
+  if (addTabBtn) {
+    addTabBtn.querySelector('span:nth-child(1)').textContent = '➕';
+    addTabBtn.querySelector('span:nth-child(2)').textContent = window.i18n.t('tabAddRule');
+  }
+  
   // 重置 JSON 验证状态
   validateJsonRealtime();
 }

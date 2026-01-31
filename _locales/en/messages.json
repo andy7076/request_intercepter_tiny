@@ -23,6 +23,9 @@
   "tabAddRule": {
     "message": "Add Rule"
   },
+  "tabEditRule": {
+    "message": "Edit Rule"
+  },
   "tabRequestLogs": {
     "message": "Request Logs"
   },
