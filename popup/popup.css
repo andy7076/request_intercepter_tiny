@@ -49,7 +49,7 @@ body {
   width: 100%;
   min-width: 420px;
   max-width: 100%;
-  min-height: 100vh;
+  height: 100vh; /* Fixed height */
   background: var(--bg-main);
   color: var(--text-primary);
   font-family:
@@ -59,23 +59,25 @@ body {
     sans-serif;
   font-size: 14px;
   line-height: 1.6;
-  overflow-x: hidden;
+  overflow: hidden; /* Prevent body scroll */
 }
 
 .container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100%; /* Fill body */
+  overflow: hidden; /* Prevent container scroll */
 }
 
 /* Header & Glassmorphism */
 .header {
   background: var(--bg-dark);
-  position: sticky;
-  top: 0;
+  /* Remove sticky, just standard flow in flex container */
   z-index: 100;
   padding: 24px 20px;
   border-bottom: 1px solid var(--border);
+  flex-shrink: 0; /* Header doesn't shrink */
+  position: relative;
   overflow: hidden;
 }
 
@@ -167,6 +169,7 @@ body {
   border-radius: 12px;
   border: 1px solid var(--border);
   gap: 4px;
+  flex-shrink: 0; /* Tabs don't shrink */
 }
 
 .tab-btn {
@@ -203,6 +206,29 @@ body {
   display: none;
   padding: 0 20px 24px;
   animation: slideIn 0.3s ease-out;
+  flex: 1; /* Take all remaining vertical space */
+  overflow-y: auto; /* Scroll ONLY inside the panel */
+  overflow-x: hidden;
+  height: 100%; /* Ensure it fills parent */
+  min-height: 0; /* Important for scroll to work in nested flex */
+}
+
+/* Custom Scrollbar for Panels */
+.panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.panel::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
+}
+
+.panel::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
 }
 
 .panel.active {
@@ -424,22 +450,11 @@ body {
 }
 
 .rules-list {
-  max-height: calc(100vh - 220px);
-  overflow-y: auto;
+  /* Removed manual max-height calculation */
+  /* max-height: calc(100vh - 220px); */
+  /* overflow-y: auto; */
   padding-right: 4px;
-}
-
-.rules-list::-webkit-scrollbar {
-  width: 5px;
-}
-
-.rules-list::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.rules-list::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 10px;
+  padding-bottom: 20px; /* Add some bottom padding for last item */
 }
 
 /* Rule Card Design */
