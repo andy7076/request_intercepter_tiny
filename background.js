@@ -6,19 +6,17 @@ const LANG_STORAGE_KEY = 'preferredLanguage';
 let i18nMessages = {};
 let currentLang = DEFAULT_LANGUAGE;
 
-// 加载语言消息
+// 加载语言消息（静默处理所有错误）
 async function loadI18nMessages(lang) {
   try {
     const url = chrome.runtime.getURL(`_locales/${lang}/messages.json`);
     // 检查 URL 是否有效
     if (!url || url.includes('invalid')) return {};
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`Failed to load ${lang}`);
+    if (!response.ok) return {};
     return await response.json();
   } catch (e) {
-    if (lang !== DEFAULT_LANGUAGE) {
-      return loadI18nMessages(DEFAULT_LANGUAGE);
-    }
+    // 静默处理所有错误
     return {};
   }
 }

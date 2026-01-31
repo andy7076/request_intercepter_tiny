@@ -17,21 +17,18 @@ function isExtensionContextValid() {
   }
 }
 
-// 加载语言消息
+// 加载语言消息（静默处理所有错误）
 async function loadI18nMessages(lang) {
-  if (!isExtensionContextValid()) return {};
   try {
+    if (!isExtensionContextValid()) return {};
     const url = chrome.runtime.getURL(`_locales/${lang}/messages.json`);
     // 检查 URL 是否有效（上下文失效时会返回 chrome-extension://invalid/）
     if (!url || url.includes('invalid')) return {};
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`Failed to load ${lang}`);
+    if (!response.ok) return {};
     return await response.json();
   } catch (e) {
-    // 如果加载失败且不是默认语言，尝试加载默认语言
-    if (lang !== DEFAULT_LANGUAGE && isExtensionContextValid()) {
-      return loadI18nMessages(DEFAULT_LANGUAGE);
-    }
+    // 静默处理所有错误，不尝试回退（避免循环）
     return {};
   }
 }
