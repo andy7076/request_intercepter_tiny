@@ -152,6 +152,12 @@ function setupEventListeners() {
   tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const tab = btn.dataset.tab;
+      
+      // 如果点击的是规则列表，且当前处于编辑模式，则重置表单（视为放弃编辑）
+      if (tab === 'rules' && editingRuleId) {
+        resetForm();
+      }
+      
       switchTab(tab);
     });
   });
