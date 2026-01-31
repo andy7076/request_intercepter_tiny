@@ -1,6 +1,6 @@
 # Request Interceptor Tiny
 
-**[中文](./README_CN.md) | [English](./README.md)**
+**[English](./README.md) | 中文**
 
 **轻量级接口模拟工具**
 

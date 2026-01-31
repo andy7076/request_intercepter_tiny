@@ -1,6 +1,6 @@
 # Request Interceptor Tiny
 
-**[中文](./README_CN.md) | English**
+**English | [中文](./README_CN.md)**
 
 **Lightweight API Mocking Tool**
 
