@@ -1,18 +1,5 @@
 // Content Script - 拦截和修改网络请求响应
 
-// ========== i18n 模块（使用 Chrome 内置 API）==========
-// 获取翻译文本（静默处理所有错误）
-function t(key) {
-  try {
-    // 直接使用 Chrome i18n API，它会根据浏览器语言自动选择
-    const msg = chrome.i18n.getMessage(key);
-    return msg || key;
-  } catch (e) {
-    // 上下文失效时返回 key 本身
-    return key;
-  }
-}
-
 // 检查扩展上下文是否有效
 function isExtensionContextValid() {
   try {
@@ -43,16 +30,16 @@ function loadMockRules() {
     try {
       chrome.storage.local.get('interceptRules', (result) => {
         if (chrome.runtime.lastError) {
-        console.error('[Request Interceptor Tiny]', t('logLoadRulesFailed'), chrome.runtime.lastError.message);
+        console.error('[Request Interceptor Tiny]', 'Failed to load rules:', chrome.runtime.lastError.message);
         resolve([]);
         return;
       }
       const allRules = result.interceptRules || [];
       // 过滤出启用的规则
       mockRules = allRules.filter(r => r.enabled);
-      log('[Request Interceptor Tiny] ✅', t('logMockRulesLoaded'), mockRules.length);
+      log('[Request Interceptor Tiny] ✅', 'Mock rules loaded:', mockRules.length);
       if (mockRules.length > 0) {
-        log('[Request Interceptor Tiny] 📋', t('logRulesList'), mockRules.map(r => ({
+        log('[Request Interceptor Tiny] 📋', 'Rules list:', mockRules.map(r => ({
           name: r.name,
           pattern: r.urlPattern
         })));
@@ -87,9 +74,9 @@ function loadSettings() {
 }
 
 // 初始化加载规则和设置
-log('[Request Interceptor Tiny] 🚀', t('logContentScriptInitStart'));
+log('[Request Interceptor Tiny] 🚀', 'Initializing content script...');
 loadMockRules().then(() => {
-  log('[Request Interceptor Tiny] ✨', t('logInitComplete'));
+  log('[Request Interceptor Tiny] ✨', 'Initialization complete');
 });
 loadSettings();
 
@@ -102,8 +89,8 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     const allRules = changes['interceptRules'].newValue || [];
     // 过滤出启用的规则
     mockRules = allRules.filter(r => r.enabled);
-    log('[Request Interceptor Tiny]', t('logRulesUpdated'), mockRules.length);
-    log('[Request Interceptor Tiny]', t('logCurrentEnabledRules'), mockRules.map(r => r.name));
+    log('[Request Interceptor Tiny]', 'Rules updated, enabled count:', mockRules.length);
+    log('[Request Interceptor Tiny]', 'Current enabled rules:', mockRules.map(r => r.name));
     
     // 通知页面规则已更新
     window.postMessage({
@@ -129,7 +116,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'MOCK_RULES_UPDATED') {
     mockRules = message.rules || [];
-    log('[Request Interceptor Tiny]', t('logReceivedRulesUpdateMessage'), mockRules.length);
+    log('[Request Interceptor Tiny]', 'Received rules update message, count:', mockRules.length);
   }
 });
 
@@ -172,7 +159,7 @@ function matchUrl(pattern, url) {
     const regex = new RegExp(finalPattern, 'i');
     return regex.test(url);
   } catch (e) {
-    console.warn('[Request Interceptor Tiny]', t('logURLMatchRegexError'), e.message);
+    console.warn('[Request Interceptor Tiny]', 'URL match regex error:', e.message);
     return false;
   }
 }
@@ -194,8 +181,8 @@ window.addEventListener('message', (event) => {
   if (event.data.type === 'REQUEST_INTERCEPTOR_CHECK') {
     const { url, requestId } = event.data;
     
-    log('[Request Interceptor Tiny]', t('logCheckingURL'), url);
-    log('[Request Interceptor Tiny]', t('logCurrentRulesCount'), mockRules.length);
+    log('[Request Interceptor Tiny]', 'Checking URL:', url);
+    log('[Request Interceptor Tiny]', 'Current rules count:', mockRules.length);
     
     // 检查扩展上下文是否有效
     if (!isExtensionContextValid()) {
@@ -208,7 +195,7 @@ window.addEventListener('message', (event) => {
     }
     
     const mockRule = findMockRule(url);
-    log('[Request Interceptor Tiny]', t('logMatchResult'), mockRule ? (t('logMatchedRule') + ': ' + mockRule.name) : t('logNoMatchingRule'));
+    log('[Request Interceptor Tiny]', 'Match result:', mockRule ? ('Matched rule' + ': ' + mockRule.name) : 'No matching rule');
     
     if (mockRule) {
       // 发送 mock 响应
@@ -245,5 +232,5 @@ window.addEventListener('message', (event) => {
 });
 
 // 注意：injected.js 现在由 manifest.json 直接注入到 MAIN world，无需动态注入
-console.log('[Request Interceptor Tiny] 📦', t('logContentScriptReady'));
+console.log('[Request Interceptor Tiny] 📦', 'Content script ready');
 

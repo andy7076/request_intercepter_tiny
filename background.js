@@ -1,15 +1,3 @@
-// ========== i18n 模块（使用 Chrome 内置 API）==========
-// 获取翻译文本
-function t(key) {
-  try {
-    // 直接使用 Chrome i18n API
-    const msg = chrome.i18n.getMessage(key);
-    return msg || key;
-  } catch (e) {
-    return key;
-  }
-}
-
 // ========== 规则存储 ==========
 // 存储规则的键名
 const RULES_STORAGE_KEY = 'interceptRules';
@@ -22,7 +10,7 @@ chrome.runtime.onInstalled.addListener(async () => {
   if (!result[RULES_STORAGE_KEY]) {
     await chrome.storage.local.set({ [RULES_STORAGE_KEY]: [] });
   }
-  console.log('[Request Interceptor Tiny]', t('logExtensionInstalled'));
+  console.log('[Request Interceptor Tiny]', 'Extension installed');
 });
 
 // 点击扩展图标时打开 Side Panel
@@ -130,7 +118,7 @@ async function notifyMockRulesUpdated() {
       }
     }
   } catch (e) {
-    console.error('[Request Interceptor Tiny]', t('logFailedToNotifyTabs'), e);
+    console.error('[Request Interceptor Tiny]', 'Failed to notify tabs:', e);
   }
 }
 
@@ -237,7 +225,7 @@ async function applyRules() {
   }
   
   // mockResponse 规则由 content script 处理，不需要添加 declarativeNetRequest 规则
-  console.log('[Request Interceptor Tiny]', t('logRulesCleanedUp'));
+  console.log('[Request Interceptor Tiny]', 'Rules cleaned up');
 }
 
 // 启动时应用规则
@@ -291,8 +279,8 @@ try {
       });
     }
   });
-  console.log('[Request Interceptor Tiny]', t('logRequestLoggingEnabled'));
+  console.log('[Request Interceptor Tiny]', 'Request logging enabled');
 } catch (e) {
   // onRuleMatchedDebug 只在开发模式下可用
-  console.log('[Request Interceptor Tiny]', t('logRequestLoggingNotAvailable'));
+  console.log('[Request Interceptor Tiny]', 'Request logging not available (requires developer mode)');
 }
