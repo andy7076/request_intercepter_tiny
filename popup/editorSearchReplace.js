@@ -430,6 +430,10 @@ class EditorSearchReplace {
       this.searchInput.value = selectedText;
       // 打开时不自动聚焦到匹配项，保持搜索框焦点
       this.performSearch(false);
+    } else {
+      // 没有任何选中时，确保输入框是空的（对应"关闭时清空"的需求，防止上次残留）
+      this.searchInput.value = '';
+      this.performSearch(false); // Update UI to empty state
     }
     
     if (focusReplace) {
