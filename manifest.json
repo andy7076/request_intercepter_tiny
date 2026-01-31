@@ -8,8 +8,6 @@
     "declarativeNetRequest",
     "declarativeNetRequestWithHostAccess",
     "declarativeNetRequestFeedback",
-    "scripting",
-    "activeTab",
     "sidePanel",
     "tabs"
   ],
