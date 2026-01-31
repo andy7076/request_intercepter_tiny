@@ -298,6 +298,16 @@ function setupEventListeners() {
   const openInTabBtn = document.getElementById('open-in-tab-btn');
   if (openInTabBtn) {
     openInTabBtn.addEventListener('click', () => {
+      // 检查是否有未保存的修改
+      const currentActiveBtn = document.querySelector('.tab-btn.active');
+      const currentTab = currentActiveBtn ? currentActiveBtn.dataset.tab : 'rules';
+      
+      if (currentTab === 'add' && checkFormDirty()) {
+        if (!confirm(window.i18n.t('confirmDiscardChanges'))) {
+          return;
+        }
+      }
+
       chrome.tabs.create({ url: chrome.runtime.getURL('popup/popup.html') });
       window.close(); // Close the popup
     });
