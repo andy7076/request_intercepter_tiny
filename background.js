@@ -1,57 +1,14 @@
-// ========== i18n 模块 ==========
-const SUPPORTED_LANGUAGES = ['en', 'zh_CN'];
-const DEFAULT_LANGUAGE = 'en';
-const LANG_STORAGE_KEY = 'preferredLanguage';
-
-let i18nMessages = {};
-let currentLang = DEFAULT_LANGUAGE;
-
-// 加载语言消息（静默处理所有错误）
-async function loadI18nMessages(lang) {
-  try {
-    const url = chrome.runtime.getURL(`_locales/${lang}/messages.json`);
-    // 检查 URL 是否有效
-    if (!url || url.includes('invalid')) return {};
-    const response = await fetch(url);
-    if (!response.ok) return {};
-    return await response.json();
-  } catch (e) {
-    // 静默处理所有错误
-    return {};
-  }
-}
-
+// ========== i18n 模块（使用 Chrome 内置 API）==========
 // 获取翻译文本
 function t(key) {
-  const entry = i18nMessages[key];
-  if (entry) return entry.message;
-  // 回退到 Chrome 内置 API
-  return chrome.i18n.getMessage(key) || key;
-}
-
-// 初始化 i18n
-async function initI18n() {
-  const result = await chrome.storage.local.get(LANG_STORAGE_KEY);
-  const savedLang = result[LANG_STORAGE_KEY];
-  currentLang = savedLang && SUPPORTED_LANGUAGES.includes(savedLang) ? savedLang : DEFAULT_LANGUAGE;
-  i18nMessages = await loadI18nMessages(currentLang);
-}
-
-// 监听语言变化
-chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName === 'local' && changes[LANG_STORAGE_KEY]) {
-    const newLang = changes[LANG_STORAGE_KEY].newValue;
-    if (newLang && SUPPORTED_LANGUAGES.includes(newLang)) {
-      currentLang = newLang;
-      loadI18nMessages(newLang).then(msgs => {
-        i18nMessages = msgs;
-      });
-    }
+  try {
+    // 直接使用 Chrome i18n API
+    const msg = chrome.i18n.getMessage(key);
+    return msg || key;
+  } catch (e) {
+    return key;
   }
-});
-
-// 启动时初始化 i18n
-initI18n();
+}
 
 // ========== 规则存储 ==========
 // 存储规则的键名

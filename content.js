@@ -1,12 +1,17 @@
 // Content Script - 拦截和修改网络请求响应
 
-// ========== i18n 模块 ==========
-const SUPPORTED_LANGUAGES = ['en', 'zh_CN'];
-const DEFAULT_LANGUAGE = 'en';
-const LANG_STORAGE_KEY = 'preferredLanguage';
-
-let i18nMessages = {};
-let currentLang = DEFAULT_LANGUAGE;
+// ========== i18n 模块（使用 Chrome 内置 API）==========
+// 获取翻译文本（静默处理所有错误）
+function t(key) {
+  try {
+    // 直接使用 Chrome i18n API，它会根据浏览器语言自动选择
+    const msg = chrome.i18n.getMessage(key);
+    return msg || key;
+  } catch (e) {
+    // 上下文失效时返回 key 本身
+    return key;
+  }
+}
 
 // 检查扩展上下文是否有效
 function isExtensionContextValid() {
@@ -16,62 +21,6 @@ function isExtensionContextValid() {
     return false;
   }
 }
-
-// 加载语言消息（静默处理所有错误）
-async function loadI18nMessages(lang) {
-  try {
-    if (!isExtensionContextValid()) return {};
-    const url = chrome.runtime.getURL(`_locales/${lang}/messages.json`);
-    // 检查 URL 是否有效（上下文失效时会返回 chrome-extension://invalid/）
-    if (!url || url.includes('invalid')) return {};
-    const response = await fetch(url);
-    if (!response.ok) return {};
-    return await response.json();
-  } catch (e) {
-    // 静默处理所有错误，不尝试回退（避免循环）
-    return {};
-  }
-}
-
-// 获取翻译文本
-function t(key) {
-  const entry = i18nMessages[key];
-  if (entry) return entry.message;
-  // 回退到 Chrome 内置 API（如果上下文有效）
-  if (isExtensionContextValid()) {
-    try {
-      const msg = chrome.i18n.getMessage(key);
-      if (msg) return msg;
-    } catch (e) {
-      // 忽略
-    }
-  }
-  return key;
-}
-
-// 初始化 i18n
-async function initI18n() {
-  if (!isExtensionContextValid()) return;
-  return new Promise((resolve) => {
-    try {
-      chrome.storage.local.get(LANG_STORAGE_KEY, async (result) => {
-        if (chrome.runtime.lastError) {
-          resolve();
-          return;
-        }
-        const savedLang = result[LANG_STORAGE_KEY];
-        currentLang = savedLang && SUPPORTED_LANGUAGES.includes(savedLang) ? savedLang : DEFAULT_LANGUAGE;
-        i18nMessages = await loadI18nMessages(currentLang);
-        resolve();
-      });
-    } catch (e) {
-      resolve();
-    }
-  });
-}
-
-// 启动时初始化 i18n
-initI18n();
 
 // ========== 日志控制 ==========
 // 日志控制
@@ -173,17 +122,6 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
       type: 'CONSOLE_LOGS_UPDATED',
       enabled: enabled
     }, '*');
-  }
-
-  // 监听语言变化
-  if (areaName === 'local' && changes[LANG_STORAGE_KEY]) {
-    const newLang = changes[LANG_STORAGE_KEY].newValue;
-    if (newLang && SUPPORTED_LANGUAGES.includes(newLang)) {
-      currentLang = newLang;
-      loadI18nMessages(newLang).then(msgs => {
-        i18nMessages = msgs;
-      });
-    }
   }
 });
 
