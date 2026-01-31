@@ -66,7 +66,12 @@ class EditorSearchReplace {
     
     // 监听内容变化
     this.textarea.addEventListener('input', () => {
-      this.updateHighlights();
+      // 只有在搜索框开启且有搜索内容时才重新搜索
+      if (this.isVisible && this.searchInput && this.searchInput.value) {
+        this.performSearch(false); // 重新计算匹配位置，但不改变焦点
+      } else {
+        this.updateHighlights(); // 只是更新高亮层的内容（虽然可能没用，保持兼容）
+      }
     });
   }
   
