@@ -299,6 +299,7 @@ function setupEventListeners() {
   if (openInTabBtn) {
     openInTabBtn.addEventListener('click', () => {
       chrome.tabs.create({ url: chrome.runtime.getURL('popup/popup.html') });
+      window.close(); // Close the popup
     });
   }
 
