@@ -890,6 +890,7 @@ async function handleEdit(ruleId) {
     // 更改图标和文本
     addTabBtn.querySelector('span:nth-child(1)').textContent = '✏️';
     addTabBtn.querySelector('span:nth-child(2)').textContent = window.i18n.t('tabEditRule');
+    addTabBtn.querySelector('span:nth-child(2)').setAttribute('data-i18n', 'tabEditRule');
   }
   
   // 验证 JSON 格式
@@ -975,6 +976,7 @@ function resetForm() {
   if (addTabBtn) {
     addTabBtn.querySelector('span:nth-child(1)').textContent = '➕';
     addTabBtn.querySelector('span:nth-child(2)').textContent = window.i18n.t('tabAddRule');
+    addTabBtn.querySelector('span:nth-child(2)').setAttribute('data-i18n', 'tabAddRule');
   }
   
   // 重置 JSON 验证状态
