@@ -65,15 +65,15 @@
     
     // 监听规则更新通知
     if (event.data.type === 'REQUEST_INTERCEPTOR_RULES_UPDATED') {
-      log(`[Request Interceptor Tiny] 🔄 规则已更新! 当前启用规则数: ${event.data.rulesCount}`);
-      log('[Request Interceptor Tiny] 💡 新的请求将使用更新后的规则');
+      log(`[Request Interceptor Tiny] 🔄 Rules have been updated! Current enabled rules count: ${event.data.rulesCount}`);
+      log('[Request Interceptor Tiny] 💡 New requests will use updated rules');
     }
     
     // 监听日志设置更新
     if (event.data.type === 'CONSOLE_LOGS_UPDATED') {
       consoleLogsEnabled = event.data.enabled;
       if (consoleLogsEnabled) {
-        log('[Request Interceptor Tiny] 📝 控制台日志已开启');
+        log('[Request Interceptor Tiny] 📝 Console logs enabled');
       }
     }
   });

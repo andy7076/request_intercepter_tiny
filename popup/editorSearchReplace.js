@@ -398,7 +398,7 @@ class EditorSearchReplace {
       // 显示替换完成提示
       this.showToast(window.i18n ? window.i18n.t('replacedCount', matchCount) : `Replaced ${matchCount} occurrences`);
     } catch (e) {
-      console.error('Replace failed:', e);
+      console.error('[Request Interceptor Tiny]', window.i18n ? window.i18n.t('logReplaceFailed') : 'Replace failed:', e);
     }
   }
   

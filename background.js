@@ -9,7 +9,7 @@ chrome.runtime.onInstalled.addListener(async () => {
   if (!result[RULES_STORAGE_KEY]) {
     await chrome.storage.local.set({ [RULES_STORAGE_KEY]: [] });
   }
-  console.log('Request Interceptor Tiny 扩展已安装');
+  console.log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logExtensionInstalled'));
 });
 
 // 点击扩展图标时打开 Side Panel
@@ -117,7 +117,7 @@ async function notifyMockRulesUpdated() {
       }
     }
   } catch (e) {
-    console.error('Failed to notify tabs:', e);
+    console.error('[Request Interceptor Tiny]', chrome.i18n.getMessage('logFailedToNotifyTabs'), e);
   }
 }
 
@@ -224,7 +224,7 @@ async function applyRules() {
   }
   
   // mockResponse 规则由 content script 处理，不需要添加 declarativeNetRequest 规则
-  console.log('[Request Interceptor Tiny] 规则已清理，mockResponse 由 content script 处理');
+  console.log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logRulesCleanedUp'));
 }
 
 // 启动时应用规则
@@ -278,8 +278,8 @@ try {
       });
     }
   });
-  console.log('Request logging enabled');
+  console.log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logRequestLoggingEnabled'));
 } catch (e) {
   // onRuleMatchedDebug 只在开发模式下可用
-  console.log('Request logging not available (requires developer mode)');
+  console.log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logRequestLoggingNotAvailable'));
 }

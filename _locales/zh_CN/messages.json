@@ -334,5 +334,107 @@
   },
   "closeEscKey": {
     "message": "关闭 (Esc)"
+  },
+  "logExtensionInstalled": {
+    "message": "扩展已安装"
+  },
+  "logFailedToNotifyTabs": {
+    "message": "通知标签页失败"
+  },
+  "logRulesCleanedUp": {
+    "message": "规则已清理，mockResponse 由 content script 处理"
+  },
+  "logRequestLoggingEnabled": {
+    "message": "请求日志已启用"
+  },
+  "logRequestLoggingNotAvailable": {
+    "message": "请求日志不可用（需要开发者模式）"
+  },
+  "logCommunicationFailed": {
+    "message": "通信失败"
+  },
+  "logSendMessageError": {
+    "message": "发送消息异常"
+  },
+  "logImportError": {
+    "message": "导入错误"
+  },
+  "logLoadRulesFailed": {
+    "message": "读取规则失败"
+  },
+  "logMockRulesLoaded": {
+    "message": "已加载 mock 规则"
+  },
+  "logRulesList": {
+    "message": "规则列表"
+  },
+  "logContentScriptInitStart": {
+    "message": "Content Script 开始初始化..."
+  },
+  "logInitComplete": {
+    "message": "初始化完成，准备拦截请求"
+  },
+  "logRulesUpdated": {
+    "message": "规则已更新"
+  },
+  "logCurrentEnabledRules": {
+    "message": "当前启用的规则"
+  },
+  "logReceivedRulesUpdateMessage": {
+    "message": "收到规则更新消息"
+  },
+  "logURLMatchRegexError": {
+    "message": "URL匹配正则错误"
+  },
+  "logCheckingURL": {
+    "message": "检查URL"
+  },
+  "logCurrentRulesCount": {
+    "message": "当前规则数量"
+  },
+  "logMatchResult": {
+    "message": "匹配结果"
+  },
+  "logMatchedRule": {
+    "message": "匹配到规则"
+  },
+  "logNoMatchingRule": {
+    "message": "无匹配规则"
+  },
+  "logContentScriptReady": {
+    "message": "Content script 就绪，等待来自 injected.js 的消息"
+  },
+  "logErrorCheckingMockRule": {
+    "message": "检查 mock 规则时出错"
+  },
+  "logFailedToOverrideXHR": {
+    "message": "覆盖 XHR 属性失败"
+  },
+  "logRulesHaveBeenUpdated": {
+    "message": "规则已更新! 当前启用规则数"
+  },
+  "logNewRequestsWillUseUpdatedRules": {
+    "message": "新的请求将使用更新后的规则"
+  },
+  "logConsoleLogsEnabled": {
+    "message": "控制台日志已开启"
+  },
+  "logWillMockFetchResponse": {
+    "message": "将 mock fetch 响应"
+  },
+  "logResponseMockedFor": {
+    "message": "响应已 mock"
+  },
+  "logWillMockXHRResponse": {
+    "message": "将 mock XHR 响应"
+  },
+  "logResponseMockedForXHR": {
+    "message": "XHR 响应已 mock"
+  },
+  "logInjectedScriptLoaded": {
+    "message": "注入脚本已加载 - Network 显示原始响应，页面显示 mock 内容"
+  },
+  "logReplaceFailed": {
+    "message": "替换失败"
   }
 }

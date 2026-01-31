@@ -19,16 +19,16 @@ function loadMockRules() {
   return new Promise((resolve) => {
     chrome.storage.local.get('interceptRules', (result) => {
       if (chrome.runtime.lastError) {
-        console.error('[Request Interceptor Tiny] 读取规则失败:', chrome.runtime.lastError.message);
+        console.error('[Request Interceptor Tiny]', chrome.i18n.getMessage('logLoadRulesFailed'), chrome.runtime.lastError.message);
         resolve([]);
         return;
       }
       const allRules = result.interceptRules || [];
       // 过滤出启用的规则
       mockRules = allRules.filter(r => r.enabled);
-      log('[Request Interceptor Tiny] ✅ 已加载 mock 规则:', mockRules.length);
+      log('[Request Interceptor Tiny] ✅', chrome.i18n.getMessage('logMockRulesLoaded'), mockRules.length);
       if (mockRules.length > 0) {
-        log('[Request Interceptor Tiny] 📋 规则列表:', mockRules.map(r => ({
+        log('[Request Interceptor Tiny] 📋', chrome.i18n.getMessage('logRulesList'), mockRules.map(r => ({
           name: r.name,
           pattern: r.urlPattern
         })));
@@ -54,9 +54,9 @@ function loadSettings() {
 }
 
 // 初始化加载规则和设置
-log('[Request Interceptor Tiny] 🚀 Content Script 开始初始化...');
+log('[Request Interceptor Tiny] 🚀', chrome.i18n.getMessage('logContentScriptInitStart'));
 loadMockRules().then(() => {
-  log('[Request Interceptor Tiny] ✨ 初始化完成,准备拦截请求');
+  log('[Request Interceptor Tiny] ✨', chrome.i18n.getMessage('logInitComplete'));
 });
 loadSettings();
 
@@ -66,8 +66,8 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     const allRules = changes['interceptRules'].newValue || [];
     // 过滤出启用的规则
     mockRules = allRules.filter(r => r.enabled);
-    log('[Request Interceptor Tiny] 规则已更新:', mockRules.length);
-    log('[Request Interceptor Tiny] 当前启用的规则:', mockRules.map(r => r.name));
+    log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logRulesUpdated'), mockRules.length);
+    log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logCurrentEnabledRules'), mockRules.map(r => r.name));
     
     // 通知页面规则已更新
     window.postMessage({
@@ -93,7 +93,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'MOCK_RULES_UPDATED') {
     mockRules = message.rules || [];
-    log('[Request Interceptor Tiny] 收到规则更新消息:', mockRules.length);
+    log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logReceivedRulesUpdateMessage'), mockRules.length);
   }
 });
 
@@ -136,7 +136,7 @@ function matchUrl(pattern, url) {
     const regex = new RegExp(finalPattern, 'i');
     return regex.test(url);
   } catch (e) {
-    console.warn('[Request Interceptor Tiny] URL匹配正则错误:', e.message);
+    console.warn('[Request Interceptor Tiny]', chrome.i18n.getMessage('logURLMatchRegexError'), e.message);
     return false;
   }
 }
@@ -168,8 +168,8 @@ window.addEventListener('message', (event) => {
   if (event.data.type === 'REQUEST_INTERCEPTOR_CHECK') {
     const { url, requestId } = event.data;
     
-    log('[Request Interceptor Tiny] 检查URL:', url);
-    log('[Request Interceptor Tiny] 当前规则数量:', mockRules.length);
+    log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logCheckingURL'), url);
+    log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logCurrentRulesCount'), mockRules.length);
     
     // 检查扩展上下文是否有效
     if (!isContextValid()) {
@@ -182,7 +182,7 @@ window.addEventListener('message', (event) => {
     }
     
     const mockRule = findMockRule(url);
-    log('[Request Interceptor Tiny] 匹配结果:', mockRule ? `匹配到规则: ${mockRule.name}` : '无匹配规则');
+    log('[Request Interceptor Tiny]', chrome.i18n.getMessage('logMatchResult'), mockRule ? (chrome.i18n.getMessage('logMatchedRule') + ': ' + mockRule.name) : chrome.i18n.getMessage('logNoMatchingRule'));
     
     if (mockRule) {
       // 发送 mock 响应
@@ -219,5 +219,5 @@ window.addEventListener('message', (event) => {
 });
 
 // 注意：injected.js 现在由 manifest.json 直接注入到 MAIN world，无需动态注入
-console.log('[Request Interceptor Tiny] 📦 Content script 就绪，等待来自 injected.js 的消息');
+console.log('[Request Interceptor Tiny] 📦', chrome.i18n.getMessage('logContentScriptReady'));
 

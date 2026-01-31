@@ -334,5 +334,107 @@
   },
   "closeEscKey": {
     "message": "Close (Esc)"
+  },
+  "logExtensionInstalled": {
+    "message": "Extension installed"
+  },
+  "logFailedToNotifyTabs": {
+    "message": "Failed to notify tabs"
+  },
+  "logRulesCleanedUp": {
+    "message": "Rules cleaned up, mockResponse handled by content script"
+  },
+  "logRequestLoggingEnabled": {
+    "message": "Request logging enabled"
+  },
+  "logRequestLoggingNotAvailable": {
+    "message": "Request logging not available (requires developer mode)"
+  },
+  "logCommunicationFailed": {
+    "message": "Communication failed"
+  },
+  "logSendMessageError": {
+    "message": "Send message error"
+  },
+  "logImportError": {
+    "message": "Import error"
+  },
+  "logLoadRulesFailed": {
+    "message": "Failed to load rules"
+  },
+  "logMockRulesLoaded": {
+    "message": "Mock rules loaded"
+  },
+  "logRulesList": {
+    "message": "Rules list"
+  },
+  "logContentScriptInitStart": {
+    "message": "Content Script initializing..."
+  },
+  "logInitComplete": {
+    "message": "Initialization complete, ready to intercept requests"
+  },
+  "logRulesUpdated": {
+    "message": "Rules updated"
+  },
+  "logCurrentEnabledRules": {
+    "message": "Current enabled rules"
+  },
+  "logReceivedRulesUpdateMessage": {
+    "message": "Received rules update message"
+  },
+  "logURLMatchRegexError": {
+    "message": "URL match regex error"
+  },
+  "logCheckingURL": {
+    "message": "Checking URL"
+  },
+  "logCurrentRulesCount": {
+    "message": "Current rules count"
+  },
+  "logMatchResult": {
+    "message": "Match result"
+  },
+  "logMatchedRule": {
+    "message": "Matched rule"
+  },
+  "logNoMatchingRule": {
+    "message": "No matching rule"
+  },
+  "logContentScriptReady": {
+    "message": "Content script ready, waiting for messages from injected.js"
+  },
+  "logErrorCheckingMockRule": {
+    "message": "Error checking mock rule"
+  },
+  "logFailedToOverrideXHR": {
+    "message": "Failed to override XHR properties"
+  },
+  "logRulesHaveBeenUpdated": {
+    "message": "Rules have been updated! Current enabled rules count"
+  },
+  "logNewRequestsWillUseUpdatedRules": {
+    "message": "New requests will use updated rules"
+  },
+  "logConsoleLogsEnabled": {
+    "message": "Console logs enabled"
+  },
+  "logWillMockFetchResponse": {
+    "message": "Will mock fetch response"
+  },
+  "logResponseMockedFor": {
+    "message": "Response mocked for"
+  },
+  "logWillMockXHRResponse": {
+    "message": "Will mock XHR response"
+  },
+  "logResponseMockedForXHR": {
+    "message": "Response mocked for XHR"
+  },
+  "logInjectedScriptLoaded": {
+    "message": "Injected script loaded - Network shows original responses, page displays mocked content"
+  },
+  "logReplaceFailed": {
+    "message": "Replace failed"
   }
 }
