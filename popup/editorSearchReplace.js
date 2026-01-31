@@ -78,31 +78,31 @@ class EditorSearchReplace {
       <div class="search-replace-container">
         <div class="search-row">
           <div class="search-input-wrapper">
-            <input type="text" class="search-input" id="sr-search-input" placeholder="搜索..." />
+            <input type="text" class="search-input" id="sr-search-input" data-i18n-placeholder="searchPlaceholder" placeholder="Search..." />
             <span class="match-info" id="sr-match-info"></span>
           </div>
           <div class="search-options">
-            <button type="button" class="option-btn" id="sr-case-btn" title="区分大小写 (Alt+C)">Aa</button>
-            <button type="button" class="option-btn" id="sr-word-btn" title="全字匹配 (Alt+W)">ab</button>
-            <button type="button" class="option-btn" id="sr-regex-btn" title="正则表达式 (Alt+R)">.*</button>
+            <button type="button" class="option-btn" id="sr-case-btn" data-i18n-title="caseSensitive" title="Case Sensitive (Alt+C)">Aa</button>
+            <button type="button" class="option-btn" id="sr-word-btn" data-i18n-title="wholeWord" title="Whole Word (Alt+W)">ab</button>
+            <button type="button" class="option-btn" id="sr-regex-btn" data-i18n-title="regex" title="Regular Expression (Alt+R)">.*</button>
           </div>
           <div class="search-nav">
-            <button type="button" class="nav-btn" id="sr-prev-btn" title="上一个 (Shift+Enter)">
+            <button type="button" class="nav-btn" id="sr-prev-btn" data-i18n-title="prevMatch" title="Previous (Shift+Enter)">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>
             </button>
-            <button type="button" class="nav-btn" id="sr-next-btn" title="下一个 (Enter)">
+            <button type="button" class="nav-btn" id="sr-next-btn" data-i18n-title="nextMatch" title="Next (Enter)">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
           </div>
-          <button type="button" class="close-btn" id="sr-close-btn" title="关闭 (Esc)">×</button>
+          <button type="button" class="close-btn" id="sr-close-btn" data-i18n-title="closeEsc" title="Close (Esc)">×</button>
         </div>
         <div class="replace-row">
           <div class="replace-input-wrapper">
-            <input type="text" class="replace-input" id="sr-replace-input" placeholder="替换..." />
+            <input type="text" class="replace-input" id="sr-replace-input" data-i18n-placeholder="replacePlaceholder" placeholder="Replace..." />
           </div>
           <div class="replace-actions">
-            <button type="button" class="action-btn" id="sr-replace-btn" title="替换 (Ctrl+Shift+1)">替换</button>
-            <button type="button" class="action-btn" id="sr-replace-all-btn" title="全部替换 (Ctrl+Shift+Enter)">全部替换</button>
+            <button type="button" class="action-btn" id="sr-replace-btn" data-i18n="replace" title="Replace (Ctrl+Shift+1)">Replace</button>
+            <button type="button" class="action-btn" id="sr-replace-all-btn" data-i18n="replaceAll" title="Replace All (Ctrl+Shift+Enter)">Replace All</button>
           </div>
         </div>
       </div>
@@ -263,7 +263,7 @@ class EditorSearchReplace {
       }
     } catch (e) {
       // 无效正则，忽略
-      console.warn('搜索模式无效:', e.message);
+      console.warn(window.i18n ? window.i18n.t('invalidSearchPattern') : 'Invalid search pattern:', e.message);
     }
     
     this.updateMatchInfo();
@@ -274,7 +274,7 @@ class EditorSearchReplace {
   updateMatchInfo() {
     if (this.matches.length === 0) {
       if (this.searchInput.value) {
-        this.matchInfo.textContent = '无结果';
+        this.matchInfo.textContent = window.i18n ? window.i18n.t('noResults') : 'No results';
         this.matchInfo.classList.add('no-results');
       } else {
         this.matchInfo.textContent = '';
@@ -396,9 +396,9 @@ class EditorSearchReplace {
       this.performSearch();
       
       // 显示替换完成提示
-      this.showToast(`已替换 ${matchCount} 处`);
+      this.showToast(window.i18n ? window.i18n.t('replacedCount', matchCount) : `Replaced ${matchCount} occurrences`);
     } catch (e) {
-      console.error('替换失败:', e);
+      console.error('Replace failed:', e);
     }
   }
   
@@ -414,6 +414,11 @@ class EditorSearchReplace {
   show(focusReplace = false) {
     this.widget.classList.add('active');
     this.isVisible = true;
+    
+    // Apply i18n translations to dynamically created elements
+    if (window.i18n && window.i18n.applyTranslations) {
+      window.i18n.applyTranslations();
+    }
     
     // 如果有选中文本，用作搜索词
     const selectedText = this.textarea.value.substring(

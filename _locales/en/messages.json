@@ -1,0 +1,338 @@
+{
+  "extName": {
+    "message": "Request Interceptor Tiny"
+  },
+  "extDescription": {
+    "message": "Lightweight API Mock Tool"
+  },
+  "subtitle": {
+    "message": "Lightweight API Mock Tool"
+  },
+  "fullView": {
+    "message": "Full View"
+  },
+  "openInFullWindow": {
+    "message": "Open in Full Window"
+  },
+  "settings": {
+    "message": "Settings"
+  },
+  "tabRulesList": {
+    "message": "Rules List"
+  },
+  "tabAddRule": {
+    "message": "Add Rule"
+  },
+  "tabRequestLogs": {
+    "message": "Request Logs"
+  },
+  "rulesCount": {
+    "message": "Total $COUNT$ rules",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "searchRules": {
+    "message": "Search rules..."
+  },
+  "clearSearch": {
+    "message": "Clear Search"
+  },
+  "disableAllRules": {
+    "message": "Disable All Rules"
+  },
+  "clearAllRules": {
+    "message": "Clear All Rules"
+  },
+  "importRules": {
+    "message": "Import Rules"
+  },
+  "exportRules": {
+    "message": "Export Rules"
+  },
+  "noRules": {
+    "message": "No Rules"
+  },
+  "noRulesHint": {
+    "message": "Click \"Add Rule\" to create your first rule"
+  },
+  "noRulesAdvancedHint": {
+    "message": "Click below or \"Add Rule\" at top to start efficient debugging"
+  },
+  "noSearchResults": {
+    "message": "No matching rules found"
+  },
+  "searchFor": {
+    "message": "Search:"
+  },
+  "ruleName": {
+    "message": "Rule Name"
+  },
+  "ruleNamePlaceholder": {
+    "message": "e.g., Config Modify API"
+  },
+  "urlPattern": {
+    "message": "URL Match Pattern"
+  },
+  "urlPatternPlaceholder": {
+    "message": "e.g., *://api.example.com/*"
+  },
+  "urlPatternHint": {
+    "message": "Supports wildcard * to match any characters"
+  },
+  "responseContent": {
+    "message": "Response Content (JSON)"
+  },
+  "responseContentHint": {
+    "message": "Enter JSON response content to return"
+  },
+  "expandEdit": {
+    "message": "Expand Edit"
+  },
+  "cancel": {
+    "message": "Cancel"
+  },
+  "saveRule": {
+    "message": "Save Rule"
+  },
+  "recentMatchRecords": {
+    "message": "Recent $COUNT$ match records",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "clearLogs": {
+    "message": "Clear Logs"
+  },
+  "noLogs": {
+    "message": "No Logs"
+  },
+  "noLogsHint": {
+    "message": "Matched requests will be displayed here when rules match"
+  },
+  "noNetworkLogs": {
+    "message": "No Network Logs"
+  },
+  "noNetworkLogsHint": {
+    "message": "Enable rules, and matched requests will be displayed here in real-time"
+  },
+  "responseEditor": {
+    "message": "Response Content Editor"
+  },
+  "searchReplace": {
+    "message": "Search & Replace"
+  },
+  "close": {
+    "message": "Close"
+  },
+  "settingsTitle": {
+    "message": "Settings"
+  },
+  "consoleLogs": {
+    "message": "Console Logs"
+  },
+  "consoleLogsDesc": {
+    "message": "Show request interception debug info in browser console"
+  },
+  "edit": {
+    "message": "Edit"
+  },
+  "delete": {
+    "message": "Delete"
+  },
+  "exportRule": {
+    "message": "Export Rule"
+  },
+  "expand": {
+    "message": "Expand"
+  },
+  "collapse": {
+    "message": "Collapse"
+  },
+  "ruleStatusUpdated": {
+    "message": "Rule status updated"
+  },
+  "ruleDeleted": {
+    "message": "Rule deleted"
+  },
+  "confirmDeleteRule": {
+    "message": "Are you sure you want to delete this rule?"
+  },
+  "needJsonObjectOrArray": {
+    "message": "✗ Need JSON object {} or array []"
+  },
+  "pleaseEnterValidJson": {
+    "message": "Please enter valid JSON format"
+  },
+  "pleaseEnterResponseContent": {
+    "message": "Please enter response content"
+  },
+  "ruleUpdated": {
+    "message": "Rule updated"
+  },
+  "ruleAdded": {
+    "message": "Rule added"
+  },
+  "noRulesToExport": {
+    "message": "No rules to export"
+  },
+  "exportedRules": {
+    "message": "Exported $COUNT$ rules",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "ruleNotExist": {
+    "message": "Rule does not exist"
+  },
+  "exportedRule": {
+    "message": "Exported rule: $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "invalidRuleFileFormat": {
+    "message": "Invalid rule file format"
+  },
+  "confirmImportRules": {
+    "message": "Are you sure you want to import $COUNT$ rules?\nThey will be added to existing rules.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "importedRules": {
+    "message": "Successfully imported $COUNT$ rules",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "importFailed": {
+    "message": "Import failed: $ERROR$",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      }
+    }
+  },
+  "confirmClearLogs": {
+    "message": "Are you sure you want to clear all logs?"
+  },
+  "logsCleared": {
+    "message": "Logs cleared"
+  },
+  "noRulesToClear": {
+    "message": "No rules to clear"
+  },
+  "confirmClearAllRules": {
+    "message": "Are you sure you want to clear all rules? This action cannot be undone."
+  },
+  "allRulesCleared": {
+    "message": "All rules cleared"
+  },
+  "noRulesAvailable": {
+    "message": "No rules available"
+  },
+  "allRulesAlreadyDisabled": {
+    "message": "All rules are already disabled"
+  },
+  "confirmDisableAllRules": {
+    "message": "Are you sure you want to disable all rules?"
+  },
+  "allRulesDisabled": {
+    "message": "All rules disabled"
+  },
+  "consoleLogsEnabled": {
+    "message": "Console logs enabled"
+  },
+  "consoleLogsDisabled": {
+    "message": "Console logs disabled"
+  },
+  "jsonValid": {
+    "message": "✓ JSON format valid"
+  },
+  "jsonErrorAtPosition": {
+    "message": "✗ JSON format error (position $POS$)",
+    "placeholders": {
+      "pos": {
+        "content": "$1"
+      }
+    }
+  },
+  "jsonError": {
+    "message": "✗ JSON format error"
+  },
+  "communicationFailed": {
+    "message": "Communication failed"
+  },
+  "language": {
+    "message": "Language"
+  },
+  "languageDesc": {
+    "message": "Select interface language"
+  },
+  "searchPlaceholder": {
+    "message": "Search..."
+  },
+  "replacePlaceholder": {
+    "message": "Replace..."
+  },
+  "caseSensitive": {
+    "message": "Case Sensitive (Alt+C)"
+  },
+  "wholeWord": {
+    "message": "Whole Word (Alt+W)"
+  },
+  "regex": {
+    "message": "Regular Expression (Alt+R)"
+  },
+  "prevMatch": {
+    "message": "Previous (Shift+Enter)"
+  },
+  "nextMatch": {
+    "message": "Next (Enter)"
+  },
+  "closeEsc": {
+    "message": "Close (Esc)"
+  },
+  "replace": {
+    "message": "Replace"
+  },
+  "replaceAll": {
+    "message": "Replace All"
+  },
+  "noResults": {
+    "message": "No results"
+  },
+  "replacedCount": {
+    "message": "Replaced $COUNT$ occurrences",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "invalidSearchPattern": {
+    "message": "Invalid search pattern"
+  },
+  "noRulesYet": {
+    "message": "No interception rules yet"
+  },
+  "searchReplaceCtrlF": {
+    "message": "Search & Replace (Ctrl+F)"
+  },
+  "closeEscKey": {
+    "message": "Close (Esc)"
+  }
+}

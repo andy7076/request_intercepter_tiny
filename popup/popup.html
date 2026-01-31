@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -19,17 +19,17 @@
           <div class="header-title-row">
             <div class="header-title">
               <h1>Request Interceptor Tiny</h1>
-              <p class="subtitle">轻量级接口模拟工具</p>
+              <p class="subtitle" data-i18n="subtitle">Lightweight API Mock Tool</p>
             </div>
-            <button type="button" id="open-in-tab-btn" class="btn-open-tab" title="在完整窗口中打开">
+            <button type="button" id="open-in-tab-btn" class="btn-open-tab" data-i18n-title="openInFullWindow">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect width="20" height="14" x="2" y="3" rx="2"></rect>
                 <line x1="8" x2="16" y1="21" y2="21"></line>
                 <line x1="12" x2="12" y1="17" y2="21"></line>
               </svg>
-              <span>完整视图</span>
+              <span data-i18n="fullView">Full View</span>
             </button>
-            <button type="button" id="settings-btn" class="btn-icon-header" title="设置">
+            <button type="button" id="settings-btn" class="btn-icon-header" data-i18n-title="settings">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="3"></circle>
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -40,17 +40,15 @@
       </header>
 
       <div class="tabs">
-        <button class="tab-btn active" data-tab="rules"><span>📋</span> 规则列表</button>
-        <button class="tab-btn" data-tab="add"><span>➕</span> 添加规则</button>
-        <button class="tab-btn" data-tab="logs"><span>📊</span> 请求日志</button>
+        <button class="tab-btn active" data-tab="rules"><span>📋</span> <span data-i18n="tabRulesList">Rules List</span></button>
+        <button class="tab-btn" data-tab="add"><span>➕</span> <span data-i18n="tabAddRule">Add Rule</span></button>
+        <button class="tab-btn" data-tab="logs"><span>📊</span> <span data-i18n="tabRequestLogs">Request Logs</span></button>
       </div>
 
-      <!-- 规则列表面板 -->
+      <!-- Rules List Panel -->
       <div id="rules-panel" class="panel active">
         <div class="rules-header">
-          <span class="rules-count"
-            >共 <span id="rule-count">0</span> 条规则</span
-          >
+          <span class="rules-count" id="rules-count-text"></span>
           <div class="rules-search">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
               <circle cx="11" cy="11" r="8"></circle>
@@ -59,10 +57,11 @@
             <input
               type="text"
               id="rules-search-input"
-              placeholder="搜索规则..."
+              data-i18n-placeholder="searchRules"
+              placeholder="Search rules..."
               autocomplete="off"
             />
-            <button type="button" id="clear-search-btn" class="btn-clear-search" title="清除搜索">
+            <button type="button" id="clear-search-btn" class="btn-clear-search" data-i18n-title="clearSearch">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -74,7 +73,7 @@
               type="button"
               id="disable-rules-btn"
               class="btn-icon"
-              title="关闭所有规则"
+              data-i18n-title="disableAllRules"
               style="color: var(--warning)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -86,7 +85,7 @@
               type="button"
               id="clear-rules-btn"
               class="btn-icon"
-              title="清空所有规则"
+              data-i18n-title="clearAllRules"
               style="color: var(--danger)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -98,7 +97,7 @@
               type="button"
               id="import-btn"
               class="btn-icon"
-              title="导入规则"
+              data-i18n-title="importRules"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -110,7 +109,7 @@
               type="button"
               id="export-btn"
               class="btn-icon"
-              title="导出规则"
+              data-i18n-title="exportRules"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -123,8 +122,8 @@
         <div id="rules-list" class="rules-list">
           <div class="empty-state">
             <span class="empty-icon">📋</span>
-            <p>暂无规则</p>
-            <p class="hint">点击"添加规则"创建第一条规则</p>
+            <p data-i18n="noRules">No Rules</p>
+            <p class="hint" data-i18n="noRulesHint">Click "Add Rule" to create your first rule</p>
           </div>
         </div>
         <input
@@ -135,40 +134,42 @@
         />
       </div>
 
-      <!-- 添加规则面板 -->
+      <!-- Add Rule Panel -->
       <div id="add-panel" class="panel">
         <form id="rule-form">
           <div class="form-group">
-            <label for="rule-name">规则名称</label>
+            <label for="rule-name" data-i18n="ruleName">Rule Name</label>
             <input
               type="text"
               id="rule-name"
-              placeholder="例如：配置修改接口"
+              data-i18n-placeholder="ruleNamePlaceholder"
+              placeholder="e.g., Config Modify API"
               required
             />
           </div>
 
           <div class="form-group">
-            <label for="url-pattern">URL匹配模式</label>
+            <label for="url-pattern" data-i18n="urlPattern">URL Match Pattern</label>
             <input
               type="text"
               id="url-pattern"
-              placeholder="例如：*://api.example.com/*"
+              data-i18n-placeholder="urlPatternPlaceholder"
+              placeholder="e.g., *://api.example.com/*"
               required
             />
-            <span class="hint">支持通配符 * 匹配任意字符</span>
+            <span class="hint" data-i18n="urlPatternHint">Supports wildcard * to match any characters</span>
           </div>
 
-          <!-- Mock Response配置 -->
+          <!-- Mock Response Config -->
           <div id="mock-config" class="config-section">
             <div class="form-group">
               <div class="response-label-row">
-                <label for="response-body">响应内容 (JSON)</label>
+                <label for="response-body" data-i18n="responseContent">Response Content (JSON)</label>
                 <button
                   type="button"
                   id="expand-editor"
                   class="btn-expand"
-                  title="放大编辑"
+                  data-i18n-title="expandEdit"
                 >
                   ⛶
                 </button>
@@ -180,75 +181,76 @@
               ></textarea>
               <div class="json-status">
                 <span id="json-status-indicator" class="json-status-indicator"></span>
-                <span id="json-status-text" class="hint">输入要返回的 JSON 响应内容</span>
+                <span id="json-status-text" class="hint" data-i18n="responseContentHint">Enter JSON response content to return</span>
               </div>
             </div>
           </div>
 
           <div class="form-actions">
-            <button type="button" id="cancel-btn" class="btn-secondary">
-              取消
+            <button type="button" id="cancel-btn" class="btn-secondary" data-i18n="cancel">
+              Cancel
             </button>
-            <button type="submit" class="btn-primary">保存规则</button>
+            <button type="submit" class="btn-primary" data-i18n="saveRule">Save Rule</button>
           </div>
         </form>
       </div>
 
-      <!-- 请求日志面板 -->
+      <!-- Request Logs Panel -->
       <div id="logs-panel" class="panel">
         <div class="logs-header">
-          <span class="logs-info"
-            >最近 <span id="log-count">0</span> 条匹配记录</span
-          >
+          <span class="logs-info" id="logs-count-text"></span>
           <div class="logs-actions">
             <button
               type="button"
               id="clear-logs-btn"
               class="btn-small btn-danger"
+              data-i18n="clearLogs"
             >
-              清空日志
+              Clear Logs
             </button>
           </div>
         </div>
         <div id="logs-list" class="logs-list">
           <div class="empty-state">
             <span class="empty-icon">📊</span>
-            <p>暂无日志</p>
-            <p class="hint">当规则匹配到请求时会在这里显示</p>
+            <p data-i18n="noLogs">No Logs</p>
+            <p class="hint" data-i18n="noLogsHint">Matched requests will be displayed here when rules match</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 全屏编辑器模态框 -->
+    <!-- Fullscreen Editor Modal -->
     <div id="editor-modal" class="editor-modal">
       <div class="editor-modal-header">
-        <h3>📝 响应内容编辑器</h3>
+        <h3>📝 <span data-i18n="responseEditor">Response Content Editor</span></h3>
         <div class="editor-modal-actions">
           <button
             type="button"
             id="modal-search-btn"
             class="btn-modal-action"
-            title="搜索替换 (Ctrl+F)"
+            data-i18n-title="searchReplaceCtrlF"
+            title="Search & Replace (Ctrl+F)"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <span>搜索替换</span>
+            <span data-i18n="searchReplace">Search & Replace</span>
           </button>
           <button
             type="button"
             id="modal-close"
             class="btn-modal-close"
-            title="关闭 (Esc)"
+            data-i18n-title="closeEscKey"
+            title="Close (Esc)"
           >
             ×
           </button>
         </div>
       </div>
       <div class="editor-modal-content" id="editor-modal-content">
-        <!-- 搜索替换 widget 会在这里动态插入 -->
+        <!-- Search/Replace widget will be dynamically inserted here -->
         <textarea
           id="modal-textarea"
           placeholder='{"success": true, "data": {}}'
@@ -257,33 +259,44 @@
       <div class="editor-modal-footer">
         <div class="json-status">
           <span id="modal-json-status-indicator" class="json-status-indicator"></span>
-          <span id="modal-json-status-text" class="hint">输入要返回的 JSON 响应内容</span>
+          <span id="modal-json-status-text" class="hint" data-i18n="responseContentHint">Enter JSON response content to return</span>
         </div>
       </div>
     </div>
 
-    <!-- 设置模态框 -->
+    <!-- Settings Modal -->
     <div id="settings-modal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>⚙️ 设置</h3>
-          <button type="button" id="settings-close" class="btn-modal-close" title="关闭">×</button>
+          <h3>⚙️ <span data-i18n="settingsTitle">Settings</span></h3>
+          <button type="button" id="settings-close" class="btn-modal-close" data-i18n-title="close">×</button>
         </div>
         <div class="modal-body">
           <div class="setting-item">
             <div class="setting-info">
-              <span class="setting-title">控制台日志</span>
-              <span class="setting-desc">在浏览器控制台中显示请求拦截的调试信息</span>
+              <span class="setting-title" data-i18n="consoleLogs">Console Logs</span>
+              <span class="setting-desc" data-i18n="consoleLogsDesc">Show request interception debug info in browser console</span>
             </div>
             <label class="switch">
               <input type="checkbox" id="setting-console-log">
               <span class="slider round"></span>
             </label>
           </div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-title" data-i18n="language">Language</span>
+              <span class="setting-desc" data-i18n="languageDesc">Select interface language</span>
+            </div>
+            <select id="setting-language" class="setting-select">
+              <option value="en">English</option>
+              <option value="zh_CN">中文</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
 
+    <script src="i18n.js"></script>
     <script src="editorSearchReplace.js"></script>
     <script src="popup.js"></script>
   </body>
