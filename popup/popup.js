@@ -653,7 +653,7 @@ function sendMessage(message) {
     try {
       chrome.runtime.sendMessage(message, (response) => {
         if (chrome.runtime.lastError) {
-          console.error('[Request Interceptor Tiny]', window.i18n ? window.i18n.t('logCommunicationFailed') : 'Communication failed:', chrome.runtime.lastError.message);
+          console.error('[Request Interceptor Tiny]', 'Communication failed:', chrome.runtime.lastError.message);
           // 如果后台服务未响应，根据请求类型返回安全的默认值
           if (message.type && message.type.startsWith('GET_')) {
             resolve([]);
@@ -666,7 +666,7 @@ function sendMessage(message) {
         }
       });
     } catch (e) {
-      console.error('[Request Interceptor Tiny]', window.i18n ? window.i18n.t('logSendMessageError') : 'Send message error:', e);
+      console.error('[Request Interceptor Tiny]', 'Send message error:', e);
       if (message.type && message.type.startsWith('GET_')) {
         resolve([]);
       } else {
@@ -794,7 +794,7 @@ async function handleImport(e) {
     loadRules();
     showToast(window.i18n.t('importedRules', imported));
   } catch (error) {
-    console.error('[Request Interceptor Tiny]', window.i18n ? window.i18n.t('logImportError') : 'Import error:', error);
+    console.error('[Request Interceptor Tiny]', 'Import error:', error);
     showToast(window.i18n.t('importFailed', error.message), true);
   }
   

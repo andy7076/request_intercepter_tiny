@@ -263,7 +263,7 @@ class EditorSearchReplace {
       }
     } catch (e) {
       // 无效正则，忽略
-      console.warn(window.i18n ? window.i18n.t('invalidSearchPattern') : 'Invalid search pattern:', e.message);
+      console.warn('Invalid search pattern:', e.message);
     }
     
     this.updateMatchInfo();
@@ -398,7 +398,7 @@ class EditorSearchReplace {
       // 显示替换完成提示
       this.showToast(window.i18n ? window.i18n.t('replacedCount', matchCount) : `Replaced ${matchCount} occurrences`);
     } catch (e) {
-      console.error('[Request Interceptor Tiny]', window.i18n ? window.i18n.t('logReplaceFailed') : 'Replace failed:', e);
+      console.error('[Request Interceptor Tiny]', 'Replace failed:', e);
     }
   }
   
