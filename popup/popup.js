@@ -233,7 +233,7 @@ function initGlobalTooltip() {
   document.body.addEventListener('mouseover', (e) => {
     // 查找最近的带有 title 或 data-tooltip 的目标元素
     // 同时必须是指定的按钮类型
-    const target = e.target.closest('.btn-icon, .btn-icon-small, .btn-open-tab, .rule-toggle');
+    const target = e.target.closest('.btn-icon, .btn-icon-small, .btn-open-tab, .rule-toggle, .btn-icon-header, .btn-expand');
     
     if (!target) return;
 
@@ -276,7 +276,7 @@ function initGlobalTooltip() {
 
   // 鼠标移出时隐藏
   document.body.addEventListener('mouseout', (e) => {
-    const target = e.target.closest('.btn-icon, .btn-icon-small, .btn-open-tab, .rule-toggle');
+    const target = e.target.closest('.btn-icon, .btn-icon-small, .btn-open-tab, .rule-toggle, .btn-icon-header, .btn-expand');
     if (target) {
       tooltip.classList.remove('visible');
     }
