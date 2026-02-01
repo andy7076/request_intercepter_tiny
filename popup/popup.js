@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initGlobalTooltip();
   initLanguageSelector();
   initCodeMirrorEditors(); // 初始化 CodeMirror 编辑器
+  setupFormValidation(); // 初始化表单验证
   checkViewMode();
 });
 
@@ -91,6 +92,9 @@ function initLanguageSelector() {
       loadRules();
       loadLogs();
       validateJsonRealtime();
+      
+      // Clear custom validity on form fields so they get re-validated with new language
+      document.querySelectorAll('#rule-form input[required]').forEach(input => input.setCustomValidity(''));
     });
   }
 }
@@ -1253,4 +1257,23 @@ async function handleDisableRules() {
   await sendMessage({ type: 'DISABLE_ALL_RULES' });
   loadRules();
   showToast(window.i18n.t('allRulesDisabled'));
+}
+
+// 初始化表单验证
+function setupFormValidation() {
+  const inputs = document.querySelectorAll('#rule-form input[required]');
+  inputs.forEach(input => {
+    // 当验证失败时（提交表单时），设置自定义错误消息
+    input.addEventListener('invalid', (e) => {
+      // 只有当 validity.valueMissing 为 true 时才认为是必填错误
+      if (e.target.validity.valueMissing) {
+        e.target.setCustomValidity(window.i18n.t('requiredFieldMessage'));
+      }
+    });
+
+    // 当用户输入时，清除自定义错误消息，允许表单重新验证
+    input.addEventListener('input', (e) => {
+      e.target.setCustomValidity('');
+    });
+  });
 }

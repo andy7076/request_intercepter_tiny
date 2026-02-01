@@ -459,5 +459,8 @@
   },
   "logReplaceFailed": {
     "message": "Replace failed"
+  },
+  "requiredFieldMessage": {
+    "message": "Please fill out this field."
   }
 }

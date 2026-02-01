@@ -459,5 +459,8 @@
   },
   "logReplaceFailed": {
     "message": "替换失败"
+  },
+  "requiredFieldMessage": {
+    "message": "请填写此字段。"
   }
 }
