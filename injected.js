@@ -87,11 +87,11 @@
       const requestId = generateRequestId();
       
       // 设置超时，避免请求卡住
-      // 增加超时时间以确保在系统繁忙时也能成功拦截
+      // 增加超时时间以确保在系统繁忙时或等待 storage 读取时也能成功拦截
       const timeout = setTimeout(() => {
         pendingRequests.delete(requestId);
         resolve(null);
-      }, 2000);
+      }, 5000);
       
       pendingRequests.set(requestId, {
         resolve: (result) => {

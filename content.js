@@ -37,8 +37,8 @@ function loadMockRules() {
         return;
       }
       const allRules = result.interceptRules || [];
-      // 过滤出启用的规则
-      mockRules = allRules.filter(r => r.enabled);
+      // 过滤出启用的 mockResponse 类型规则
+      mockRules = allRules.filter(r => r.enabled && r.type === 'mockResponse');
       log('[Request Interceptor Tiny] ✅', 'Mock rules loaded:', mockRules.length);
       if (mockRules.length > 0) {
         log('[Request Interceptor Tiny] 📋', 'Rules list:', mockRules.map(r => ({
@@ -89,10 +89,9 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   
   if (areaName === 'local' && changes['interceptRules']) {
     const allRules = changes['interceptRules'].newValue || [];
-    // 过滤出启用的规则
-    mockRules = allRules.filter(r => r.enabled);
-    log('[Request Interceptor Tiny]', 'Rules updated, enabled count:', mockRules.length);
-    log('[Request Interceptor Tiny]', 'Current enabled rules:', mockRules.map(r => r.name));
+    // 过滤出启用的 mockResponse 类型规则
+    mockRules = allRules.filter(r => r.enabled && r.type === 'mockResponse');
+    log('[Request Interceptor Tiny]', 'Rules updated via storage.onChanged, count:', mockRules.length);
     
     // 通知页面规则已更新
     window.postMessage({
@@ -122,7 +121,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'MOCK_RULES_UPDATED') {
     mockRules = message.rules || [];
-    log('[Request Interceptor Tiny]', 'Received rules update message, count:', mockRules.length);
+    log('[Request Interceptor Tiny]', 'Received MOCK_RULES_UPDATED message, count:', mockRules.length);
   } else if (message.type === 'CONSOLE_LOGS_UPDATED') {
     const enabled = message.enabled;
     // 防止重复通知
@@ -195,14 +194,13 @@ function findMockRule(url) {
 }
 
 // 监听来自注入脚本的消息
-window.addEventListener('message', (event) => {
+window.addEventListener('message', async (event) => {
   if (event.source !== window) return;
   
   if (event.data.type === 'REQUEST_INTERCEPTOR_CHECK') {
     const { url, requestId } = event.data;
     
     log('[Request Interceptor Tiny]', 'Checking URL:', url);
-    log('[Request Interceptor Tiny]', 'Current rules count:', mockRules.length);
     
     // 检查扩展上下文是否有效
     if (!isExtensionContextValid()) {
@@ -214,8 +212,20 @@ window.addEventListener('message', (event) => {
       return;
     }
     
+    // 每次检查时从 storage 加载最新规则，确保规则是最新的
+    try {
+      const result = await chrome.storage.local.get('interceptRules');
+      const allRules = result.interceptRules || [];
+      mockRules = allRules.filter(r => r.enabled && r.type === 'mockResponse');
+    } catch (e) {
+      // 如果加载失败，使用缓存的规则
+      log('[Request Interceptor Tiny]', 'Failed to reload rules, using cached');
+    }
+    
+    log('[Request Interceptor Tiny]', 'Checking URL:', url, '| Rules count:', mockRules.length);
+    
     const mockRule = findMockRule(url);
-    log('[Request Interceptor Tiny]', 'Match result:', mockRule ? ('Matched rule' + ': ' + mockRule.name) : 'No matching rule');
+    log('[Request Interceptor Tiny]', 'Match result:', mockRule ? `Matched: ${mockRule.name}` : 'No match');
     
     if (mockRule) {
       // 发送 mock 响应
