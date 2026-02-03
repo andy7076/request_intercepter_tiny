@@ -653,7 +653,7 @@ body {
 }
 
 .response-content {
-  padding: 10px 12px;
+  padding: 10px 0 10px 12px;
   background: rgba(0, 0, 0, 0.3);
   border-radius: 8px;
   font-family: "JetBrains Mono", "Monaco", Consolas, monospace;
@@ -1587,6 +1587,7 @@ input:focus + .slider {
 .response-content .renderjson-container {
   max-height: 300px;
   overflow-y: auto;
+  padding-right: 8px;
   scrollbar-width: thin;
   scrollbar-color: var(--primary) rgba(0, 0, 0, 0.2);
 }
