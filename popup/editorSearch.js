@@ -24,6 +24,7 @@ class EditorSearch {
     this.close = this.close.bind(this);
     this.handleInput = this.handleInput.bind(this);
     this.togglePanel = this.togglePanel.bind(this);
+    this.changeTimer = null;
     
     this.init();
   }
@@ -74,13 +75,16 @@ class EditorSearch {
     // Re-search on content change if search is active
     this.cm.on('change', (cm, change) => {
       if (this.state.query && !this.panel.classList.contains('hidden')) {
-        // Debounce could be added here for performance, but for now direct call
         // Avoid infinite loop if change is from replacement? 
         // Replacement comes from this.replace which calls search() anyway.
         // We only care about external changes (typing).
         if (change.origin !== '+move' && change.origin !== 'setValue') {
-             // Simplistic approach: just re-search to update positions
-             this.search();
+             // Debounce search on content change
+             if (this.changeTimer) clearTimeout(this.changeTimer);
+             this.changeTimer = setTimeout(() => {
+                 // Passive update: don't jump, don't select, just update marks/count
+                 this.search(false, false, false);
+             }, 200);
         }
       }
     });
@@ -200,14 +204,15 @@ class EditorSearch {
     this.searchInput.focus();
     // When opening with existing content
     if (this.searchInput.value) {
-        // If query hasn't changed, preserve the index state and don't jump
+        // If query hasn't changed, we want to sync valid matches but NOT preserve strict index
+        // because cursor might have moved. logic: find match closest to cursor.
         const sameQuery = (this.searchInput.value === this.state.query);
         // jump = !sameQuery (jump only if new query)
-        // preserve = sameQuery (preserve if same query)
+        // preserve = false (always find closest to cursor on open)
         
         // Ensure state.query is set before calling search via handleInput logic, 
         // actually handleInput sets it.
-        this.handleInput(this.searchInput.value, !sameQuery, sameQuery);
+        this.handleInput(this.searchInput.value, !sameQuery, false);
     }
   }
 
@@ -216,7 +221,7 @@ class EditorSearch {
     this.search(jump, preserve);
   }
 
-  search(jumpToFirst = true, preserveIndex = false) {
+  search(jumpToFirst = true, preserveIndex = false, selectMatch = true) {
     // Save previous index before clearing
     const prevIdx = this.state.currentIdx;
 
@@ -257,20 +262,32 @@ class EditorSearch {
       if (jumpToFirst) {
         // User is typing, force jump to first as requested
         this.state.currentIdx = 0;
-        this.highlightCurrent();
+        this.highlightCurrent(true, selectMatch);
       } else if (preserveIndex && prevIdx !== -1 && prevIdx < this.state.matches.length) {
         // Preserve previous index state, do not jump, do not change cursor/scroll
         this.state.currentIdx = prevIdx;
-        this.highlightCurrent(false);
+        this.highlightCurrent(false, selectMatch);
       } else {
         // Just opening or passive update, find closest to keep context
         const cursor = doc.getCursor();
-        let nextIdx = this.state.matches.findIndex(m => 
-          (m.from.line > cursor.line) || (m.from.line === cursor.line && m.from.ch >= cursor.ch)
-        );
-        if (nextIdx === -1) nextIdx = 0; // Wrap around
-        this.state.currentIdx = nextIdx;
-        this.highlightCurrent(false);
+        
+        // 1. Try to find match that overlaps with cursor (current active match)
+        let closestIdx = this.state.matches.findIndex(m => {
+             const afterFrom = (cursor.line > m.from.line) || (cursor.line === m.from.line && cursor.ch >= m.from.ch);
+             const beforeTo = (cursor.line < m.to.line) || (cursor.line === m.to.line && cursor.ch <= m.to.ch);
+             return afterFrom && beforeTo;
+        });
+
+        // 2. If not inside a match, find next match after cursor
+        if (closestIdx === -1) {
+             closestIdx = this.state.matches.findIndex(m => 
+                (m.from.line > cursor.line) || (m.from.line === cursor.line && m.from.ch >= cursor.ch)
+             );
+        }
+
+        if (closestIdx === -1) closestIdx = 0; // Wrap around
+        this.state.currentIdx = closestIdx;
+        this.highlightCurrent(false, selectMatch);
       }
       this.updateCount();
     } else {
@@ -278,7 +295,7 @@ class EditorSearch {
     }
   }
   
-  highlightCurrent(scroll = true) {
+  highlightCurrent(scroll = true, select = true) {
     if (this.state.currentIdx === -1 || !this.state.matches[this.state.currentIdx]) return;
     
     const match = this.state.matches[this.state.currentIdx];
@@ -292,14 +309,15 @@ class EditorSearch {
     // Create new active mark
     this.currentMatchMark = this.cm.markText(match.from, match.to, { className: 'cm-match-highlight-active' });
     
-    // Remove previous active highlights if any (controlled by CSS usually, but here we can force it)
-    // Actually, let's just selection
-    this.cm.setSelection(match.from, match.to, { scroll: scroll });
-    
-    // Use a larger margin (100px) to try to center the match or at least keep it away from edges
-    // Pass {from, to} to ensures the entire match is visible if possible
-    if (scroll) {
-      this.cm.scrollIntoView({from: match.from, to: match.to}, 100);
+    // Set selection and scroll ONLY if requested (don't disrupt typing on passive update)
+    if (select) {
+        this.cm.setSelection(match.from, match.to, { scroll: scroll });
+        
+        // Use a larger margin (100px) to try to center the match or at least keep it away from edges
+        // Pass {from, to} to ensures the entire match is visible if possible
+        if (scroll) {
+          this.cm.scrollIntoView({from: match.from, to: match.to}, 100);
+        }
     }
   }
 
