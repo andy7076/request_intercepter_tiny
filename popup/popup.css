@@ -1487,11 +1487,24 @@ input:focus + .slider {
   background: var(--bg-dark);
   border-top: 1px solid var(--border);
   flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-footer-actions {
+  display: flex;
+  gap: 8px;
 }
 
 /* Animations */
 .rule-card {
   animation: slideIn 0.3s ease-out forwards;
+}
+
+.rule-header-actions {
+  display: flex;
+  gap: 8px;
 }
 
 /* Response Label Row */
@@ -2001,4 +2014,67 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   border-top: 1px solid var(--border);
   background: var(--bg-card);
   border-radius: 0 0 16px 16px;
+}
+/* Inline Editor Styles */
+.inline-editor-wrapper {
+  /* Counteract the padding of .response-content to utilize full space */
+  margin: -10px 0 0 -12px;
+  background: transparent;
+}
+
+.inline-editor-wrapper .CodeMirror {
+  background: transparent;
+  height: auto;
+  min-height: 60px;
+}
+
+.inline-editor-wrapper .CodeMirror-scroll {
+  max-height: 300px; /* Limit height of inline editors */
+  padding-bottom: 0;
+}
+
+.inline-editor-wrapper .CodeMirror-lines {
+  padding: 10px 0;
+}
+
+.inline-editor-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px;
+  /* Counteract padding of .response-content to be flush with bottom/sides */
+  margin: 0 0 -10px -12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: 0;
+}
+
+.btn-save-inline {
+  padding: 5px 12px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-save-inline::before {
+  content: "✓";
+  font-weight: bold;
+}
+
+.btn-save-inline:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-glow);
+}
+
+.btn-save-inline:active {
+  transform: translateY(0);
 }

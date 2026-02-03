@@ -514,5 +514,11 @@
         "content": "$1"
       }
     }
+  },
+  "confirm": {
+    "message": "Confirm"
+  },
+  "editResponse": {
+    "message": "Edit Response Content"
   }
 }

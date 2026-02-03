@@ -514,5 +514,11 @@
         "content": "$1"
       }
     }
+  },
+  "confirm": {
+    "message": "确认"
+  },
+  "editResponse": {
+    "message": "编辑响应内容"
   }
 }

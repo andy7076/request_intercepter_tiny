@@ -29,7 +29,11 @@ const expandEditor = document.getElementById('expand-editor');
 const editorModal = document.getElementById('editor-modal');
 const modalTextarea = document.getElementById('modal-textarea');
 const modalClose = document.getElementById('modal-close');
+const modalSaveBtn = document.getElementById('modal-save-btn');
 const editorModalContent = document.getElementById('editor-modal-content');
+
+let modalMode = 'form'; // 'form' | 'direct'
+let modalTargetRuleId = null;
 
 
 
@@ -220,15 +224,17 @@ function initModalCodeMirror() {
     const value = editor.getValue();
     modalTextarea.value = value;
     
-    // 同步到表单编辑器
-    const responseBody = document.getElementById('response-body');
-    if (responseBody) {
-      responseBody.value = value;
-    }
-    
-    // 同步到表单的 CodeMirror
-    if (formCodeMirror && formCodeMirror.getValue() !== value) {
-      formCodeMirror.setValue(value);
+    // 仅在 form 模式下同步到表单编辑器
+    if (modalMode === 'form') {
+      const responseBody = document.getElementById('response-body');
+      if (responseBody) {
+        responseBody.value = value;
+      }
+      
+      // 同步到表单的 CodeMirror
+      if (formCodeMirror && formCodeMirror.getValue() !== value) {
+        formCodeMirror.setValue(value);
+      }
     }
     
     validateJsonRealtime();
@@ -441,7 +447,8 @@ function setupEventListeners() {
   modalTextarea.addEventListener('keydown', handleTabKey);
   
   // 放大编辑器
-  expandEditor.addEventListener('click', openEditorModal);
+  // 放大编辑器
+  expandEditor.addEventListener('click', () => openEditorModal('form'));
   
   // Search buttons
   // searchEditorBtn listener removed as button is removed
@@ -462,6 +469,9 @@ function setupEventListeners() {
   }
 
   modalClose.addEventListener('click', closeEditorModal);
+  if (modalSaveBtn) {
+    modalSaveBtn.addEventListener('click', handleModalSave);
+  }
   
   // ESC关闭模态框
   document.addEventListener('keydown', (e) => {
@@ -586,18 +596,43 @@ function switchTab(tab) {
 }
 
 // 实时验证 JSON 格式
+// 实时验证 JSON 格式
 function validateJsonRealtime() {
   const mainIndicator = document.getElementById('json-status-indicator');
   const mainStatusText = document.getElementById('json-status-text');
   const modalIndicator = document.getElementById('modal-json-status-indicator');
   const modalStatusText = document.getElementById('modal-json-status-text');
   
-  const targets = [];
-  if (mainIndicator && mainStatusText) targets.push({ indicator: mainIndicator, text: mainStatusText });
-  if (modalIndicator && modalStatusText) targets.push({ indicator: modalIndicator, text: modalStatusText });
-  
-  // 优先从 CodeMirror 获取内容 (保留原始空白符以计算准确位置)
-  const rawValue = formCodeMirror ? formCodeMirror.getValue() : responseBody.value;
+  // 根据模式确定验证目标和内容源
+  let targets = [];
+  let rawValue = '';
+  let editorsToMark = [];
+  let editorsToClear = [];
+
+  if (modalMode === 'direct') {
+    // Direct 模式：只验证模态框内容
+    if (modalIndicator && modalStatusText) targets.push({ indicator: modalIndicator, text: modalStatusText });
+    rawValue = modalCodeMirror ? modalCodeMirror.getValue() : modalTextarea.value;
+    if (modalCodeMirror) {
+      editorsToMark.push(modalCodeMirror);
+      editorsToClear.push(modalCodeMirror);
+    }
+  } else {
+    // Form 模式：验证表单内容（模态框内容应已同步）
+    if (mainIndicator && mainStatusText) targets.push({ indicator: mainIndicator, text: mainStatusText });
+    if (modalIndicator && modalStatusText) targets.push({ indicator: modalIndicator, text: modalStatusText });
+    
+    rawValue = formCodeMirror ? formCodeMirror.getValue() : responseBody.value;
+    if (formCodeMirror) {
+      editorsToMark.push(formCodeMirror);
+      editorsToClear.push(formCodeMirror);
+    }
+    if (modalCodeMirror) {
+      editorsToMark.push(modalCodeMirror);
+      editorsToClear.push(modalCodeMirror);
+    }
+  }
+
   const trimmedValue = rawValue.trim();
   
   if (!trimmedValue) {
@@ -622,13 +657,8 @@ function validateJsonRealtime() {
       return false;
     }
     
-    // 清除错误标记（如果有）
-    if (formCodeMirror) {
-      formCodeMirror.getAllMarks().forEach(mark => mark.clear());
-    }
-    if (modalCodeMirror) {
-      modalCodeMirror.getAllMarks().forEach(mark => mark.clear());
-    }
+    // 清除错误标记
+    editorsToClear.forEach(cm => cm.getAllMarks().forEach(mark => mark.clear()));
     
     targets.forEach(({ indicator, text }) => {
       indicator.className = 'json-status-indicator valid';
@@ -653,8 +683,9 @@ function validateJsonRealtime() {
       errorMsg = window.i18n.t('jsonErrorDetailed', errorLine, errorCol);
     } else if (err.message.match(/Unexpected end of JSON input/)) {
       // JSON 意外结束（通常在最后）
-      if (formCodeMirror) {
-        const pos = formCodeMirror.posFromIndex(rawValue.length);
+      if (editorsToMark.length > 0) {
+        // Use the first editor to calculate position (assuming sync)
+        const pos = editorsToMark[0].posFromIndex(rawValue.length);
         errorLine = pos.line + 1;
         errorCol = pos.ch + 1;
       } else {
@@ -686,20 +717,16 @@ function validateJsonRealtime() {
              from.ch = lineContent.length - 1;
              to.ch = lineContent.length;
            } else {
-             // 空行的情况，标记开头即可 (虽然看不见，但逻辑闭环)
+             // 空行的情况，标记开头即可
              from.ch = 0;
              to.ch = 1; 
            }
         }
         
         cm.markText(from, to, { className: "cm-json-error" });
-        
-        // 滚动到错误位置 (可选，优化体验)
-        // cm.scrollIntoView(from, 20); 
       };
 
-      if (formCodeMirror) markError(formCodeMirror);
-      if (modalCodeMirror) markError(modalCodeMirror);
+      editorsToMark.forEach(cm => markError(cm));
     }
     
     targets.forEach(({ indicator, text }) => {
@@ -712,9 +739,25 @@ function validateJsonRealtime() {
 }
 
 // 打开全屏编辑器
-function openEditorModal() {
-  // 获取当前表单内容
-  const currentValue = formCodeMirror ? formCodeMirror.getValue() : responseBody.value;
+// 打开全屏编辑器
+function openEditorModal(mode = 'form', content = null, ruleId = null) {
+  // Check if mode is an event object (clicked directly)
+  if (typeof mode === 'object') {
+    mode = 'form';
+  }
+
+  modalMode = mode;
+  modalTargetRuleId = ruleId;
+
+  // 获取当前内容
+  let currentValue = '';
+  if (mode === 'form') {
+    currentValue = formCodeMirror ? formCodeMirror.getValue() : responseBody.value;
+    if (modalSaveBtn) modalSaveBtn.style.display = 'none';
+  } else {
+    currentValue = content || '';
+    if (modalSaveBtn) modalSaveBtn.style.display = 'block';
+  }
   
   // 初始化模态框的 CodeMirror（如果还没有初始化）
   if (!modalCodeMirror) {
@@ -744,11 +787,13 @@ function closeEditorModal() {
   // 获取模态框编辑器内容
   const modalValue = modalCodeMirror ? modalCodeMirror.getValue() : modalTextarea.value;
   
-  // 同步内容回表单编辑器
-  if (formCodeMirror) {
-    formCodeMirror.setValue(modalValue);
+  // 同步内容回表单编辑器 (仅在表单模式下)
+  if (modalMode === 'form') {
+    if (formCodeMirror) {
+      formCodeMirror.setValue(modalValue);
+    }
+    responseBody.value = modalValue;
   }
-  responseBody.value = modalValue;
   
   // Reset search state if active
   if (modalEditorSearch) {
@@ -757,8 +802,49 @@ function closeEditorModal() {
 
   editorModal.classList.remove('active');
   
-  // 验证 JSON 格式
-  validateJsonRealtime();
+  // 验证 JSON 格式 (仅在表单模式下)
+  if (modalMode === 'form') {
+    validateJsonRealtime();
+  }
+}
+
+// 处理直接编辑保存
+async function handleModalSave() {
+  if (modalMode !== 'direct' || !modalTargetRuleId) return;
+  
+  const content = modalCodeMirror ? modalCodeMirror.getValue() : modalTextarea.value;
+  
+  // 验证 JSON
+  try {
+     const parsed = JSON.parse(content);
+     if (typeof parsed !== 'object' || parsed === null) {
+        showToast(window.i18n.t('needJsonObjectOrArray'), true);
+        return;
+     }
+  } catch(e) {
+     showToast(window.i18n.t('jsonError'), true);
+     return;
+  }
+  
+  const rules = await sendMessage({ type: 'GET_RULES' });
+  const rule = rules.find(r => r.id === modalTargetRuleId);
+  if (rule) {
+    rule.responseBody = content;
+    await sendMessage({ type: 'UPDATE_RULE', ruleId: modalTargetRuleId, rule });
+    showToast(window.i18n.t('ruleUpdated'));
+    loadRules();
+    closeEditorModal();
+  }
+}
+
+// 处理直接编辑响应内容
+async function handleDirectEdit(ruleId) {
+  const rules = await sendMessage({ type: 'GET_RULES' });
+  const rule = rules.find(r => r.id === ruleId);
+  
+  if (!rule || !rule.responseBody) return;
+  
+  openEditorModal('direct', rule.responseBody, ruleId);
 }
 
 // 加载规则列表
@@ -841,13 +927,21 @@ function renderRules(rules, highlightQuery = '') {
       <div class="rule-header">
         <div class="rule-toggle ${rule.enabled ? 'active' : ''}" data-id="${rule.id}"></div>
         <span class="rule-name">${highlightText(escapeHtml(rule.name), highlightQuery)}</span>
-        <button class="btn-icon-small btn-export-icon" data-id="${rule.id}" title="${window.i18n.t('exportRule')}">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-            <polyline points="16 6 12 2 8 6"></polyline>
-            <line x1="12" y1="2" x2="12" y2="15"></line>
-          </svg>
-        </button>
+        <div class="rule-header-actions">
+           <button class="btn-icon-small btn-direct-edit" data-id="${rule.id}" title="${window.i18n.t('editResponse')}">
+             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+             </svg>
+           </button>
+           <button class="btn-icon-small btn-export-icon" data-id="${rule.id}" title="${window.i18n.t('exportRule')}">
+             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+               <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+               <polyline points="16 6 12 2 8 6"></polyline>
+               <line x1="12" y1="2" x2="12" y2="15"></line>
+             </svg>
+           </button>
+        </div>
       </div>
       <div class="rule-url">${highlightText(escapeHtml(rule.urlPattern), highlightQuery)}</div>
       ${renderRuleDetails(rule)}
@@ -875,6 +969,13 @@ function renderRules(rules, highlightQuery = '') {
     btn.addEventListener('click', (e) => {
       e.stopPropagation(); // Prevent toggling rule when clicking export
       handleExportRule(btn.dataset.id);
+    });
+  });
+
+  rulesList.querySelectorAll('.btn-direct-edit').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      handleDirectEdit(btn.dataset.id);
     });
   });
   
