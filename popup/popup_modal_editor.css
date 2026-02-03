@@ -1,0 +1,15 @@
+
+/* Fullscreen modal CodeMirror overrides */
+#modal-codemirror-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: none;
+  border-radius: 12px;
+}
+
+#modal-codemirror-wrapper .CodeMirror {
+  height: 100%;
+  border-radius: 12px;
+}

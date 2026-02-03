@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="lib/codemirror/codemirror.css" />
     <link rel="stylesheet" href="lib/codemirror/addon/fold/foldgutter.css" />
     <link rel="stylesheet" href="popup.css" />
+    <link rel="stylesheet" href="popup_search.css" />
+    <link rel="stylesheet" href="popup_modal_editor.css" />
   </head>
   <body>
     <div class="container">
@@ -311,14 +313,16 @@
                   <label for="response-body" data-i18n="responseContent"
                     >Response Content (JSON)</label
                   >
-                  <button
-                    type="button"
-                    id="expand-editor"
-                    class="btn-expand"
-                    data-i18n-title="expandEdit"
-                  >
-                    ⛶
-                  </button>
+                  <div class="editor-actions">
+                    <button
+                      type="button"
+                      id="expand-editor"
+                      class="btn-expand"
+                      data-i18n-title="expandEdit"
+                    >
+                      ⛶
+                    </button>
+                  </div>
                 </div>
                 <textarea
                   id="response-body"
@@ -400,7 +404,18 @@
           📝 <span data-i18n="responseEditor">Response Content Editor</span>
         </h3>
         <div class="editor-modal-actions">
-
+          <button
+            type="button"
+            id="modal-search-btn"
+            class="btn-icon"
+            data-i18n-title="searchReplaceCtrlF"
+            style="margin-right: 8px;"
+           >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
           <button
             type="button"
             id="modal-close"
@@ -413,7 +428,6 @@
         </div>
       </div>
       <div class="editor-modal-content" id="editor-modal-content">
-
         <textarea
           id="modal-textarea"
           placeholder='{"success": true, "data": {}}'
@@ -520,7 +534,8 @@
               data-i18n-placeholder="curlCommandPlaceholder"
             ></textarea>
             <span class="hint" data-i18n="curlHint"
-              >Paste the cURL command from browser DevTools (right-click request → Copy as cURL)</span
+              >Paste the cURL command from browser DevTools (right-click request
+              → Copy as cURL)</span
             >
           </div>
           <div id="curl-error" class="curl-error"></div>
@@ -554,6 +569,7 @@
     <script src="lib/codemirror/addon/fold/foldgutter.js"></script>
     <script src="lib/codemirror/addon/fold/brace-fold.js"></script>
     <script src="i18n.js"></script>
+    <script src="editorSearch.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

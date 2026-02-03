@@ -36,6 +36,8 @@ const editorModalContent = document.getElementById('editor-modal-content');
 // CodeMirror 编辑器实例
 let formCodeMirror = null;
 let modalCodeMirror = null;
+let formEditorSearch = null;
+let modalEditorSearch = null;
 
 let editingRuleId = null;
 let currentEditingRuleData = null; // Store original data for restore
@@ -150,6 +152,16 @@ function initFormCodeMirror(config) {
     placeholder: textarea.placeholder
   });
 
+  // Initialize Search
+  // Search removed for form editor as per request
+  /* 
+  try {
+    formEditorSearch = new EditorSearch(formCodeMirror, wrapper);
+  } catch (e) {
+    console.error('Failed to initialize EditorSearch for form:', e);
+  }
+  */
+
   // 同步内容到隐藏的 textarea
   formCodeMirror.on('change', (cm) => {
     textarea.value = cm.getValue();
@@ -195,6 +207,13 @@ function initModalCodeMirror() {
       }
     }
   });
+
+  // Initialize Search
+  try {
+    modalEditorSearch = new EditorSearch(cm, wrapper);
+  } catch (e) {
+    console.error('Failed to initialize EditorSearch for modal:', e);
+  }
 
   // 同步内容到隐藏的 textarea 和表单
   cm.on('change', (editor) => {
@@ -423,6 +442,25 @@ function setupEventListeners() {
   
   // 放大编辑器
   expandEditor.addEventListener('click', openEditorModal);
+  
+  // Search buttons
+  // searchEditorBtn listener removed as button is removed
+  /*
+  const searchEditorBtn = document.getElementById('search-editor-btn');
+  if (searchEditorBtn) {
+    searchEditorBtn.addEventListener('click', () => {
+      if (formEditorSearch) formEditorSearch.togglePanel();
+    });
+  }
+  */
+
+  const modalSearchBtn = document.getElementById('modal-search-btn');
+  if (modalSearchBtn) {
+    modalSearchBtn.addEventListener('click', () => {
+      if (modalEditorSearch) modalEditorSearch.togglePanel();
+    });
+  }
+
   modalClose.addEventListener('click', closeEditorModal);
   
   // ESC关闭模态框
@@ -461,6 +499,9 @@ function setupEventListeners() {
   if (settingsClose) {
     settingsClose.addEventListener('click', () => {
       settingsModal.classList.remove('active');
+      if (document.activeElement === settingsBtn) {
+        settingsBtn.blur();
+      }
     });
   }
 
@@ -469,6 +510,16 @@ function setupEventListeners() {
     settingsModal.addEventListener('click', (e) => {
       if (e.target === settingsModal) {
         settingsModal.classList.remove('active');
+      }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && settingsModal.classList.contains('active')) {
+        settingsModal.classList.remove('active');
+        if (document.activeElement) {
+          document.activeElement.blur();
+        }
       }
     });
   }
@@ -699,6 +750,11 @@ function closeEditorModal() {
   }
   responseBody.value = modalValue;
   
+  // Reset search state if active
+  if (modalEditorSearch) {
+    modalEditorSearch.reset();
+  }
+
   editorModal.classList.remove('active');
   
   // 验证 JSON 格式

@@ -1,0 +1,158 @@
+/* Search Panel Styles */
+.cm-search-panel {
+  background: var(--bg-card);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px; /* Consistent gap for all top-level items */
+  align-items: center;
+  font-size: 13px;
+  position: relative;
+  z-index: 10;
+  animation: slideInTop 0.2s ease-out;
+}
+
+@keyframes slideInTop {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cm-search-panel.hidden {
+  display: none;
+}
+
+/* Groups for Search and Replace sections */
+.cm-search-group {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Consistent gap inside groups */
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Field wrapper (Input + Count) */
+.cm-search-field {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 100px;
+}
+
+.cm-search-input {
+  width: 100%;
+  padding: 6px 8px;
+  padding-right: 28px; /* Space for count */
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: inherit;
+  height: 28px;
+  line-height: normal;
+}
+
+.cm-search-input::placeholder {
+  font-size: 12px;
+}
+
+.cm-search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-glow);
+}
+
+.cm-search-count {
+  position: absolute;
+  right: 6px;
+  font-size: 10px;
+  color: var(--text-muted);
+  pointer-events: none;
+  line-height: 28px;
+}
+
+/* Button groups */
+.cm-search-btns {
+  display: flex;
+  gap: 8px; /* Consistent gap between buttons */
+}
+
+/* Base button styles */
+.cm-btn {
+  padding: 0 10px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cm-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.cm-btn.primary {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.cm-btn.primary:hover {
+  background: var(--primary-dark);
+}
+
+.cm-btn.close-btn {
+  width: 28px;
+  padding: 0;
+  margin-left: auto; /* Push close button to edge if space allows */
+}
+
+/* Icon-only buttons */
+.cm-btn.prev-btn,
+.cm-btn.next-btn {
+  width: 28px;
+  padding: 0;
+}
+
+/* Search match highlighting */
+.cm-match-highlight {
+  background-color: rgba(255, 255, 0, 0.4);
+}
+
+.cm-match-highlight-active {
+  background-color: rgba(255, 165, 0, 0.6);
+  outline: 1px solid rgba(255, 140, 0, 0.8);
+}
+
+/* Responsive adjustments for very small widths */
+@media (max-width: 450px) {
+  .cm-search-panel {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .cm-search-group {
+    width: 100%;
+    min-width: 0;
+  }
+  
+  .cm-btn.close-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    margin: 0;
+  }
+}

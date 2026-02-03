@@ -692,6 +692,23 @@ body {
   margin-bottom: 20px;
 }
 
+.response-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.response-label-row label {
+  margin-bottom: 0;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 8px;
+}
+
+
 .form-group label {
   display: block;
   margin-bottom: 8px;

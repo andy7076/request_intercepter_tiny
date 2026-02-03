@@ -335,6 +335,9 @@
   "replaceAll": {
     "message": "Replace All"
   },
+  "replaceAllShort": {
+    "message": "All"
+  },
   "noResults": {
     "message": "No results"
   },

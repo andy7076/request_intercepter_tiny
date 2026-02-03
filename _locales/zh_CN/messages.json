@@ -335,6 +335,9 @@
   "replaceAll": {
     "message": "全部替换"
   },
+  "replaceAllShort": {
+    "message": "全部"
+  },
   "noResults": {
     "message": "无结果"
   },
