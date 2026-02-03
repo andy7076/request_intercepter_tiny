@@ -1220,6 +1220,7 @@ function showToast(message, isError = false) {
     toast.remove();
   }, 2500);
 }
+window.showToast = showToast;
 
 // HTML转义
 function escapeHtml(text) {

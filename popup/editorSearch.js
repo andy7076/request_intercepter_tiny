@@ -359,11 +359,21 @@ class EditorSearch {
     
     // Update search (brute force re-search is safer to keep indices correct)
     this.search(); 
+    
+    if (window.showToast) {
+      window.showToast(window.i18n.t('replacedCount', 1));
+    }
   }
 
   replaceAll() {
     const query = this.state.query;
     if (!query) return;
+
+    const count = this.state.matches.length;
+    if (count === 0) {
+      if (window.showToast) window.showToast(window.i18n.t('noResults'));
+      return;
+    }
     
     const replacement = this.replaceInput.value;
     const value = this.cm.getValue();
@@ -379,6 +389,10 @@ class EditorSearch {
     
     this.cm.setValue(newValue);
     this.search(); // Reset
+    
+    if (window.showToast) {
+      window.showToast(window.i18n.t('replacedCount', count));
+    }
   }
 }
 
