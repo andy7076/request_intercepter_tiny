@@ -1465,23 +1465,59 @@ function generateRuleNameFromUrl(url) {
     const urlObj = new URL(url);
     const pathParts = urlObj.pathname.split('/').filter(Boolean);
     
-    if (pathParts.length > 0) {
-      // 取路径的最后一部分作为规则名称
-      let name = pathParts[pathParts.length - 1];
-      // 移除常见的 API 版本前缀
-      name = name.replace(/^v\d+$/i, '');
-      if (name) {
-        // 转换为更可读的格式 (camelCase 或 snake_case -> Title Case)
-        name = name
-          .replace(/[-_]/g, ' ')
-          .replace(/([a-z])([A-Z])/g, '$1 $2')
-          .replace(/\b\w/g, c => c.toUpperCase());
-        return name;
-      }
+    if (pathParts.length === 0) {
+      // 没有路径，使用主机名
+      return urlObj.hostname.replace('www.', '').split('.')[0];
     }
     
-    // 如果路径不可用，使用主机名
-    return urlObj.hostname.replace('www.', '').split('.')[0];
+    // 过滤掉常见的无意义路径部分
+    const ignoreParts = ['api', 'v1', 'v2', 'v3', 'v4', 'rest', 'ajax', 'json', 'data', 'service', 'services'];
+    const meaningfulParts = pathParts.filter(part => {
+      const lowerPart = part.toLowerCase();
+      // 忽略版本号 (v1, v2, v1.0 等)
+      if (/^v\d+(\.\d+)?$/i.test(part)) return false;
+      // 忽略常见的无意义路径
+      if (ignoreParts.includes(lowerPart)) return false;
+      // 忽略纯数字 (ID)
+      if (/^\d+$/.test(part)) return false;
+      return true;
+    });
+    
+    // 取最后 1-2 个有意义的部分组成名称
+    let nameParts;
+    if (meaningfulParts.length >= 2) {
+      // 如果有多个有意义的部分，取最后两个
+      nameParts = meaningfulParts.slice(-2);
+    } else if (meaningfulParts.length === 1) {
+      nameParts = meaningfulParts;
+    } else {
+      // 所有部分都被过滤掉了，使用原始路径的最后一部分
+      nameParts = [pathParts[pathParts.length - 1]];
+    }
+    
+    // 格式化每个部分
+    const formattedParts = nameParts.map(part => {
+      return part
+        // 移除文件扩展名
+        .replace(/\.\w+$/, '')
+        // snake_case 和 kebab-case 转空格
+        .replace(/[-_]/g, ' ')
+        // camelCase 转空格
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        // 首字母大写
+        .replace(/\b\w/g, c => c.toUpperCase())
+        .trim();
+    });
+    
+    // 合并并清理
+    let name = formattedParts.join(' ').trim();
+    
+    // 如果名称为空，回退到主机名
+    if (!name) {
+      return urlObj.hostname.replace('www.', '').split('.')[0];
+    }
+    
+    return name;
   } catch {
     return 'API Rule';
   }
