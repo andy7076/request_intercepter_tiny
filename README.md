@@ -30,6 +30,9 @@ Request Interceptor Tiny is a Chrome extension designed for developers, providin
   - Quick creation, editing, deletion, and one-click enable/disable of rules.
   - **Import/Export**: Export rules to JSON files for team sharing, or import existing rules from files.
 
+- **⚡ Quick cURL Import**  
+  Copy a request's cURL command from browser DevTools and parse it with one click to create a rule. Automatically fetches the real response to use as a Mock data template.
+
 - **🎨 Minimalist Modern UI**  
   Dark mode design with glassmorphism style, featuring a refined interface and smooth interactions.
 
@@ -55,9 +58,14 @@ Request Interceptor Tiny is a Chrome extension designed for developers, providin
 1. **Add Interception Rules**
    - Click the extension icon to open the interface.
    - Switch to the **"Add Rule"** tab.
-   - **Rule Name**: Give your rule an easily identifiable name.
-   - **URL Match Pattern**: Enter the API address to intercept, supports `*` wildcard (e.g., `*://api.example.com/v1/users*`).
-   - **Response Content**: Enter your expected JSON data. The editor validates format in real-time, showing green indicator when correct.
+   - **Option 1: Manual Entry**
+     - **Rule Name**: Give your rule an easily identifiable name.
+     - **URL Match Pattern**: Enter the API address to intercept, supports `*` wildcard (e.g., `*://api.example.com/v1/users*`).
+     - **Response Content**: Enter your expected JSON data. The editor validates format in real-time, showing green indicator when correct.
+   - **Option 2: Import from cURL**
+     - In browser DevTools Network panel, right-click a request → "Copy as cURL".
+     - Click the **"Import from cURL"** button, paste the command and click parse.
+     - The extension will automatically fetch the real response and fill in the rule name, URL pattern, and response content.
    - Click **"Save Rule"**.
 
 2. **Verify Results**
