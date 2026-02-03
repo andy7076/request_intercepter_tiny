@@ -123,23 +123,47 @@
       if (mockResponse) {
         log('[Request Interceptor Tiny] 🎭 Will mock fetch response:', url);
         
-        // 发出真实请求（Network 面板显示原始请求和响应）
-        const realResponse = await originalFetch.apply(this, arguments);
+        let realResponse = null;
+        try {
+          // 尝试发出真实请求（Network 面板显示原始请求和响应）
+          realResponse = await originalFetch.apply(this, arguments);
+        } catch (err) {
+          log('[Request Interceptor Tiny] ⚠️ Real request failed (likely blocked by CSP/Network), using fallback properties:', err);
+        }
         
         // 创建一个伪装的 Response 对象，它保留原始响应的属性，但返回 mock 的内容
         // 这样 Network 面板显示的是真实的原始响应，但代码读取的是 mock 数据
+        
+        // 准备响应头 (使用真实响应的头或根据 mock 配置生成)
+        const headers = realResponse ? realResponse.headers : new Headers({
+          'content-type': mockResponse.contentType || 'application/json'
+        });
+        
+        // 准备状态码
+        const status = realResponse ? realResponse.status : (mockResponse.status || 200);
+        const statusText = realResponse ? realResponse.statusText : (mockResponse.statusText || 'OK (Mocked)');
+        
         const mockedResponse = new Response(mockResponse.body, {
-          status: realResponse.status, // 保留原始状态码（Network 显示一致）
-          statusText: realResponse.statusText,
-          headers: realResponse.headers // 保留原始头部
+          status: status,
+          statusText: statusText,
+          headers: headers
         });
         
         // 复制原始响应的只读属性
-        Object.defineProperties(mockedResponse, {
-          url: { value: realResponse.url },
-          redirected: { value: realResponse.redirected },
-          type: { value: realResponse.type }
-        });
+        if (realResponse) {
+          Object.defineProperties(mockedResponse, {
+            url: { value: realResponse.url },
+            redirected: { value: realResponse.redirected },
+            type: { value: realResponse.type }
+          });
+        } else {
+          // 如果真实请求失败，使用请求 URL 作为响应 URL
+          Object.defineProperties(mockedResponse, {
+            url: { value: url },
+            redirected: { value: false },
+            type: { value: 'basic' }
+          });
+        }
         
         log('[Request Interceptor Tiny] ✅ Response mocked for:', url);
         
