@@ -492,5 +492,24 @@
   },
   "curlParsedSuccess": {
     "message": "Form filled from cURL command"
+  },
+  "curlFetching": {
+    "message": "Fetching..."
+  },
+  "curlFetchFailed": {
+    "message": "Request failed: $ERROR$, using default template",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      }
+    }
+  },
+  "curlParsedWithResponse": {
+    "message": "Fetched real response (HTTP $STATUS$) and filled form",
+    "placeholders": {
+      "status": {
+        "content": "$1"
+      }
+    }
   }
 }

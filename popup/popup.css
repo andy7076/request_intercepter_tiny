@@ -1284,6 +1284,14 @@ input:focus + .slider {
   box-shadow: var(--shadow-glow);
 }
 
+.btn-primary:disabled {
+  background: var(--text-muted);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
 .btn-secondary {
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);

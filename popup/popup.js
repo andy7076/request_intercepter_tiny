@@ -1490,7 +1490,7 @@ function generateUrlPattern(url) {
 }
 
 // 解析并填充表单
-function parseAndFillCurl() {
+async function parseAndFillCurl() {
   if (!curlInput) return;
   
   const command = curlInput.value.trim();
@@ -1500,8 +1500,32 @@ function parseAndFillCurl() {
     return;
   }
 
+  let parsed;
   try {
-    const parsed = parseCurlCommand(command);
+    parsed = parseCurlCommand(command);
+  } catch (error) {
+    showCurlError(error.message);
+    return;
+  }
+
+  // 显示加载状态
+  if (curlParseBtn) {
+    curlParseBtn.disabled = true;
+    curlParseBtn.textContent = window.i18n.t('curlFetching');
+  }
+  hideCurlError();
+
+  try {
+    // 发起实际请求获取真实响应
+    const response = await sendMessage({
+      type: 'FETCH_URL',
+      request: {
+        url: parsed.url,
+        method: parsed.method,
+        headers: parsed.headers,
+        body: parsed.data
+      }
+    });
     
     // 填充规则名称
     const ruleNameInput = document.getElementById('rule-name');
@@ -1516,29 +1540,28 @@ function parseAndFillCurl() {
     }
     
     // 填充响应内容
-    // 如果 cURL 有请求体，尝试将其作为示例响应（通常 Mock 需要根据请求返回类似结构）
-    let defaultResponse = '{\n  "success": true,\n  "data": {}\n}';
+    let responseBody;
     
-    if (parsed.data) {
-      try {
-        // 尝试解析请求体并格式化
-        const bodyObj = JSON.parse(parsed.data);
-        defaultResponse = JSON.stringify({
-          success: true,
-          data: bodyObj
-        }, null, 2);
-      } catch {
-        // 请求体不是有效 JSON，使用默认响应
+    if (response && response.success && response.body) {
+      // 使用真实的响应内容
+      responseBody = response.body;
+    } else {
+      // 请求失败，使用默认模板
+      responseBody = '{\n  "success": true,\n  "data": {}\n}';
+      
+      // 如果有错误信息，显示警告
+      if (response && response.error) {
+        showToast(window.i18n.t('curlFetchFailed', response.error), true);
       }
     }
     
     // 设置响应内容
     if (formCodeMirror) {
-      formCodeMirror.setValue(defaultResponse);
+      formCodeMirror.setValue(responseBody);
     }
     const responseBodyInput = document.getElementById('response-body');
     if (responseBodyInput) {
-      responseBodyInput.value = defaultResponse;
+      responseBodyInput.value = responseBody;
     }
     
     // 验证 JSON
@@ -1548,10 +1571,20 @@ function parseAndFillCurl() {
     closeCurlModal();
     
     // 显示成功提示
-    showToast(window.i18n.t('curlParsedSuccess'));
+    if (response && response.success) {
+      showToast(window.i18n.t('curlParsedWithResponse', response.status));
+    } else {
+      showToast(window.i18n.t('curlParsedSuccess'));
+    }
     
   } catch (error) {
     showCurlError(error.message);
+  } finally {
+    // 恢复按钮状态
+    if (curlParseBtn) {
+      curlParseBtn.disabled = false;
+      curlParseBtn.textContent = window.i18n.t('parseAndFill');
+    }
   }
 }
 

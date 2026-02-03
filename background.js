@@ -96,7 +96,70 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse({ success: true });
     return true;
   }
+
+  // 执行 HTTP 请求（用于 cURL 导入功能）
+  if (message.type === 'FETCH_URL') {
+    executeFetch(message.request)
+      .then(sendResponse)
+      .catch(err => sendResponse({ error: err.message }));
+    return true;
+  }
 });
+
+// 执行 fetch 请求
+async function executeFetch(requestConfig) {
+  const { url, method = 'GET', headers = {}, body } = requestConfig;
+  
+  try {
+    const fetchOptions = {
+      method,
+      headers,
+    };
+    
+    // 只有非 GET/HEAD 请求才添加 body
+    if (body && method !== 'GET' && method !== 'HEAD') {
+      fetchOptions.body = body;
+    }
+    
+    const response = await fetch(url, fetchOptions);
+    
+    // 获取响应内容
+    const contentType = response.headers.get('content-type') || '';
+    let responseBody;
+    
+    if (contentType.includes('application/json')) {
+      try {
+        const jsonData = await response.json();
+        responseBody = JSON.stringify(jsonData, null, 2);
+      } catch {
+        responseBody = await response.text();
+      }
+    } else {
+      responseBody = await response.text();
+      // 尝试解析为 JSON 并格式化
+      try {
+        const jsonData = JSON.parse(responseBody);
+        responseBody = JSON.stringify(jsonData, null, 2);
+      } catch {
+        // 不是 JSON，保持原样
+      }
+    }
+    
+    return {
+      success: true,
+      status: response.status,
+      statusText: response.statusText,
+      contentType,
+      body: responseBody
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
 
 // 获取所有规则
 async function getRules() {

@@ -492,5 +492,24 @@
   },
   "curlParsedSuccess": {
     "message": "已从 cURL 命令填充表单"
+  },
+  "curlFetching": {
+    "message": "正在请求..."
+  },
+  "curlFetchFailed": {
+    "message": "请求失败: $ERROR$，已使用默认模板",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      }
+    }
+  },
+  "curlParsedWithResponse": {
+    "message": "已获取真实响应 (HTTP $STATUS$) 并填充表单",
+    "placeholders": {
+      "status": {
+        "content": "$1"
+      }
+    }
   }
 }
