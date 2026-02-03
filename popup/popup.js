@@ -888,9 +888,16 @@ async function handleEdit(ruleId) {
   currentEditingRuleData = JSON.parse(JSON.stringify(rule)); // Deep copy
   
   // 填充表单
-  document.getElementById('rule-name').value = rule.name;
-  document.getElementById('url-pattern').value = rule.urlPattern;
+  const ruleNameInput = document.getElementById('rule-name');
+  const urlPatternInput = document.getElementById('url-pattern');
+  
+  ruleNameInput.value = rule.name;
+  urlPatternInput.value = rule.urlPattern;
   document.getElementById('response-body').value = rule.responseBody || '';
+  
+  // 清除自定义验证消息（解决通过 JS 设置值后仍提示"请填写此字段"的问题）
+  ruleNameInput.setCustomValidity('');
+  urlPatternInput.setCustomValidity('');
   
   // 同步到 CodeMirror 编辑器
   if (formCodeMirror) {
@@ -1576,12 +1583,14 @@ async function parseAndFillCurl() {
     const ruleNameInput = document.getElementById('rule-name');
     if (ruleNameInput) {
       ruleNameInput.value = generateRuleNameFromUrl(parsed.url);
+      ruleNameInput.setCustomValidity('');
     }
     
     // 填充 URL 模式
     const urlPatternInput = document.getElementById('url-pattern');
     if (urlPatternInput) {
       urlPatternInput.value = generateUrlPattern(parsed.url);
+      urlPatternInput.setCustomValidity('');
     }
     
     // 填充响应内容
