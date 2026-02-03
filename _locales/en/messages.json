@@ -462,5 +462,35 @@
   },
   "requiredFieldMessage": {
     "message": "Please fill out this field."
+  },
+  "importFromCurl": {
+    "message": "Import from cURL"
+  },
+  "importFromCurlTitle": {
+    "message": "Quickly create a rule from a cURL command copied from browser"
+  },
+  "curlCommand": {
+    "message": "cURL Command"
+  },
+  "curlCommandPlaceholder": {
+    "message": "Paste the cURL command from browser DevTools..."
+  },
+  "curlHint": {
+    "message": "Paste the cURL command from browser DevTools (right-click request → Copy as cURL)"
+  },
+  "parseAndFill": {
+    "message": "Parse & Fill"
+  },
+  "curlParseErrorEmpty": {
+    "message": "Please enter a cURL command"
+  },
+  "curlParseErrorInvalid": {
+    "message": "Invalid cURL command, must start with 'curl'"
+  },
+  "curlParseErrorNoUrl": {
+    "message": "Unable to extract URL from cURL command"
+  },
+  "curlParsedSuccess": {
+    "message": "Form filled from cURL command"
   }
 }

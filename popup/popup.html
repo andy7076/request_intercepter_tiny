@@ -251,6 +251,32 @@
       <div id="add-panel" class="panel">
         <form id="rule-form">
           <div class="form-content">
+            <!-- Import from cURL button -->
+            <div class="import-curl-section">
+              <button
+                type="button"
+                id="import-curl-btn"
+                class="btn-import-curl"
+                data-i18n-title="importFromCurlTitle"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M4 17l6-6-6-6"></path>
+                  <path d="M12 19h8"></path>
+                </svg>
+                <span data-i18n="importFromCurl">Import from cURL</span>
+              </button>
+            </div>
+
             <div class="form-group">
               <label for="rule-name" data-i18n="ruleName">Rule Name</label>
               <input
@@ -450,6 +476,72 @@
               <option value="zh_CN">中文</option>
             </select>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- cURL Import Modal -->
+    <div id="curl-modal" class="modal">
+      <div class="modal-content curl-modal-content">
+        <div class="modal-header">
+          <h3>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M4 17l6-6-6-6"></path>
+              <path d="M12 19h8"></path>
+            </svg>
+            <span data-i18n="importFromCurl">Import from cURL</span>
+          </h3>
+          <button
+            type="button"
+            id="curl-modal-close"
+            class="btn-modal-close"
+            data-i18n-title="close"
+          >
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="curl-input-group">
+            <label for="curl-input" data-i18n="curlCommand">cURL Command</label>
+            <textarea
+              id="curl-input"
+              rows="8"
+              placeholder="curl 'https://api.example.com/data' -X POST -H 'Content-Type: application/json' -d '{&quot;key&quot;: &quot;value&quot;}'"
+              data-i18n-placeholder="curlCommandPlaceholder"
+            ></textarea>
+            <span class="hint" data-i18n="curlHint"
+              >Paste the cURL command from browser DevTools (right-click request → Copy as cURL)</span
+            >
+          </div>
+          <div id="curl-error" class="curl-error"></div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            id="curl-cancel-btn"
+            class="btn-secondary"
+            data-i18n="cancel"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            id="curl-parse-btn"
+            class="btn-primary"
+            data-i18n="parseAndFill"
+          >
+            Parse & Fill
+          </button>
         </div>
       </div>
     </div>

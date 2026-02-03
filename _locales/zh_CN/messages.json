@@ -462,5 +462,35 @@
   },
   "requiredFieldMessage": {
     "message": "请填写此字段。"
+  },
+  "importFromCurl": {
+    "message": "从 cURL 导入"
+  },
+  "importFromCurlTitle": {
+    "message": "从浏览器复制的 cURL 命令快速创建规则"
+  },
+  "curlCommand": {
+    "message": "cURL 命令"
+  },
+  "curlCommandPlaceholder": {
+    "message": "粘贴从浏览器 DevTools 复制的 cURL 命令..."
+  },
+  "curlHint": {
+    "message": "从浏览器 DevTools 粘贴 cURL 命令（右键请求 → 复制为 cURL）"
+  },
+  "parseAndFill": {
+    "message": "解析并填充"
+  },
+  "curlParseErrorEmpty": {
+    "message": "请输入 cURL 命令"
+  },
+  "curlParseErrorInvalid": {
+    "message": "无效的 cURL 命令，必须以 'curl' 开头"
+  },
+  "curlParseErrorNoUrl": {
+    "message": "无法从 cURL 命令中提取 URL"
+  },
+  "curlParsedSuccess": {
+    "message": "已从 cURL 命令填充表单"
   }
 }

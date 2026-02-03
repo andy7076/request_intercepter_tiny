@@ -1277,3 +1277,286 @@ function setupFormValidation() {
     });
   });
 }
+
+// ==================== cURL 导入功能 ====================
+
+// cURL 模态框相关元素
+const curlModal = document.getElementById('curl-modal');
+const curlInput = document.getElementById('curl-input');
+const curlModalClose = document.getElementById('curl-modal-close');
+const curlCancelBtn = document.getElementById('curl-cancel-btn');
+const curlParseBtn = document.getElementById('curl-parse-btn');
+const curlError = document.getElementById('curl-error');
+const importCurlBtn = document.getElementById('import-curl-btn');
+
+// 初始化 cURL 导入事件监听
+function initCurlImport() {
+  if (!importCurlBtn || !curlModal) return;
+
+  // 打开 cURL 模态框
+  importCurlBtn.addEventListener('click', openCurlModal);
+
+  // 关闭模态框
+  if (curlModalClose) {
+    curlModalClose.addEventListener('click', closeCurlModal);
+  }
+  if (curlCancelBtn) {
+    curlCancelBtn.addEventListener('click', closeCurlModal);
+  }
+
+  // 点击模态框背景关闭
+  if (curlModal) {
+    curlModal.addEventListener('click', (e) => {
+      if (e.target === curlModal) {
+        closeCurlModal();
+      }
+    });
+  }
+
+  // ESC 关闭模态框
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && curlModal.classList.contains('active')) {
+      closeCurlModal();
+    }
+  });
+
+  // 解析并填充按钮
+  if (curlParseBtn) {
+    curlParseBtn.addEventListener('click', parseAndFillCurl);
+  }
+}
+
+// 打开 cURL 模态框
+function openCurlModal() {
+  if (curlModal) {
+    curlModal.classList.add('active');
+    if (curlInput) {
+      curlInput.value = '';
+      curlInput.focus();
+    }
+    hideCurlError();
+  }
+}
+
+// 关闭 cURL 模态框
+function closeCurlModal() {
+  if (curlModal) {
+    curlModal.classList.remove('active');
+    if (curlInput) {
+      curlInput.value = '';
+    }
+    hideCurlError();
+  }
+}
+
+// 显示 cURL 错误
+function showCurlError(message) {
+  if (curlError) {
+    curlError.textContent = message;
+    curlError.classList.add('visible');
+  }
+}
+
+// 隐藏 cURL 错误
+function hideCurlError() {
+  if (curlError) {
+    curlError.textContent = '';
+    curlError.classList.remove('visible');
+  }
+}
+
+// 解析 cURL 命令
+function parseCurlCommand(curlCommand) {
+  if (!curlCommand || typeof curlCommand !== 'string') {
+    throw new Error(window.i18n.t('curlParseErrorEmpty'));
+  }
+
+  const trimmed = curlCommand.trim();
+  
+  // 检查是否以 curl 开头
+  if (!trimmed.toLowerCase().startsWith('curl')) {
+    throw new Error(window.i18n.t('curlParseErrorInvalid'));
+  }
+
+  // 解析结果
+  const result = {
+    url: '',
+    method: 'GET',
+    headers: {},
+    data: ''
+  };
+
+  // 简化版本: 移除多行连接符并合并
+  let normalized = trimmed
+    .replace(/\\\r?\n/g, ' ')  // 处理多行命令
+    .replace(/\s+/g, ' ')       // 合并多余空白
+    .trim();
+
+  // 提取 URL - 支持多种格式
+  // 格式1: curl 'URL' ...
+  // 格式2: curl "URL" ...
+  // 格式3: curl URL ...
+  // 格式4: curl ... 'URL' (URL 可能在参数之后)
+  
+  let urlMatch = normalized.match(/curl\s+(?:(?:-[A-Za-z]+\s+(?:'[^']*'|"[^"]*"|\S+)\s+)*)?['"]?(https?:\/\/[^'">\s]+)['"]?/i);
+  
+  if (!urlMatch) {
+    // 尝试在命令中任意位置查找 URL
+    urlMatch = normalized.match(/['"]?(https?:\/\/[^'">\s]+)['"]?/);
+  }
+  
+  if (urlMatch) {
+    result.url = urlMatch[1].replace(/['"]$/, ''); // 移除尾部可能的引号
+  } else {
+    throw new Error(window.i18n.t('curlParseErrorNoUrl'));
+  }
+
+  // 提取 HTTP 方法 -X 或 --request
+  const methodMatch = normalized.match(/(?:-X|--request)\s+['"]?(\w+)['"]?/i);
+  if (methodMatch) {
+    result.method = methodMatch[1].toUpperCase();
+  }
+
+  // 提取 Headers -H 或 --header
+  const headerRegex = /(?:-H|--header)\s+['"]([^'"]+)['"]/g;
+  let headerMatch;
+  while ((headerMatch = headerRegex.exec(normalized)) !== null) {
+    const headerStr = headerMatch[1];
+    const colonIndex = headerStr.indexOf(':');
+    if (colonIndex > 0) {
+      const key = headerStr.substring(0, colonIndex).trim();
+      const value = headerStr.substring(colonIndex + 1).trim();
+      result.headers[key] = value;
+    }
+  }
+
+  // 提取请求体 -d 或 --data 或 --data-raw
+  const dataMatch = normalized.match(/(?:-d|--data|--data-raw|--data-binary)\s+\$?'([^']+)'/);
+  if (dataMatch) {
+    result.data = dataMatch[1];
+  } else {
+    // 尝试双引号格式
+    const dataMatchDouble = normalized.match(/(?:-d|--data|--data-raw|--data-binary)\s+"([^"]+)"/);
+    if (dataMatchDouble) {
+      result.data = dataMatchDouble[1].replace(/\\"/g, '"'); // 还原转义的双引号
+    }
+  }
+
+  // 如果有 data 但没有指定方法，默认为 POST
+  if (result.data && result.method === 'GET') {
+    result.method = 'POST';
+  }
+
+  return result;
+}
+
+// 从 URL 生成规则名称
+function generateRuleNameFromUrl(url) {
+  try {
+    const urlObj = new URL(url);
+    const pathParts = urlObj.pathname.split('/').filter(Boolean);
+    
+    if (pathParts.length > 0) {
+      // 取路径的最后一部分作为规则名称
+      let name = pathParts[pathParts.length - 1];
+      // 移除常见的 API 版本前缀
+      name = name.replace(/^v\d+$/i, '');
+      if (name) {
+        // 转换为更可读的格式 (camelCase 或 snake_case -> Title Case)
+        name = name
+          .replace(/[-_]/g, ' ')
+          .replace(/([a-z])([A-Z])/g, '$1 $2')
+          .replace(/\b\w/g, c => c.toUpperCase());
+        return name;
+      }
+    }
+    
+    // 如果路径不可用，使用主机名
+    return urlObj.hostname.replace('www.', '').split('.')[0];
+  } catch {
+    return 'API Rule';
+  }
+}
+
+// 从 URL 生成匹配模式
+function generateUrlPattern(url) {
+  try {
+    const urlObj = new URL(url);
+    // 生成通配符模式: *://hostname/path*
+    return `*://${urlObj.hostname}${urlObj.pathname}*`;
+  } catch {
+    return url;
+  }
+}
+
+// 解析并填充表单
+function parseAndFillCurl() {
+  if (!curlInput) return;
+  
+  const command = curlInput.value.trim();
+  
+  if (!command) {
+    showCurlError(window.i18n.t('curlParseErrorEmpty'));
+    return;
+  }
+
+  try {
+    const parsed = parseCurlCommand(command);
+    
+    // 填充规则名称
+    const ruleNameInput = document.getElementById('rule-name');
+    if (ruleNameInput) {
+      ruleNameInput.value = generateRuleNameFromUrl(parsed.url);
+    }
+    
+    // 填充 URL 模式
+    const urlPatternInput = document.getElementById('url-pattern');
+    if (urlPatternInput) {
+      urlPatternInput.value = generateUrlPattern(parsed.url);
+    }
+    
+    // 填充响应内容
+    // 如果 cURL 有请求体，尝试将其作为示例响应（通常 Mock 需要根据请求返回类似结构）
+    let defaultResponse = '{\n  "success": true,\n  "data": {}\n}';
+    
+    if (parsed.data) {
+      try {
+        // 尝试解析请求体并格式化
+        const bodyObj = JSON.parse(parsed.data);
+        defaultResponse = JSON.stringify({
+          success: true,
+          data: bodyObj
+        }, null, 2);
+      } catch {
+        // 请求体不是有效 JSON，使用默认响应
+      }
+    }
+    
+    // 设置响应内容
+    if (formCodeMirror) {
+      formCodeMirror.setValue(defaultResponse);
+    }
+    const responseBodyInput = document.getElementById('response-body');
+    if (responseBodyInput) {
+      responseBodyInput.value = defaultResponse;
+    }
+    
+    // 验证 JSON
+    validateJsonRealtime();
+    
+    // 关闭模态框
+    closeCurlModal();
+    
+    // 显示成功提示
+    showToast(window.i18n.t('curlParsedSuccess'));
+    
+  } catch (error) {
+    showCurlError(error.message);
+  }
+}
+
+// 在页面加载时初始化 cURL 导入
+document.addEventListener('DOMContentLoaded', () => {
+  // 延迟初始化以确保 i18n 已就绪
+  setTimeout(initCurlImport, 100);
+});
