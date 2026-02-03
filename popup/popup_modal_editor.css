@@ -10,6 +10,8 @@
 }
 
 #modal-codemirror-wrapper .CodeMirror {
-  height: 100%;
+  flex: 1;
+  height: auto;
+  min-height: 0;
   border-radius: 12px;
 }
