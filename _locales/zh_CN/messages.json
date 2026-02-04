@@ -500,12 +500,18 @@
     "message": "正在请求..."
   },
   "curlFetchFailed": {
-    "message": "请求失败: $ERROR$，已使用默认模板",
+    "message": "请求失败: $ERROR$",
     "placeholders": {
       "error": {
         "content": "$1"
       }
     }
+  },
+  "curlFetchErrorTitle": {
+    "message": "请求失败"
+  },
+  "alertTitle": {
+    "message": "提示"
   },
   "curlParsedWithResponse": {
     "message": "已获取真实响应 (HTTP $STATUS$) 并填充表单",

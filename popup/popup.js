@@ -1222,6 +1222,67 @@ function showToast(message, isError = false) {
 }
 window.showToast = showToast;
 
+// 显示主题化Alert弹窗
+function showAlert(message, title) {
+  return new Promise((resolve) => {
+    const alertModal = document.getElementById('alert-modal');
+    const alertMessage = document.getElementById('alert-message');
+    const alertTitle = document.getElementById('alert-title');
+    const alertConfirmBtn = document.getElementById('alert-confirm-btn');
+    const alertCloseBtn = document.getElementById('alert-modal-close');
+    
+    if (!alertModal || !alertMessage) {
+      // 如果没有找到alert modal，回退到原生alert
+      alert(message);
+      resolve();
+      return;
+    }
+    
+    // 设置消息内容
+    alertMessage.textContent = message;
+    
+    // 设置标题（如果提供）
+    if (alertTitle) {
+      alertTitle.textContent = title || window.i18n.t('alertTitle') || 'Alert';
+    }
+    
+    // 显示模态框
+    alertModal.classList.add('active');
+    
+    // 关闭函数
+    const closeAlert = () => {
+      alertModal.classList.remove('active');
+      alertConfirmBtn.removeEventListener('click', closeAlert);
+      alertCloseBtn.removeEventListener('click', closeAlert);
+      document.removeEventListener('keydown', handleEsc);
+      resolve();
+    };
+    
+    // ESC键关闭
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') {
+        closeAlert();
+      }
+    };
+    
+    // 绑定事件
+    alertConfirmBtn.addEventListener('click', closeAlert);
+    alertCloseBtn.addEventListener('click', closeAlert);
+    document.addEventListener('keydown', handleEsc);
+    
+    // 点击背景关闭
+    alertModal.addEventListener('click', (e) => {
+      if (e.target === alertModal) {
+        closeAlert();
+      }
+    }, { once: true });
+    
+    // 聚焦确认按钮
+    alertConfirmBtn.focus();
+  });
+}
+window.showAlert = showAlert;
+
 // HTML转义
 function escapeHtml(text) {
   const div = document.createElement('div');
@@ -1742,6 +1803,25 @@ async function parseAndFillCurl() {
       }
     });
     
+    // 检查请求是否成功
+    if (!response || !response.success) {
+      // 请求失败，使用alert弹窗显示错误
+      const errorMessage = response && response.error 
+        ? window.i18n.t('curlFetchFailed', response.error)
+        : window.i18n.t('curlFetchFailed', 'Unknown error');
+      
+      // 恢复按钮状态
+      if (curlParseBtn) {
+        curlParseBtn.disabled = false;
+        curlParseBtn.textContent = window.i18n.t('parseAndFill');
+      }
+      
+      // 显示错误弹窗
+      await showAlert(errorMessage, window.i18n.t('curlFetchErrorTitle') || window.i18n.t('alertTitle'));
+      return;
+    }
+    
+    // 请求成功，执行填充逻辑
     // 填充规则名称
     const ruleNameInput = document.getElementById('rule-name');
     if (ruleNameInput) {
@@ -1756,23 +1836,8 @@ async function parseAndFillCurl() {
       urlPatternInput.setCustomValidity('');
     }
     
-    // 填充响应内容
-    let responseBody;
-    
-    if (response && response.success && response.body) {
-      // 使用真实的响应内容
-      responseBody = response.body;
-    } else {
-      // 请求失败，使用默认模板
-      responseBody = '{\n  "success": true,\n  "data": {}\n}';
-      
-      // 如果有错误信息，显示警告
-      if (response && response.error) {
-        showToast(window.i18n.t('curlFetchFailed', response.error), true);
-      }
-    }
-    
     // 设置响应内容
+    const responseBody = response.body;
     if (formCodeMirror) {
       formCodeMirror.setValue(responseBody);
     }
@@ -1788,17 +1853,20 @@ async function parseAndFillCurl() {
     closeCurlModal();
     
     // 显示成功提示
-    if (response && response.success) {
-      showToast(window.i18n.t('curlParsedWithResponse', response.status));
-    } else {
-      showToast(window.i18n.t('curlParsedSuccess'));
-    }
+    showToast(window.i18n.t('curlParsedWithResponse', response.status));
     
   } catch (error) {
-    showCurlError(error.message);
-  } finally {
     // 恢复按钮状态
     if (curlParseBtn) {
+      curlParseBtn.disabled = false;
+      curlParseBtn.textContent = window.i18n.t('parseAndFill');
+    }
+    
+    // 显示错误弹窗
+    await showAlert(error.message, window.i18n.t('curlFetchErrorTitle') || window.i18n.t('alertTitle'));
+  } finally {
+    // 确保按钮状态已恢复（以防在成功路径中未恢复）
+    if (curlParseBtn && curlParseBtn.disabled) {
       curlParseBtn.disabled = false;
       curlParseBtn.textContent = window.i18n.t('parseAndFill');
     }

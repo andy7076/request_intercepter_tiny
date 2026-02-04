@@ -581,6 +581,39 @@
       </div>
     </div>
 
+    <!-- Alert Modal -->
+    <div id="alert-modal" class="modal alert-modal">
+      <div class="modal-content alert-modal-content">
+        <div class="modal-header alert-modal-header">
+          <h3>
+            <span class="alert-icon">⚠️</span>
+            <span id="alert-title" data-i18n="alertTitle">Alert</span>
+          </h3>
+          <button
+            type="button"
+            id="alert-modal-close"
+            class="btn-modal-close"
+            data-i18n-title="close"
+          >
+            ×
+          </button>
+        </div>
+        <div class="modal-body alert-modal-body">
+          <p id="alert-message" class="alert-message"></p>
+        </div>
+        <div class="modal-footer alert-modal-footer">
+          <button
+            type="button"
+            id="alert-confirm-btn"
+            class="btn-primary"
+            data-i18n="confirm"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script src="lib/renderjson.js"></script>
     <!-- CodeMirror 核心和插件 -->
     <script src="lib/codemirror/codemirror.js"></script>
