@@ -6,9 +6,6 @@
   "default_locale": "en",
   "permissions": [
     "storage",
-    "declarativeNetRequest",
-    "declarativeNetRequestWithHostAccess",
-    "declarativeNetRequestFeedback",
     "sidePanel"
   ],
   "host_permissions": ["<all_urls>"],
