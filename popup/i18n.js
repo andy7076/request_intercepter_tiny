@@ -63,7 +63,7 @@ async function initI18n() {
   const savedLang = result[STORAGE_KEY];
   currentLanguage = savedLang && SUPPORTED_LANGUAGES.includes(savedLang) 
     ? savedLang 
-    : DEFAULT_LANGUAGE;
+    : getBrowserLanguage();
   
   // Load messages
   messages = await loadMessages(currentLanguage);
