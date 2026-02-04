@@ -1519,6 +1519,11 @@ function closeCurlModal() {
     if (curlInput) {
       curlInput.value = '';
     }
+    // 重置按钮状态
+    if (curlParseBtn) {
+      curlParseBtn.disabled = false;
+      curlParseBtn.textContent = window.i18n.t('parseAndFill');
+    }
     hideCurlError();
   }
 }
