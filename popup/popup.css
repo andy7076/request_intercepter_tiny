@@ -2032,6 +2032,32 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   transition: var(--transition);
 }
 
+.curl-input-group textarea::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.curl-input-group textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.curl-input-group textarea::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.2);
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+  transition: background-color 0.2s ease;
+}
+
+.curl-input-group textarea::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-secondary);
+  border: 2px solid transparent;
+}
+
+.curl-input-group textarea::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 .curl-input-group textarea:focus {
   outline: none;
   border-color: var(--primary);
