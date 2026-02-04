@@ -46,8 +46,8 @@
 }
 
 body {
-  width: 100%;
-  min-width: 420px;
+  width: 600px; 
+  /* min-width removed to avoid conflicts, fixed width is safer for cross-platform popup consistency */
   max-width: 100%;
   height: 100vh; /* Fixed height */
   background: var(--bg-main);
