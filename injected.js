@@ -22,6 +22,21 @@
   // 将相对URL转换为绝对URL
   function toAbsoluteUrl(url) {
     if (!url) return url;
+    
+    // 确保 url 是字符串类型
+    // 处理 Request 对象、URL 对象等情况
+    if (typeof url !== 'string') {
+      if (url instanceof Request) {
+        url = url.url;
+      } else if (url instanceof URL) {
+        url = url.href;
+      } else if (url.toString) {
+        url = url.toString();
+      } else {
+        return url;
+      }
+    }
+    
     // 如果已经是绝对URL，直接返回
     if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) {
       // 处理 // 开头的协议相对URL
