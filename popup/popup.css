@@ -2081,51 +2081,37 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 
 /* Alert Modal Styles */
 .alert-modal .alert-modal-content {
-  max-width: 360px;
-  border: 1px solid var(--danger);
-  box-shadow: 
-    0 0 20px rgba(239, 68, 68, 0.2),
-    var(--shadow-lg);
+  max-width: 340px;
 }
 
 .alert-modal .alert-modal-header {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.1));
-  border-bottom: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .alert-modal .alert-modal-header h3 {
-  color: var(--danger);
+  color: var(--text-primary);
 }
 
 .alert-modal .alert-icon {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .alert-modal .alert-modal-body {
-  padding: 24px 20px;
-  text-align: center;
+  padding: 20px;
 }
 
 .alert-modal .alert-message {
-  color: var(--text-primary);
-  font-size: 14px;
+  color: var(--text-secondary);
+  font-size: 13px;
   line-height: 1.6;
   word-break: break-word;
   margin: 0;
 }
 
 .alert-modal .alert-modal-footer {
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.2);
+  justify-content: flex-end;
 }
 
 .alert-modal .alert-modal-footer .btn-primary {
-  min-width: 100px;
-  background: var(--danger);
-  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
-}
-
-.alert-modal .alert-modal-footer .btn-primary:hover {
-  background: #dc2626;
-  box-shadow: 0 6px 12px -2px rgba(239, 68, 68, 0.4);
+  min-width: 80px;
 }
