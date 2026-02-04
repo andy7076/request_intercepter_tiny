@@ -9,8 +9,7 @@
     "declarativeNetRequest",
     "declarativeNetRequestWithHostAccess",
     "declarativeNetRequestFeedback",
-    "sidePanel",
-    "tabs"
+    "sidePanel"
   ],
   "host_permissions": ["<all_urls>"],
   "background": {
