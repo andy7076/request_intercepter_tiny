@@ -1758,8 +1758,8 @@ function generateRuleNameFromUrl(url) {
 function generateUrlPattern(url) {
   try {
     const urlObj = new URL(url);
-    // 生成通配符模式: *://hostname/path*
-    return `*://${urlObj.hostname}${urlObj.pathname}*`;
+    // 生成通配符模式: *://host/path* (host包含端口号)
+    return `*://${urlObj.host}${urlObj.pathname}*`;
   } catch {
     return url;
   }
