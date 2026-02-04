@@ -91,7 +91,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     const allRules = changes['interceptRules'].newValue || [];
     // 过滤出启用的 mockResponse 类型规则
     mockRules = allRules.filter(r => r.enabled && r.type === 'mockResponse');
-    console.log('[Request Interceptor Tiny]', 'Rules updated via storage.onChanged, count:', mockRules.length);
+    log('[Request Interceptor Tiny]', 'Rules updated via storage.onChanged, count:', mockRules.length);
     
     // 通知页面规则已更新
     window.postMessage({
@@ -121,7 +121,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'MOCK_RULES_UPDATED') {
     mockRules = message.rules || [];
-    console.log('[Request Interceptor Tiny]', 'Received MOCK_RULES_UPDATED message, count:', mockRules.length);
+    log('[Request Interceptor Tiny]', 'Received MOCK_RULES_UPDATED message, count:', mockRules.length);
     
     // 通知 injected.js 规则已更新
     window.postMessage({
@@ -222,15 +222,10 @@ window.addEventListener('message', async (event) => {
     try {
       const result = await chrome.storage.local.get('interceptRules');
       const allRules = result.interceptRules || [];
-      const previousCount = mockRules.length;
       mockRules = allRules.filter(r => r.enabled && r.type === 'mockResponse');
-      // 如果规则数量变化，输出日志
-      if (previousCount !== mockRules.length) {
-        console.log('[Request Interceptor Tiny]', `Rules reloaded from storage: ${previousCount} -> ${mockRules.length}`);
-      }
     } catch (e) {
       // 如果加载失败，使用缓存的规则
-      console.warn('[Request Interceptor Tiny]', 'Failed to reload rules from storage:', e.message);
+      log('[Request Interceptor Tiny]', 'Failed to reload rules, using cached');
     }
     
     log('[Request Interceptor Tiny]', 'Checking URL:', url, '| Rules count:', mockRules.length);

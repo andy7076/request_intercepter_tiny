@@ -177,12 +177,9 @@ async function getMockRules() {
 async function notifyMockRulesUpdated() {
   const mockRules = await getMockRules();
   
-  console.log('[Request Interceptor Tiny]', 'Notifying mock rules updated, count:', mockRules.length);
-  
   // 获取所有标签页并发送消息
   try {
     const tabs = await chrome.tabs.query({});
-    let successCount = 0;
     for (const tab of tabs) {
       if (tab.id) {
         try {
@@ -190,13 +187,11 @@ async function notifyMockRulesUpdated() {
             type: 'MOCK_RULES_UPDATED',
             rules: mockRules
           });
-          successCount++;
         } catch (e) {
           // 忽略无法发送消息的标签页（可能是 chrome:// 或其他受保护页面）
         }
       }
     }
-    console.log('[Request Interceptor Tiny]', `Successfully notified ${successCount}/${tabs.length} tabs`);
   } catch (e) {
     console.error('[Request Interceptor Tiny]', 'Failed to notify tabs:', e);
   }
