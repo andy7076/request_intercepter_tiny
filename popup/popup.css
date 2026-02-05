@@ -475,9 +475,9 @@ body {
 /* Rule Card Design */
 .rule-card {
   background: var(--bg-card);
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 12px;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 8px;
   border: 1px solid var(--border);
   transition: var(--transition);
   position: relative;
@@ -523,7 +523,7 @@ body {
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 6px; /* Reduced from 12px to bring URL closer to header */
+  margin-bottom: 4px;
 }
 
 .rule-info {
@@ -554,13 +554,13 @@ body {
   word-break: break-all;
   font-family: "JetBrains Mono", "Monaco", monospace;
   background: rgba(0, 0, 0, 0.15);
-  padding: 6px 8px; /* Slightly more padding for the box effect */
+  padding: 4px 6px;
   border-radius: 4px;
   margin-top: 4px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   opacity: 1;
   line-height: 1.4;
-  width: 100%; /* Ensure full width */
+  width: 100%;
   display: block;
 }
 
@@ -607,8 +607,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 12px;
-  padding-top: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -672,14 +672,15 @@ body {
 .response-preview {
   font-size: 12px;
   color: var(--text-muted);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
+  margin-top: 8px; /* Added slight top margin to separate from URL */
 }
 
 .response-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .content-type-label {
@@ -688,14 +689,16 @@ body {
 }
 
 .response-content {
-  padding: 10px 0 10px 12px;
+  padding: 8px 0 8px 10px;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
+  border-radius: 6px;
   font-family: "JetBrains Mono", "Monaco", Consolas, monospace;
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 11px; /* Slight font reduction for preview */
+  line-height: 1.4;
   border: 1px solid rgba(255, 255, 255, 0.05);
   overflow: hidden;
+  max-height: 200px; /* Limit max height to prevent one rule taking over */
+  overflow-y: auto;
 }
 
 /* Form Styles */
