@@ -978,6 +978,27 @@ function renderRules(rules, highlightQuery = '') {
       handleDirectEdit(btn.dataset.id);
     });
   });
+
+  // Toggle response details
+  rulesList.querySelectorAll('.response-header.clickable').forEach(header => {
+    header.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const ruleId = header.dataset.toggleId;
+      const content = document.getElementById(`content-${ruleId}`);
+      const icon = header.querySelector('.toggle-icon');
+      
+      if (content) {
+        const isHidden = content.classList.contains('hidden');
+        if (isHidden) {
+          content.classList.remove('hidden');
+          if (icon) icon.style.transform = 'rotate(90deg)';
+        } else {
+          content.classList.add('hidden');
+          if (icon) icon.style.transform = 'rotate(0deg)';
+        }
+      }
+    });
+  });
   
   // 初始化 renderjson 渲染每个规则的 JSON
   rules.forEach(rule => {
@@ -992,10 +1013,13 @@ function renderRuleDetails(rule) {
   if (rule.responseBody) {
     return `
       <div class="rule-details response-preview" data-rule-id="${rule.id}">
-        <div class="response-header">
-          <span class="content-type-label">application/json</span>
+        <div class="response-header clickable" data-toggle-id="${rule.id}">
+          <div class="header-left">
+             <span class="toggle-icon">▶</span>
+             <span class="content-type-label">application/json</span>
+          </div>
         </div>
-        <div class="response-content" data-content-id="${rule.id}">
+        <div class="response-content hidden" id="content-${rule.id}" data-content-id="${rule.id}">
           <div class="renderjson-container" data-json-id="${rule.id}"></div>
         </div>
       </div>

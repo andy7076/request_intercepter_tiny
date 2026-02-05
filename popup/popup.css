@@ -2197,3 +2197,35 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 .alert-modal .alert-modal-footer .btn-primary {
   min-width: 80px;
 }
+
+/* Toggle Styles */
+.hidden {
+  display: none !important;
+}
+
+.response-header.clickable {
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 0;
+}
+
+.response-header.clickable:hover .content-type-label,
+.response-header.clickable:hover .toggle-icon {
+  color: var(--primary-light);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.toggle-icon {
+  display: inline-block;
+  font-size: 10px;
+  color: var(--text-secondary);
+  transition: transform 0.2s ease;
+  width: 14px;
+  text-align: center;
+  margin-right: 2px;
+}
