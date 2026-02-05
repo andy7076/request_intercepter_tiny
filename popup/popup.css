@@ -214,44 +214,72 @@ body {
 }
 
 /* Tabs */
+/* Tabs */
 .tabs {
   display: flex;
-  background: var(--bg-dark);
+  background: rgba(30, 41, 59, 0.4); /* Subtle semi-transparent background */
   padding: 4px;
   margin: 16px 20px;
   border-radius: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   gap: 4px;
-  flex-shrink: 0; /* Tabs don't shrink */
+  flex-shrink: 0;
+  backdrop-filter: blur(10px);
 }
 
 .tab-btn {
   flex: 1;
-  padding: 10px;
+  padding: 8px 12px;
   background: transparent;
-  border: none;
+  border: 1px solid transparent; /* Reserve space for border transition */
   color: var(--text-secondary);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 8px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  opacity: 0.8;
 }
 
 .tab-btn:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.03);
+  opacity: 1;
 }
 
 .tab-btn.active {
   color: #fff;
-  background: var(--primary);
-  box-shadow: var(--shadow-glow);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 4px 12px rgba(99, 102, 241, 0.4), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  font-weight: 600;
+  opacity: 1;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* Optional: Add a subtle indicator line for 'active' or keep the card style */
+.tab-btn.active::after {
+  /* content: ""; */ /* keeping it simple card style for now */
+}
+
+/* Icons in tabs */
+.tab-btn span:first-child {
+  font-size: 14px;
+  /* filter: grayscale(100%) opacity(0.7); */ /* Removed per user request */
+  transition: all 0.2s;
+}
+
+.tab-btn:hover span:first-child,
+.tab-btn.active span:first-child {
+  filter: none;
+  transform: scale(1.1);
 }
 
 /* Panels */
