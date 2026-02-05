@@ -71,12 +71,13 @@ body {
 
 /* Header & Glassmorphism */
 .header {
-  background: var(--bg-dark);
-  /* Remove sticky, just standard flow in flex container */
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
   z-index: 100;
-  padding: 24px 20px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0; /* Header doesn't shrink */
+  padding: 20px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
   position: relative;
   overflow: hidden;
 }
@@ -84,17 +85,33 @@ body {
 .header::before {
   content: "";
   position: absolute;
-  top: -50%;
-  left: -20%;
-  width: 140%;
-  height: 200%;
+  top: -100px;
+  right: -100px;
+  width: 300px;
+  height: 300px;
   background: radial-gradient(
-    circle at center,
-    var(--primary-glow) 0%,
-    transparent 40%
+    circle,
+    rgba(99, 102, 241, 0.15) 0%,
+    transparent 70%
   );
   pointer-events: none;
-  opacity: 0.4;
+  filter: blur(40px);
+}
+
+.header::after {
+  content: "";
+  position: absolute;
+  bottom: -50px;
+  left: -50px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(
+    circle,
+    rgba(59, 130, 246, 0.1) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  filter: blur(40px);
 }
 
 .header-content {
@@ -105,60 +122,95 @@ body {
 .header-title-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
 }
 
 .header-title {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .btn-open-tab {
-  height: 34px;
-  padding: 0 14px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
+  height: 32px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
   color: var(--text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  transition: var(--transition);
+  gap: 6px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
+  backdrop-filter: blur(4px);
 }
 
 .btn-open-tab:hover {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-glow);
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 
 .btn-open-tab svg {
+  width: 14px;
+  height: 14px;
   transition: var(--transition);
+}
+
+/* Specific override for settings button in header to match new style */
+.header .btn-icon-header {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  backdrop-filter: blur(4px);
+}
+
+.header .btn-icon-header:hover {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: #fff;
+  transform: rotate(90deg);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 
 .header h1 {
   font-family: "Outfit", sans-serif;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
-  background: linear-gradient(to right, #fff, #818cf8);
+  /* Radiant gradient text */
+  background: linear-gradient(135deg, #fff 30%, #a5b4fc 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  letter-spacing: -0.02em;
-  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+  filter: drop-shadow(0 2px 10px rgba(99, 102, 241, 0.2));
 }
 
 .header .subtitle {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-secondary);
-  font-weight: 400;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  opacity: 0.8;
 }
 
 /* Tabs */
@@ -949,29 +1001,7 @@ body {
   margin-bottom: 8px;
 }
 
-/* Settings Button */
-.btn-icon-header {
-  width: 34px;
-  height: 34px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  color: var(--text-secondary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: var(--transition);
-  flex-shrink: 0;
-}
 
-.btn-icon-header:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--primary);
-  color: var(--primary);
-  transform: rotate(90deg);
-  box-shadow: var(--shadow-glow);
-}
 
 /* Base Modal Styles */
 .modal {
