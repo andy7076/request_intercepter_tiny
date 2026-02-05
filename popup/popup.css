@@ -1004,14 +1004,29 @@ body {
   border: none;
   border-radius: 6px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .btn-small:hover {
   background: var(--primary-dark);
-  transform: scale(1.05);
+  /* transform: scale(1.05); */ /* Removed for consistency */
+}
+
+.btn-small.btn-danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.btn-small.btn-danger:hover {
+  background: var(--danger);
+  color: white;
+  border-color: var(--danger);
 }
 
 /* Header Fields */
@@ -1362,8 +1377,8 @@ input:checked + .slider:before {
 
 .btn-primary:hover {
   background: var(--primary-dark);
-  transform: translateY(-1px); /* More subtle lift */
-  box-shadow: var(--shadow-glow);
+  /* transform: translateY(-1px); */ /* Removed for flat design */
+  /* box-shadow: var(--shadow-glow); */ /* Removed for flat design */
 }
 
 .btn-primary:disabled {
