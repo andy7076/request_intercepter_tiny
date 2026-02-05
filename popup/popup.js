@@ -928,12 +928,6 @@ function renderRules(rules, highlightQuery = '') {
         <div class="rule-toggle ${rule.enabled ? 'active' : ''}" data-id="${rule.id}"></div>
         <span class="rule-name">${highlightText(escapeHtml(rule.name), highlightQuery)}</span>
         <div class="rule-header-actions">
-           <button class="btn-icon-small btn-direct-edit" data-id="${rule.id}" title="${window.i18n.t('editResponse')}">
-             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-             </svg>
-           </button>
            <button class="btn-icon-small btn-export-icon" data-id="${rule.id}" title="${window.i18n.t('exportRule')}">
              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
@@ -946,6 +940,7 @@ function renderRules(rules, highlightQuery = '') {
       <div class="rule-url">${highlightText(escapeHtml(rule.urlPattern), highlightQuery)}</div>
       ${renderRuleDetails(rule)}
       <div class="rule-actions">
+        <button class="btn-modify-response" data-id="${rule.id}">${window.i18n.t('editResponse')}</button>
         <button class="btn-edit" data-id="${rule.id}">${window.i18n.t('edit')}</button>
         <button class="btn-delete" data-id="${rule.id}">${window.i18n.t('delete')}</button>
       </div>
@@ -972,7 +967,7 @@ function renderRules(rules, highlightQuery = '') {
     });
   });
 
-  rulesList.querySelectorAll('.btn-direct-edit').forEach(btn => {
+  rulesList.querySelectorAll('.btn-modify-response').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       handleDirectEdit(btn.dataset.id);

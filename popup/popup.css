@@ -616,6 +616,20 @@ body {
   transition: var(--transition);
 }
 
+.btn-modify-response {
+  margin-right: auto;
+  background: rgba(99, 102, 241, 0.15); /* Slightly more visible background */
+  color: var(--primary-light);
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+}
+
+.btn-modify-response:hover {
+  background: var(--primary);
+  border-color: var(--primary) !important;
+  color: white;
+  box-shadow: var(--shadow-glow);
+}
+
 .btn-edit {
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
