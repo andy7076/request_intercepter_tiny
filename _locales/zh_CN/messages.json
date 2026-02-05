@@ -526,5 +526,11 @@
   },
   "editResponse": {
     "message": "编辑响应内容"
+  },
+  "clickToEnable": {
+    "message": "点击开启规则"
+  },
+  "clickToDisable": {
+    "message": "点击关闭规则"
   }
 }

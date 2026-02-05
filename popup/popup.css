@@ -517,18 +517,63 @@ body {
   filter: grayscale(0.5);
 }
 
+/* Rule Header Layout */
 .rule-header {
   display: flex;
-  align-items: center;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 6px; /* Reduced from 12px to bring URL closer to header */
+}
+
+.rule-info {
+  flex: 1;
+  min-width: 0; /* Enable truncation */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rule-name-row {
+  display: flex;
+  align-items: center;
+}
+
+.rule-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rule-url {
+  font-size: 12px;
+  color: var(--text-secondary);
+  word-break: break-all;
+  font-family: "JetBrains Mono", "Monaco", monospace;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 6px 8px; /* Slightly more padding for the box effect */
+  border-radius: 4px;
+  margin-top: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  opacity: 1;
+  line-height: 1.4;
+  width: 100%; /* Ensure full width */
+  display: block;
+}
+
+.rule-status {
+  flex-shrink: 0;
+  padding-top: 2px;
 }
 
 .rule-toggle {
-  width: 40px;
-  height: 22px;
+  width: 36px;
+  height: 20px;
   background: #334155;
-  border-radius: 11px;
+  border-radius: 10px;
   position: relative;
   cursor: pointer;
   transition: var(--transition);
@@ -537,13 +582,13 @@ body {
 
 .rule-toggle.active {
   background: var(--success);
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
 }
 
 .rule-toggle::after {
   content: "";
   position: absolute;
-  top: 3px;
+  top: 2px;
   left: 3px;
   width: 16px;
   height: 16px;
@@ -554,97 +599,46 @@ body {
 }
 
 .rule-toggle.active::after {
-  transform: translateX(18px);
+  transform: translateX(14px);
 }
 
-.rule-name {
-  flex: 1;
-  font-weight: 600;
-  color: var(--text-primary);
-  font-size: 15px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.rule-type {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  background: var(--primary);
-  color: white;
-}
-
-.rule-type.redirect {
-  background: var(--warning);
-}
-.rule-type.block {
-  background: var(--danger);
-}
-.rule-type.mockResponse {
-  background: #8b5cf6;
-}
-
-.rule-url {
-  font-size: 12px;
-  color: var(--text-secondary);
-  word-break: break-all;
-  margin-bottom: 12px;
-  padding: 10px 12px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
-  font-family: "JetBrains Mono", "Monaco", monospace;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.rule-actions {
+/* Rule Footer Actions */
+.rule-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.rule-actions-group {
+  display: flex;
   gap: 8px;
 }
 
-.rule-actions button {
+.btn-modify-response {
   padding: 6px 14px;
-  border: none;
   border-radius: 8px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
-}
-
-.btn-modify-response {
-  margin-right: auto;
-  background: rgba(99, 102, 241, 0.15); /* Slightly more visible background */
+  background: rgba(99, 102, 241, 0.1); 
   color: var(--primary-light);
-  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+  border: 1px solid rgba(99, 102, 241, 0.2);
 }
 
 .btn-modify-response:hover {
   background: var(--primary);
-  border-color: var(--primary) !important;
+  border-color: var(--primary);
   color: white;
   box-shadow: var(--shadow-glow);
 }
 
-.btn-edit {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary);
-  border: 1px solid var(--border) !important;
-}
-
-.btn-edit:hover {
-  background: var(--primary);
-  border-color: var(--primary) !important;
-  color: white;
-}
-
 .btn-icon-small {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   background: transparent;
   border: 1px solid transparent;
   border-radius: 6px;
@@ -658,19 +652,20 @@ body {
 
 .btn-icon-small:hover {
   background: rgba(255, 255, 255, 0.1);
-  color: var(--primary);
+  color: var(--text-primary);
   border-color: rgba(255, 255, 255, 0.1);
 }
 
-.btn-delete {
-  background: var(--danger-bg);
+.btn-delete:hover {
   color: var(--danger);
-  border: 1px solid var(--danger) !important;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
 }
 
-.btn-delete:hover {
-  background: var(--danger);
-  color: white;
+.btn-edit:hover {
+  color: var(--primary);
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.2);
 }
 
 /* Response Preview */

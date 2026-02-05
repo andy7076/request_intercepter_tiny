@@ -526,5 +526,11 @@
   },
   "editResponse": {
     "message": "Edit Response Content"
+  },
+  "clickToEnable": {
+    "message": "Click to enable rule"
+  },
+  "clickToDisable": {
+    "message": "Click to disable rule"
   }
 }
