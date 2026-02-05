@@ -1973,13 +1973,13 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   padding: 14px;
   background: var(--bg-dark);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 8px; /* Standardized radius */
   color: var(--text-primary);
   font-family: "JetBrains Mono", "Monaco", monospace;
   font-size: 13px;
   line-height: 1.6;
   resize: vertical;
-  min-height: 120px;
+  min-height: 150px; /* Increased min-height */
   transition: var(--transition);
 }
 
@@ -2042,8 +2042,8 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 .modal-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  padding: 16px 20px;
+  gap: 12px;
+  padding: 16px 24px;
   border-top: 1px solid var(--border);
   background: var(--bg-card);
   border-radius: 0 0 16px 16px;
