@@ -1069,9 +1069,9 @@ body {
 .modal-content {
   background: var(--bg-card);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
+  border-radius: 10px;
   width: 90%;
-  max-width: 400px;
+  max-width: 450px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
   transform: translateY(10px);
   transition: transform 0.2s ease;
@@ -1083,7 +1083,7 @@ body {
 }
 
 .modal-header {
-  padding: 16px 20px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
@@ -1129,7 +1129,7 @@ body {
 }
 
 .modal-body {
-  padding: 20px;
+  padding: 16px;
 }
 
 /* Settings Items */
@@ -1137,9 +1137,9 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 14px;
+  padding: 10px 12px;
   background: rgba(255, 255, 255, 0.03);
-  border-radius: 10px;
+  border-radius: 8px;
   margin-bottom: 8px;
   transition: background 0.15s ease;
 }
@@ -2182,7 +2182,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  padding: 14px 20px;
+  padding: 10px 16px;
   border-top: 1px solid var(--border);
   background: rgba(0, 0, 0, 0.1);
 }
