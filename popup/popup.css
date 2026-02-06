@@ -1513,7 +1513,7 @@ input:checked + .slider:before {
 }
 
 .editor-modal-header {
-  padding: 20px;
+  padding: 12px 20px;
   background: var(--bg-dark);
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -1521,9 +1521,24 @@ input:checked + .slider:before {
   align-items: center;
 }
 
+.editor-modal-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.editor-modal-actions {
+  display: flex;
+  align-items: center;
+}
+
 .editor-modal-content {
   flex: 1;
-  padding: 20px;
+  padding: 12px 20px;
   overflow: hidden; /* Prevent overflow */
   display: flex;
   flex-direction: column;
@@ -1536,7 +1551,7 @@ input:checked + .slider:before {
   border: 1px solid var(--border);
   border-radius: 12px;
   color: var(--text-primary);
-  padding: 20px;
+  padding: 16px;
   font-family: "JetBrains Mono", "Monaco", monospace;
   font-size: 14px;
   resize: none;
@@ -1579,7 +1594,7 @@ input:checked + .slider:before {
 }
 
 .editor-modal-footer {
-  padding: 12px 20px;
+  padding: 10px 20px;
   background: var(--bg-dark);
   border-top: 1px solid var(--border);
   flex-shrink: 0;
