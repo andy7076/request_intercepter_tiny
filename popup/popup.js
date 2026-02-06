@@ -52,12 +52,29 @@ const settingsModal = document.getElementById('settings-modal');
 const settingsClose = document.getElementById('settings-close');
 const settingConsoleLog = document.getElementById('setting-console-log');
 
+// Update platform-specific keyboard shortcut hints
+function updatePlatformShortcutHints() {
+  const isMac = /Mac/.test(navigator.platform);
+  const searchBtnKey = isMac ? 'searchReplaceCmdF' : 'searchReplaceCtrlF';
+  
+  // Update modal search button title
+  const modalSearchBtn = document.getElementById('modal-search-btn');
+  if (modalSearchBtn && window.i18n) {
+    const title = window.i18n.t(searchBtnKey);
+    modalSearchBtn.setAttribute('title', title);
+    modalSearchBtn.setAttribute('data-i18n-title', searchBtnKey);
+  }
+}
+
 // Init
 document.addEventListener('DOMContentLoaded', async () => {
   // Initialize i18n first
   if (window.i18n && window.i18n.init) {
     await window.i18n.init();
   }
+  
+  // Update platform-specific hints after i18n is ready
+  updatePlatformShortcutHints();
   
   loadRules();
   loadLogs();
@@ -101,6 +118,9 @@ function initLanguageSelector() {
       
       // Clear custom validity on form fields so they get re-validated with new language
       document.querySelectorAll('#rule-form input[required]').forEach(input => input.setCustomValidity(''));
+      
+      // Update platform-specific hints with new language
+      updatePlatformShortcutHints();
     });
   }
 }

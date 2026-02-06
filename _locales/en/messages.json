@@ -358,6 +358,9 @@
   "searchReplaceCtrlF": {
     "message": "Search & Replace (Ctrl+F)"
   },
+  "searchReplaceCmdF": {
+    "message": "Search & Replace (⌘+F)"
+  },
   "closeEscKey": {
     "message": "Close (Esc)"
   },

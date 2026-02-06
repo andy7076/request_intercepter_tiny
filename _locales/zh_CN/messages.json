@@ -358,6 +358,9 @@
   "searchReplaceCtrlF": {
     "message": "搜索替换 (Ctrl+F)"
   },
+  "searchReplaceCmdF": {
+    "message": "搜索替换 (⌘+F)"
+  },
   "closeEscKey": {
     "message": "关闭 (Esc)"
   },
