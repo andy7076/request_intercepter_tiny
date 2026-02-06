@@ -1582,7 +1582,7 @@ input:checked + .slider:before {
 
 .editor-modal-content {
   flex: 1;
-  padding: 12px 20px;
+  padding: 0;
   overflow: hidden; /* Prevent overflow */
   display: flex;
   flex-direction: column;
@@ -1592,10 +1592,10 @@ input:checked + .slider:before {
   width: 100%;
   height: 100%;
   background: var(--bg-dark);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  border: none;
+  border-radius: 0;
   color: var(--text-primary);
-  padding: 16px;
+  padding: 16px 20px;
   font-family: "JetBrains Mono", "Monaco", monospace;
   font-size: 14px;
   resize: none;
@@ -2024,7 +2024,8 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 .editor-modal-content .codemirror-wrapper {
   flex: 1;
   height: 100%; /* Fallback */
-  border-radius: 12px;
+  border-radius: 0;
+  border: none;
 }
 
 .editor-modal-content .CodeMirror {
@@ -2033,6 +2034,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   min-height: 100%;
   background: var(--bg-dark);
   font-size: 14px;
+  border-radius: 0;
 }
 
 /* 隐藏原始 textarea，CodeMirror 使用时 */

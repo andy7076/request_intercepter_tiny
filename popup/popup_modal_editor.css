@@ -6,12 +6,12 @@
   flex-direction: column;
   height: 100%;
   border: none;
-  border-radius: 12px;
+  border-radius: 0;
 }
 
 #modal-codemirror-wrapper .CodeMirror {
   flex: 1;
   height: auto;
   min-height: 0;
-  border-radius: 12px;
+  border-radius: 0;
 }
