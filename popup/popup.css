@@ -998,23 +998,26 @@ body {
 }
 
 .btn-small {
-  padding: 6px 12px;
+  padding: 5px 10px;
   background: var(--primary);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: var(--transition);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .btn-small:hover {
   background: var(--primary-dark);
-  /* transform: scale(1.05); */ /* Removed for consistency */
+}
+
+.btn-small:active {
+  transform: scale(0.96);
 }
 
 .btn-small.btn-danger {
@@ -1108,7 +1111,7 @@ body {
 
 .modal .btn-modal-close {
   background: transparent;
-  border: none;
+  border: 1px solid var(--border);
   color: var(--text-muted);
   font-size: 20px;
   line-height: 1;
@@ -1409,20 +1412,24 @@ input:checked + .slider:before {
 .btn-primary {
   background: var(--primary);
   color: white;
-  padding: 8px 16px; /* Reduced button padding */
-  border-radius: 8px; /* Slightly smaller radius */
+  padding: 6px 14px;
+  border-radius: 6px;
   border: none;
-  font-size: 13px; /* Smaller text */
-  font-weight: 600; /* Adjusted weight */
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
-  box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.15);
 }
 
 .btn-primary:hover {
   background: var(--primary-dark);
-  /* transform: translateY(-1px); */ /* Removed for flat design */
-  /* box-shadow: var(--shadow-glow); */ /* Removed for flat design */
+  box-shadow: 0 3px 6px rgba(99, 102, 241, 0.25);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 2px rgba(99, 102, 241, 0.2);
 }
 
 .btn-primary:disabled {
@@ -1435,11 +1442,11 @@ input:checked + .slider:before {
 
 .btn-secondary {
   background: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary);
-  padding: 8px 16px; /* Reduced button padding */
-  border-radius: 8px;
+  color: var(--text-secondary);
+  padding: 6px 14px;
+  border-radius: 6px;
   border: 1px solid var(--border);
-  font-size: 13px; /* Smaller text */
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
@@ -1448,6 +1455,11 @@ input:checked + .slider:before {
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: var(--text-secondary);
+  color: var(--text-primary);
+}
+
+.btn-secondary:active {
+  transform: scale(0.98);
 }
 
 /* Empty States */
