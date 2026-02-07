@@ -55,14 +55,11 @@ const settingConsoleLog = document.getElementById('setting-console-log');
 // Update platform-specific keyboard shortcut hints
 function updatePlatformShortcutHints() {
   const isMac = /Mac/.test(navigator.platform);
-  const searchBtnKey = isMac ? 'searchReplaceCmdF' : 'searchReplaceCtrlF';
-  
-  // Update modal search button title
-  const modalSearchBtn = document.getElementById('modal-search-btn');
-  if (modalSearchBtn && window.i18n) {
-    const title = window.i18n.t(searchBtnKey);
-    modalSearchBtn.setAttribute('title', title);
-    modalSearchBtn.setAttribute('data-i18n-title', searchBtnKey);
+
+  // Update modal search button kbd text
+  const modalSearchKbd = document.getElementById('modal-search-kbd');
+  if (modalSearchKbd) {
+    modalSearchKbd.textContent = isMac ? '⌘+F' : 'Ctrl+F';
   }
 }
 
@@ -72,10 +69,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (window.i18n && window.i18n.init) {
     await window.i18n.init();
   }
-  
+
   // Update platform-specific hints after i18n is ready
   updatePlatformShortcutHints();
-  
+
   loadRules();
   loadLogs();
   loadSettings();
@@ -94,7 +91,7 @@ function checkViewMode() {
     const openInTabBtn = document.getElementById('open-in-tab-btn');
     if (openInTabBtn) {
       openInTabBtn.style.display = 'none';
-      
+
       // Add a class to body for specific tab styling if needed
       document.body.classList.add('full-tab-view');
     }
@@ -107,7 +104,7 @@ function initLanguageSelector() {
   if (languageSelect && window.i18n) {
     // Set current language
     languageSelect.value = window.i18n.getCurrentLanguage();
-    
+
     // Handle language change
     languageSelect.addEventListener('change', async (e) => {
       await window.i18n.setLanguage(e.target.value);
@@ -115,10 +112,10 @@ function initLanguageSelector() {
       loadRules();
       loadLogs();
       validateJsonRealtime();
-      
+
       // Clear custom validity on form fields so they get re-validated with new language
       document.querySelectorAll('#rule-form input[required]').forEach(input => input.setCustomValidity(''));
-      
+
       // Update platform-specific hints with new language
       updatePlatformShortcutHints();
     });
@@ -165,10 +162,10 @@ function initFormCodeMirror(config) {
   const wrapper = document.createElement('div');
   wrapper.className = 'codemirror-wrapper';
   textarea.parentNode.insertBefore(wrapper, textarea);
-  
+
   // 隐藏原始 textarea
   textarea.classList.add('cm-hidden');
-  
+
   // 初始化 CodeMirror
   formCodeMirror = CodeMirror(wrapper, {
     ...config,
@@ -205,10 +202,10 @@ function initModalCodeMirror() {
   const wrapper = document.createElement('div');
   wrapper.className = 'codemirror-wrapper';
   wrapper.id = 'modal-codemirror-wrapper';
-  
+
   // 将包装容器插入到搜索组件之后、textarea 之前
   modalContent.insertBefore(wrapper, modalTextarea);
-  
+
   // 隐藏原始 textarea
   modalTextarea.classList.add('cm-hidden');
 
@@ -243,20 +240,20 @@ function initModalCodeMirror() {
   cm.on('change', (editor) => {
     const value = editor.getValue();
     modalTextarea.value = value;
-    
+
     // 仅在 form 模式下同步到表单编辑器
     if (modalMode === 'form') {
       const responseBody = document.getElementById('response-body');
       if (responseBody) {
         responseBody.value = value;
       }
-      
+
       // 同步到表单的 CodeMirror
       if (formCodeMirror && formCodeMirror.getValue() !== value) {
         formCodeMirror.setValue(value);
       }
     }
-    
+
     validateJsonRealtime();
   });
 
@@ -279,7 +276,7 @@ function initGlobalTooltip() {
     // 查找最近的带有 title 或 data-tooltip 的目标元素
     // 同时必须是指定的按钮类型
     const target = e.target.closest('.btn-icon, .btn-icon-small, .btn-open-tab, .rule-toggle, .btn-icon-header, .btn-expand');
-    
+
     if (!target) return;
 
     // 处理 title 属性（防止原生提示并获取内容）
@@ -292,13 +289,13 @@ function initGlobalTooltip() {
 
     if (text) {
       const rect = target.getBoundingClientRect();
-      
+
       tooltip.textContent = text;
-      
+
       // Determine position (default top, switch to bottom if too close to top edge)
       const spaceAbove = rect.top;
       const isTooCloseToTop = spaceAbove < 40; // Threshold for switching direction
-      
+
       if (isTooCloseToTop) {
         tooltip.classList.add('bottom');
         // Position below
@@ -314,7 +311,7 @@ function initGlobalTooltip() {
         tooltip.style.left = `${left}px`;
         tooltip.style.top = `${top}px`;
       }
-      
+
       tooltip.classList.add('visible');
     }
   });
@@ -326,7 +323,7 @@ function initGlobalTooltip() {
       tooltip.classList.remove('visible');
     }
   });
-  
+
   // 滚动时隐藏，防止位置错乱
   document.addEventListener('scroll', () => {
     tooltip.classList.remove('visible');
@@ -339,7 +336,7 @@ function setupEventListeners() {
   tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const targetTab = btn.dataset.tab;
-      
+
       // 获取当前激活的 Tab
       const currentActiveBtn = document.querySelector('.tab-btn.active');
       const currentTab = currentActiveBtn ? currentActiveBtn.dataset.tab : 'rules';
@@ -350,7 +347,7 @@ function setupEventListeners() {
       // 如果当前是在"添加/编辑"页面，检查是否有未保存的修改
       if (currentTab === 'add') {
         const isDirty = checkFormDirty();
-        
+
         if (isDirty) {
           // 有修改，弹出确认
           if (!confirm(window.i18n.t('confirmDiscardChanges'))) {
@@ -358,11 +355,11 @@ function setupEventListeners() {
             return;
           }
         }
-        
+
         // 用户确认放弃，或者没有修改 -> 重置表单
         resetForm();
       }
-      
+
       // 切换到目标 Tab
       switchTab(targetTab);
     });
@@ -397,16 +394,16 @@ function setupEventListeners() {
       }
     });
   }
-  
+
   // 导入导出按钮
   importBtn.addEventListener('click', () => importFile.click());
   exportBtn.addEventListener('click', handleExport);
   importFile.addEventListener('change', handleImport);
-  
+
   // 清空日志按钮
   // 清空日志按钮
   clearLogsBtn.addEventListener('click', handleClearLogs);
-  
+
   // 清空规则按钮
   if (clearRulesBtn) {
     clearRulesBtn.addEventListener('click', handleClearRules);
@@ -416,7 +413,7 @@ function setupEventListeners() {
   if (disableRulesBtn) {
     disableRulesBtn.addEventListener('click', handleDisableRules);
   }
-  
+
   // 搜索功能
   if (rulesSearchInput) {
     rulesSearchInput.addEventListener('input', handleSearchInput);
@@ -426,11 +423,11 @@ function setupEventListeners() {
       }
     });
   }
-  
+
   if (clearSearchBtn) {
     clearSearchBtn.addEventListener('click', clearSearch);
   }
-  
+
   // JSON 实时验证（CodeMirror 有自己的 change 事件处理，这里作为回退）
   responseBody.addEventListener('input', validateJsonRealtime);
   modalTextarea.addEventListener('input', () => {
@@ -443,21 +440,21 @@ function setupEventListeners() {
     }
     validateJsonRealtime();
   });
-  
+
   // 处理 Tab 键输入缩进（CodeMirror 有自己的 Tab 处理，这里作为回退）
   const handleTabKey = (e) => {
     if (e.key === 'Tab') {
       e.preventDefault();
-      
+
       const start = e.target.selectionStart;
       const end = e.target.selectionEnd;
-      
+
       // 插入两个空格作为缩进
       e.target.value = e.target.value.substring(0, start) + '  ' + e.target.value.substring(end);
-      
+
       // 移动光标位置
       e.target.selectionStart = e.target.selectionEnd = start + 2;
-      
+
       // 触发 input 事件以更新验证
       e.target.dispatchEvent(new Event('input'));
     }
@@ -465,11 +462,11 @@ function setupEventListeners() {
 
   responseBody.addEventListener('keydown', handleTabKey);
   modalTextarea.addEventListener('keydown', handleTabKey);
-  
+
   // 放大编辑器
   // 放大编辑器
   expandEditor.addEventListener('click', () => openEditorModal('form'));
-  
+
   // Search buttons
   // searchEditorBtn listener removed as button is removed
   /*
@@ -492,14 +489,14 @@ function setupEventListeners() {
   if (modalSaveBtn) {
     modalSaveBtn.addEventListener('click', handleModalSave);
   }
-  
+
   // ESC关闭模态框
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && editorModal.classList.contains('active')) {
       closeEditorModal();
     }
   });
-  
+
   // 在新标签页打开
   const openInTabBtn = document.getElementById('open-in-tab-btn');
   if (openInTabBtn) {
@@ -507,7 +504,7 @@ function setupEventListeners() {
       // 检查是否有未保存的修改
       const currentActiveBtn = document.querySelector('.tab-btn.active');
       const currentTab = currentActiveBtn ? currentActiveBtn.dataset.tab : 'rules';
-      
+
       if (currentTab === 'add' && checkFormDirty()) {
         if (!confirm(window.i18n.t('confirmDiscardChanges'))) {
           return;
@@ -560,7 +557,7 @@ function setupEventListeners() {
       const enabled = e.target.checked;
       chrome.storage.local.set({ consoleLogs: enabled }, () => {
         showToast(enabled ? window.i18n.t('consoleLogsEnabled') : window.i18n.t('consoleLogsDisabled'));
-        
+
         // Directly notify the content script in the active tab to ensure immediate update
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
           if (tabs && tabs[0]) {
@@ -591,7 +588,7 @@ function switchTab(tab) {
   tabBtns.forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === tab);
   });
-  
+
   panels.forEach(panel => {
     panel.classList.toggle('active', panel.id === `${tab}-panel`);
   });
@@ -604,7 +601,7 @@ function switchTab(tab) {
     if (formContent) {
       formContent.scrollTop = 0;
     }
-    
+
     // 刷新 CodeMirror 编辑器
     if (formCodeMirror) {
       // 使用 setTimeout 确保 DOM 更新（display: block 生效）后再刷新
@@ -622,7 +619,7 @@ function validateJsonRealtime() {
   const mainStatusText = document.getElementById('json-status-text');
   const modalIndicator = document.getElementById('modal-json-status-indicator');
   const modalStatusText = document.getElementById('modal-json-status-text');
-  
+
   // 根据模式确定验证目标和内容源
   let targets = [];
   let rawValue = '';
@@ -641,7 +638,7 @@ function validateJsonRealtime() {
     // Form 模式：验证表单内容（模态框内容应已同步）
     if (mainIndicator && mainStatusText) targets.push({ indicator: mainIndicator, text: mainStatusText });
     if (modalIndicator && modalStatusText) targets.push({ indicator: modalIndicator, text: modalStatusText });
-    
+
     rawValue = formCodeMirror ? formCodeMirror.getValue() : responseBody.value;
     if (formCodeMirror) {
       editorsToMark.push(formCodeMirror);
@@ -654,7 +651,7 @@ function validateJsonRealtime() {
   }
 
   const trimmedValue = rawValue.trim();
-  
+
   if (!trimmedValue) {
     // 空内容时重置为默认状态
     targets.forEach(({ indicator, text }) => {
@@ -664,7 +661,7 @@ function validateJsonRealtime() {
     });
     return false;
   }
-  
+
   try {
     const parsed = JSON.parse(rawValue);
     // 检查是否为对象或数组（API 响应通常是这两种格式）
@@ -676,10 +673,10 @@ function validateJsonRealtime() {
       });
       return false;
     }
-    
+
     // 清除错误标记
     editorsToClear.forEach(cm => cm.getAllMarks().forEach(mark => mark.clear()));
-    
+
     targets.forEach(({ indicator, text }) => {
       indicator.className = 'json-status-indicator valid';
       text.className = 'hint valid';
@@ -699,7 +696,7 @@ function validateJsonRealtime() {
       const lines = rawValue.substring(0, position).split('\n');
       errorLine = lines.length;
       errorCol = lines[lines.length - 1].length + 1;
-      
+
       errorMsg = window.i18n.t('jsonErrorDetailed', errorLine, errorCol);
     } else if (err.message.match(/Unexpected end of JSON input/)) {
       // JSON 意外结束（通常在最后）
@@ -715,40 +712,40 @@ function validateJsonRealtime() {
       }
       errorMsg = window.i18n.t('jsonErrorDetailed', errorLine, errorCol);
     }
-    
+
     // 在 CodeMirror 中标记错误
     if (errorLine > 0) {
       const markError = (cm) => {
         // 清除旧标记
         cm.getAllMarks().forEach(mark => mark.clear());
-        
+
         const lineIndex = errorLine - 1;
         const colIndex = errorCol - 1;
-        
+
         // 标记精确字符
         let from = { line: lineIndex, ch: colIndex };
         let to = { line: lineIndex, ch: colIndex + 1 };
-        
+
         // 处理行尾/文件尾情况
         const lineContent = cm.getLine(lineIndex) || "";
         if (colIndex >= lineContent.length) {
-           if (lineContent.length > 0) {
-             // 如果在行尾，标记最后一个字符
-             from.ch = lineContent.length - 1;
-             to.ch = lineContent.length;
-           } else {
-             // 空行的情况，标记开头即可
-             from.ch = 0;
-             to.ch = 1; 
-           }
+          if (lineContent.length > 0) {
+            // 如果在行尾，标记最后一个字符
+            from.ch = lineContent.length - 1;
+            to.ch = lineContent.length;
+          } else {
+            // 空行的情况，标记开头即可
+            from.ch = 0;
+            to.ch = 1;
+          }
         }
-        
+
         cm.markText(from, to, { className: "cm-json-error" });
       };
 
       editorsToMark.forEach(cm => markError(cm));
     }
-    
+
     targets.forEach(({ indicator, text }) => {
       indicator.className = 'json-status-indicator invalid';
       text.className = 'hint invalid';
@@ -778,12 +775,12 @@ function openEditorModal(mode = 'form', content = null, ruleId = null) {
     currentValue = content || '';
     if (modalSaveBtn) modalSaveBtn.style.display = 'block';
   }
-  
+
   // 初始化模态框的 CodeMirror（如果还没有初始化）
   if (!modalCodeMirror) {
     modalCodeMirror = initModalCodeMirror();
   }
-  
+
   // 设置模态框编辑器内容
   if (modalCodeMirror) {
     modalCodeMirror.setValue(currentValue);
@@ -799,14 +796,14 @@ function openEditorModal(mode = 'form', content = null, ruleId = null) {
     editorModal.classList.add('active');
     modalTextarea.focus();
   }
-  
+
 }
 
 // 关闭全屏编辑器
 function closeEditorModal() {
   // 获取模态框编辑器内容
   const modalValue = modalCodeMirror ? modalCodeMirror.getValue() : modalTextarea.value;
-  
+
   // 同步内容回表单编辑器 (仅在表单模式下)
   if (modalMode === 'form') {
     if (formCodeMirror) {
@@ -814,14 +811,14 @@ function closeEditorModal() {
     }
     responseBody.value = modalValue;
   }
-  
+
   // Reset search state if active
   if (modalEditorSearch) {
     modalEditorSearch.reset();
   }
 
   editorModal.classList.remove('active');
-  
+
   // 验证 JSON 格式 (仅在表单模式下)
   if (modalMode === 'form') {
     validateJsonRealtime();
@@ -831,21 +828,21 @@ function closeEditorModal() {
 // 处理直接编辑保存
 async function handleModalSave() {
   if (modalMode !== 'direct' || !modalTargetRuleId) return;
-  
+
   const content = modalCodeMirror ? modalCodeMirror.getValue() : modalTextarea.value;
-  
+
   // 验证 JSON
   try {
-     const parsed = JSON.parse(content);
-     if (typeof parsed !== 'object' || parsed === null) {
-        showToast(window.i18n.t('needJsonObjectOrArray'), true);
-        return;
-     }
-  } catch(e) {
-     showToast(window.i18n.t('jsonError'), true);
-     return;
+    const parsed = JSON.parse(content);
+    if (typeof parsed !== 'object' || parsed === null) {
+      showToast(window.i18n.t('needJsonObjectOrArray'), true);
+      return;
+    }
+  } catch (e) {
+    showToast(window.i18n.t('jsonError'), true);
+    return;
   }
-  
+
   const rules = await sendMessage({ type: 'GET_RULES' });
   const rule = rules.find(r => r.id === modalTargetRuleId);
   if (rule) {
@@ -861,9 +858,9 @@ async function handleModalSave() {
 async function handleDirectEdit(ruleId) {
   const rules = await sendMessage({ type: 'GET_RULES' });
   const rule = rules.find(r => r.id === ruleId);
-  
+
   if (!rule || !rule.responseBody) return;
-  
+
   openEditorModal('direct', rule.responseBody, ruleId);
 }
 
@@ -880,26 +877,26 @@ function filterAndRenderRules() {
     renderRules(allRules);
     return;
   }
-  
+
   const query = searchQuery.toLowerCase();
   const filteredRules = allRules.filter(rule => {
     const nameMatch = rule.name.toLowerCase().includes(query);
     const urlMatch = rule.urlPattern.toLowerCase().includes(query);
     return nameMatch || urlMatch;
   });
-  
+
   renderRules(filteredRules, searchQuery);
 }
 
 // 处理搜索输入
 function handleSearchInput(e) {
   searchQuery = e.target.value.trim();
-  
+
   // 显示/隐藏清除按钮
   if (clearSearchBtn) {
     clearSearchBtn.classList.toggle('visible', searchQuery.length > 0);
   }
-  
+
   filterAndRenderRules();
 }
 
@@ -918,8 +915,8 @@ function clearSearch() {
 // 渲染规则列表
 function renderRules(rules, highlightQuery = '') {
   ruleCount.textContent = window.i18n.t('rulesCount', rules.length);
-  
-  
+
+
   if (rules.length === 0) {
     // 区分是搜索无结果还是真的没有规则
     if (highlightQuery && allRules.length > 0) {
@@ -941,7 +938,7 @@ function renderRules(rules, highlightQuery = '') {
     }
     return;
   }
-  
+
   rulesList.innerHTML = rules.map(rule => `
     <div class="rule-card ${rule.enabled ? '' : 'disabled'}" data-id="${rule.id}">
       <div class="rule-header">
@@ -984,7 +981,7 @@ function renderRules(rules, highlightQuery = '') {
       </div>
     </div>
   `).join('');
-  
+
   // 绑定事件
   rulesList.querySelectorAll('.rule-toggle').forEach(toggle => {
     toggle.addEventListener('click', (e) => {
@@ -992,14 +989,14 @@ function renderRules(rules, highlightQuery = '') {
       handleToggle(toggle.dataset.id);
     });
   });
-  
+
   rulesList.querySelectorAll('.btn-edit').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       handleEdit(btn.dataset.id);
     });
   });
-  
+
   rulesList.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -1028,7 +1025,7 @@ function renderRules(rules, highlightQuery = '') {
       const ruleId = header.dataset.toggleId;
       const content = document.getElementById(`content-${ruleId}`);
       const icon = header.querySelector('.toggle-icon');
-      
+
       if (content) {
         const isHidden = content.classList.contains('hidden');
         if (isHidden) {
@@ -1041,7 +1038,7 @@ function renderRules(rules, highlightQuery = '') {
       }
     });
   });
-  
+
   // 初始化 renderjson 渲染每个规则的 JSON
   rules.forEach(rule => {
     if (rule.responseBody) {
@@ -1067,7 +1064,7 @@ function renderRuleDetails(rule) {
       </div>
     `;
   }
-  
+
   return '';
 }
 
@@ -1075,14 +1072,14 @@ function renderRuleDetails(rule) {
 function initRenderjson(rule) {
   const container = document.querySelector(`.renderjson-container[data-json-id="${rule.id}"]`);
   if (!container) return;
-  
+
   try {
     const jsonData = JSON.parse(rule.responseBody);
     // 配置 renderjson
     renderjson.set_show_to_level(1); // 默认展开第一层
     renderjson.set_max_string_length(100); // 长字符串截断
     renderjson.set_sort_objects(false);
-    
+
     const rendered = renderjson(jsonData);
     container.appendChild(rendered);
   } catch (e) {
@@ -1104,29 +1101,29 @@ async function handleToggle(ruleId) {
 async function handleEdit(ruleId) {
   const rules = await sendMessage({ type: 'GET_RULES' });
   const rule = rules.find(r => r.id === ruleId);
-  
+
   if (!rule) return;
-  
+
   editingRuleId = ruleId;
   currentEditingRuleData = JSON.parse(JSON.stringify(rule)); // Deep copy
-  
+
   // 填充表单
   const ruleNameInput = document.getElementById('rule-name');
   const urlPatternInput = document.getElementById('url-pattern');
-  
+
   ruleNameInput.value = rule.name;
   urlPatternInput.value = rule.urlPattern;
   document.getElementById('response-body').value = rule.responseBody || '';
-  
+
   // 清除自定义验证消息（解决通过 JS 设置值后仍提示"请填写此字段"的问题）
   ruleNameInput.setCustomValidity('');
   urlPatternInput.setCustomValidity('');
-  
+
   // 同步到 CodeMirror 编辑器
   if (formCodeMirror) {
     formCodeMirror.setValue(rule.responseBody || '');
   }
-  
+
   // 更新 Tab UI
   // 更新 Tab UI
   const addTabBtn = document.querySelector('.tab-btn[data-tab="add"]');
@@ -1143,23 +1140,23 @@ async function handleEdit(ruleId) {
     addTabBtn.querySelector('span:nth-child(2)').textContent = window.i18n.t('tabEditRule');
     addTabBtn.querySelector('span:nth-child(2)').setAttribute('data-i18n', 'tabEditRule');
   }
-  
+
   // 验证 JSON 格式
   validateJsonRealtime();
-  
+
   switchTab('add');
 }
 
 // 处理删除
 async function handleDelete(ruleId) {
   if (!confirm(window.i18n.t('confirmDeleteRule'))) return;
-  
+
   // 如果正在编辑这条规则，先重置表单
   if (editingRuleId === ruleId) {
     resetForm();
     switchTab('rules');
   }
-  
+
   await sendMessage({ type: 'DELETE_RULE', ruleId });
   loadRules();
   showToast(window.i18n.t('ruleDeleted'));
@@ -1168,10 +1165,10 @@ async function handleDelete(ruleId) {
 // 处理表单提交
 async function handleFormSubmit(e) {
   e.preventDefault();
-  
+
   // 优先从 CodeMirror 获取内容
   const responseBodyValue = formCodeMirror ? formCodeMirror.getValue() : document.getElementById('response-body').value;
-  
+
   // 验证 JSON 格式（必须是对象或数组）
   try {
     const parsed = JSON.parse(responseBodyValue);
@@ -1183,7 +1180,7 @@ async function handleFormSubmit(e) {
     showToast(window.i18n.t('pleaseEnterValidJson'), true);
     return;
   }
-  
+
   const rule = {
     name: document.getElementById('rule-name').value.trim(),
     urlPattern: document.getElementById('url-pattern').value.trim(),
@@ -1191,12 +1188,12 @@ async function handleFormSubmit(e) {
     contentType: 'application/json',
     responseBody: responseBodyValue
   };
-  
+
   if (!rule.responseBody) {
     showToast(window.i18n.t('pleaseEnterResponseContent'), true);
     return;
   }
-  
+
   if (editingRuleId) {
     await sendMessage({ type: 'UPDATE_RULE', ruleId: editingRuleId, rule });
     showToast(window.i18n.t('ruleUpdated'));
@@ -1204,7 +1201,7 @@ async function handleFormSubmit(e) {
     await sendMessage({ type: 'ADD_RULE', rule });
     showToast(window.i18n.t('ruleAdded'));
   }
-  
+
   resetForm();
   loadRules();
   switchTab('rules');
@@ -1216,12 +1213,12 @@ function resetForm() {
   currentEditingRuleData = null;
   ruleForm.reset();
   document.getElementById('response-body').value = '';
-  
+
   // 清空 CodeMirror 编辑器
   if (formCodeMirror) {
     formCodeMirror.setValue('');
   }
-  
+
   // 恢复 Tab UI
   const addTabBtn = document.querySelector('.tab-btn[data-tab="add"]');
   if (addTabBtn) {
@@ -1235,7 +1232,7 @@ function resetForm() {
     addTabBtn.querySelector('span:nth-child(2)').textContent = window.i18n.t('tabAddRule');
     addTabBtn.querySelector('span:nth-child(2)').setAttribute('data-i18n', 'tabAddRule');
   }
-  
+
   // 重置 JSON 验证状态
   validateJsonRealtime();
 }
@@ -1246,13 +1243,13 @@ function checkFormDirty() {
   const currentUrl = document.getElementById('url-pattern').value.trim();
   // 优先从 CodeMirror 获取内容
   const currentResponse = formCodeMirror ? formCodeMirror.getValue() : document.getElementById('response-body').value;
-  
+
   if (editingRuleId && currentEditingRuleData) {
     // 编辑模式：对比原始数据
     const isNameChanged = currentName !== currentEditingRuleData.name;
     const isUrlChanged = currentUrl !== currentEditingRuleData.urlPattern;
     const isResponseChanged = currentResponse !== (currentEditingRuleData.responseBody || '');
-    
+
     return isNameChanged || isUrlChanged || isResponseChanged;
   } else {
     // 新建模式：检查是否有任何输入
@@ -1295,7 +1292,7 @@ function showToast(message, isError = false) {
   toast.className = `toast ${isError ? 'error' : ''}`;
   toast.textContent = message;
   document.body.appendChild(toast);
-  
+
   setTimeout(() => {
     toast.remove();
   }, 2500);
@@ -1310,25 +1307,25 @@ function showAlert(message, title) {
     const alertTitle = document.getElementById('alert-title');
     const alertConfirmBtn = document.getElementById('alert-confirm-btn');
     const alertCloseBtn = document.getElementById('alert-modal-close');
-    
+
     if (!alertModal || !alertMessage) {
       // 如果没有找到alert modal，回退到原生alert
       alert(message);
       resolve();
       return;
     }
-    
+
     // 设置消息内容
     alertMessage.textContent = message;
-    
+
     // 设置标题（如果提供）
     if (alertTitle) {
       alertTitle.textContent = title || window.i18n.t('alertTitle') || 'Alert';
     }
-    
+
     // 显示模态框
     alertModal.classList.add('active');
-    
+
     // 关闭函数
     const closeAlert = () => {
       alertModal.classList.remove('active');
@@ -1337,26 +1334,26 @@ function showAlert(message, title) {
       document.removeEventListener('keydown', handleEsc);
       resolve();
     };
-    
+
     // ESC键关闭
     const handleEsc = (e) => {
       if (e.key === 'Escape') {
         closeAlert();
       }
     };
-    
+
     // 绑定事件
     alertConfirmBtn.addEventListener('click', closeAlert);
     alertCloseBtn.addEventListener('click', closeAlert);
     document.addEventListener('keydown', handleEsc);
-    
+
     // 点击背景关闭
     alertModal.addEventListener('click', (e) => {
       if (e.target === alertModal) {
         closeAlert();
       }
     }, { once: true });
-    
+
     // 聚焦确认按钮
     alertConfirmBtn.focus();
   });
@@ -1373,7 +1370,7 @@ function escapeHtml(text) {
 // 高亮搜索匹配文本
 function highlightText(text, query) {
   if (!query) return text;
-  
+
   const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const regex = new RegExp(`(${escapedQuery})`, 'gi');
   return text.replace(regex, '<span class="highlight">$1</span>');
@@ -1383,26 +1380,26 @@ function highlightText(text, query) {
 // 导出规则
 async function handleExport() {
   const rules = await sendMessage({ type: 'GET_RULES' });
-  
+
   if (rules.length === 0) {
     showToast(window.i18n.t('noRulesToExport'), true);
     return;
   }
-  
+
   const exportData = {
     version: '1.0.0',
     exportedAt: new Date().toISOString(),
     rules: rules
   };
-  
+
   const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-  
+
   const a = document.createElement('a');
   a.href = url;
   a.download = `request-interceptor-rules-${new Date().toISOString().split('T')[0]}.json`;
   a.click();
-  
+
   URL.revokeObjectURL(url);
   showToast(window.i18n.t('exportedRules', rules.length));
 }
@@ -1411,29 +1408,29 @@ async function handleExport() {
 async function handleExportRule(ruleId) {
   const rules = await sendMessage({ type: 'GET_RULES' });
   const rule = rules.find(r => r.id === ruleId);
-  
+
   if (!rule) {
     showToast(window.i18n.t('ruleNotExist'), true);
     return;
   }
-  
+
   // 保持与整体导出相同的格式，但只包含一条规则
   const exportData = {
     version: '1.0.0',
     exportedAt: new Date().toISOString(),
     rules: [rule]
   };
-  
+
   const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-  
+
   const a = document.createElement('a');
   a.href = url;
   // 文件名包含规则名称，对其进行清理以作为合法文件名
   const safeName = rule.name.replace(/[\\/:*?"<>|]/g, '_').substring(0, 30);
   a.download = `rule-${safeName}-${new Date().toISOString().split('T')[0]}.json`;
   a.click();
-  
+
   URL.revokeObjectURL(url);
   showToast(window.i18n.t('exportedRule', rule.name));
 }
@@ -1442,21 +1439,21 @@ async function handleExportRule(ruleId) {
 async function handleImport(e) {
   const file = e.target.files[0];
   if (!file) return;
-  
+
   try {
     const text = await file.text();
     const data = JSON.parse(text);
-    
+
     if (!data.rules || !Array.isArray(data.rules)) {
       throw new Error(window.i18n.t('invalidRuleFileFormat'));
     }
-    
+
     const confirmMsg = window.i18n.t('confirmImportRules', data.rules.length);
     if (!confirm(confirmMsg)) {
       importFile.value = '';
       return;
     }
-    
+
     // 逐个添加规则
     let imported = 0;
     for (const rule of data.rules) {
@@ -1465,14 +1462,14 @@ async function handleImport(e) {
       await sendMessage({ type: 'ADD_RULE', rule: ruleData });
       imported++;
     }
-    
+
     loadRules();
     showToast(window.i18n.t('importedRules', imported));
   } catch (error) {
     console.error('[Request Interceptor Tiny]', 'Import error:', error);
     showToast(window.i18n.t('importFailed', error.message), true);
   }
-  
+
   // 重置文件输入
   importFile.value = '';
 }
@@ -1486,7 +1483,7 @@ async function loadLogs() {
 // 渲染日志列表
 function renderLogs(logs) {
   logCount.textContent = window.i18n.t('recentMatchRecords', logs.length);
-  
+
   if (logs.length === 0) {
     logsList.innerHTML = `
       <div class="empty-state">
@@ -1497,7 +1494,7 @@ function renderLogs(logs) {
     `;
     return;
   }
-  
+
   logsList.innerHTML = logs.map(log => {
     const locale = window.i18n && window.i18n.getCurrentLanguage() === 'zh_CN' ? 'zh-CN' : 'en-US';
     const time = new Date(log.timestamp).toLocaleString(locale, {
@@ -1505,7 +1502,7 @@ function renderLogs(logs) {
       minute: '2-digit',
       second: '2-digit'
     });
-    
+
     return `
       <div class="log-item">
         <div class="log-header">
@@ -1524,7 +1521,7 @@ function renderLogs(logs) {
 // 清空日志
 async function handleClearLogs() {
   if (!confirm(window.i18n.t('confirmClearLogs'))) return;
-  
+
   await sendMessage({ type: 'CLEAR_LOGS' });
   loadLogs();
   showToast(window.i18n.t('logsCleared'));
@@ -1545,9 +1542,9 @@ async function handleClearRules() {
     showToast(window.i18n.t('noRulesToClear'), true);
     return;
   }
-  
+
   if (!confirm(window.i18n.t('confirmClearAllRules'))) return;
-  
+
   await sendMessage({ type: 'CLEAR_ALL_RULES' });
   loadRules();
   showToast(window.i18n.t('allRulesCleared'));
@@ -1560,7 +1557,7 @@ async function handleDisableRules() {
     showToast(window.i18n.t('noRulesAvailable'), true);
     return;
   }
-  
+
   const hasEnabled = rules.some(r => r.enabled);
   if (!hasEnabled) {
     showToast(window.i18n.t('allRulesAlreadyDisabled'), true);
@@ -1568,7 +1565,7 @@ async function handleDisableRules() {
   }
 
   if (!confirm(window.i18n.t('confirmDisableAllRules'))) return;
-  
+
   await sendMessage({ type: 'DISABLE_ALL_RULES' });
   loadRules();
   showToast(window.i18n.t('allRulesDisabled'));
@@ -1692,7 +1689,7 @@ function parseCurlCommand(curlCommand) {
   }
 
   const trimmed = curlCommand.trim();
-  
+
   // 检查是否以 curl 开头
   if (!trimmed.toLowerCase().startsWith('curl')) {
     throw new Error(window.i18n.t('curlParseErrorInvalid'));
@@ -1717,14 +1714,14 @@ function parseCurlCommand(curlCommand) {
   // 格式2: curl "URL" ...
   // 格式3: curl URL ...
   // 格式4: curl ... 'URL' (URL 可能在参数之后)
-  
+
   let urlMatch = normalized.match(/curl\s+(?:(?:-[A-Za-z]+\s+(?:'[^']*'|"[^"]*"|\S+)\s+)*)?['"]?(https?:\/\/[^'">\s]+)['"]?/i);
-  
+
   if (!urlMatch) {
     // 尝试在命令中任意位置查找 URL
     urlMatch = normalized.match(/['"]?(https?:\/\/[^'">\s]+)['"]?/);
   }
-  
+
   if (urlMatch) {
     result.url = urlMatch[1].replace(/['"]$/, ''); // 移除尾部可能的引号
   } else {
@@ -1775,12 +1772,12 @@ function generateRuleNameFromUrl(url) {
   try {
     const urlObj = new URL(url);
     const pathParts = urlObj.pathname.split('/').filter(Boolean);
-    
+
     if (pathParts.length === 0) {
       // 没有路径，使用主机名
       return urlObj.hostname.replace('www.', '').split('.')[0];
     }
-    
+
     // 过滤掉常见的无意义路径部分
     const ignoreParts = ['api', 'v1', 'v2', 'v3', 'v4', 'rest', 'ajax', 'json', 'data', 'service', 'services'];
     const meaningfulParts = pathParts.filter(part => {
@@ -1793,7 +1790,7 @@ function generateRuleNameFromUrl(url) {
       if (/^\d+$/.test(part)) return false;
       return true;
     });
-    
+
     // 取最后 1-2 个有意义的部分组成名称
     let nameParts;
     if (meaningfulParts.length >= 2) {
@@ -1805,7 +1802,7 @@ function generateRuleNameFromUrl(url) {
       // 所有部分都被过滤掉了，使用原始路径的最后一部分
       nameParts = [pathParts[pathParts.length - 1]];
     }
-    
+
     // 格式化每个部分
     const formattedParts = nameParts.map(part => {
       return part
@@ -1819,15 +1816,15 @@ function generateRuleNameFromUrl(url) {
         .replace(/\b\w/g, c => c.toUpperCase())
         .trim();
     });
-    
+
     // 合并并清理
     let name = formattedParts.join(' ').trim();
-    
+
     // 如果名称为空，回退到主机名
     if (!name) {
       return urlObj.hostname.replace('www.', '').split('.')[0];
     }
-    
+
     return name;
   } catch {
     return 'API Rule';
@@ -1848,9 +1845,9 @@ function generateUrlPattern(url) {
 // 解析并填充表单
 async function parseAndFillCurl() {
   if (!curlInput) return;
-  
+
   const command = curlInput.value.trim();
-  
+
   if (!command) {
     showCurlError(window.i18n.t('curlParseErrorEmpty'));
     return;
@@ -1882,25 +1879,25 @@ async function parseAndFillCurl() {
         body: parsed.data
       }
     });
-    
+
     // 检查请求是否成功
     if (!response || !response.success) {
       // 请求失败，使用alert弹窗显示错误
-      const errorMessage = response && response.error 
+      const errorMessage = response && response.error
         ? window.i18n.t('curlFetchFailed', response.error)
         : window.i18n.t('curlFetchFailed', 'Unknown error');
-      
+
       // 恢复按钮状态
       if (curlParseBtn) {
         curlParseBtn.disabled = false;
         curlParseBtn.textContent = window.i18n.t('parseAndFill');
       }
-      
+
       // 显示错误弹窗
       await showAlert(errorMessage, window.i18n.t('curlFetchErrorTitle') || window.i18n.t('alertTitle'));
       return;
     }
-    
+
     // 请求成功，执行填充逻辑
     // 填充规则名称
     const ruleNameInput = document.getElementById('rule-name');
@@ -1908,14 +1905,14 @@ async function parseAndFillCurl() {
       ruleNameInput.value = generateRuleNameFromUrl(parsed.url);
       ruleNameInput.setCustomValidity('');
     }
-    
+
     // 填充 URL 模式
     const urlPatternInput = document.getElementById('url-pattern');
     if (urlPatternInput) {
       urlPatternInput.value = generateUrlPattern(parsed.url);
       urlPatternInput.setCustomValidity('');
     }
-    
+
     // 设置响应内容
     const responseBody = response.body;
     if (formCodeMirror) {
@@ -1925,23 +1922,23 @@ async function parseAndFillCurl() {
     if (responseBodyInput) {
       responseBodyInput.value = responseBody;
     }
-    
+
     // 验证 JSON
     validateJsonRealtime();
-    
+
     // 关闭模态框
     closeCurlModal();
-    
+
     // 显示成功提示
     showToast(window.i18n.t('curlParsedWithResponse', response.status));
-    
+
   } catch (error) {
     // 恢复按钮状态
     if (curlParseBtn) {
       curlParseBtn.disabled = false;
       curlParseBtn.textContent = window.i18n.t('parseAndFill');
     }
-    
+
     // 显示错误弹窗
     await showAlert(error.message, window.i18n.t('curlFetchErrorTitle') || window.i18n.t('alertTitle'));
   } finally {
