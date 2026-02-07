@@ -292,21 +292,46 @@ function initGlobalTooltip() {
 
       tooltip.textContent = text;
 
+      // 先显示 tooltip 获取其宽度（但保持透明）
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.display = 'block';
+      const tooltipWidth = tooltip.offsetWidth;
+      tooltip.style.visibility = '';
+      tooltip.style.display = '';
+
       // Determine position (default top, switch to bottom if too close to top edge)
       const spaceAbove = rect.top;
       const isTooCloseToTop = spaceAbove < 40; // Threshold for switching direction
 
+      // 计算水平位置，确保不超出右边界
+      let left = rect.left + rect.width / 2;
+      const viewportWidth = window.innerWidth;
+      const rightEdge = left + tooltipWidth / 2;
+      const leftEdge = left - tooltipWidth / 2;
+
+      // 调整水平偏移
+      let offsetX = 0;
+      if (rightEdge > viewportWidth - 8) {
+        // 超出右边界，向左偏移
+        offsetX = viewportWidth - 8 - rightEdge;
+      } else if (leftEdge < 8) {
+        // 超出左边界，向右偏移
+        offsetX = 8 - leftEdge;
+      }
+
+      // 设置偏移量作为 CSS 变量，用于调整箭头位置
+      tooltip.style.setProperty('--arrow-offset', `${-offsetX}px`);
+      left += offsetX;
+
       if (isTooCloseToTop) {
         tooltip.classList.add('bottom');
         // Position below
-        const left = rect.left + rect.width / 2;
         const top = rect.bottom;
         tooltip.style.left = `${left}px`;
         tooltip.style.top = `${top}px`;
       } else {
         tooltip.classList.remove('bottom');
         // Position above
-        const left = rect.left + rect.width / 2;
         const top = rect.top;
         tooltip.style.left = `${left}px`;
         tooltip.style.top = `${top}px`;

@@ -49,7 +49,8 @@ body {
   width: 100%;
   min-width: 480px;
   max-width: 100%;
-  height: 100vh; /* Fixed height */
+  height: 100vh;
+  /* Fixed height */
   background: var(--bg-main);
   color: var(--text-primary);
   font-family:
@@ -59,14 +60,17 @@ body {
     sans-serif;
   font-size: 14px;
   line-height: 1.6;
-  overflow: hidden; /* Prevent body scroll */
+  overflow: hidden;
+  /* Prevent body scroll */
 }
 
 .container {
   display: flex;
   flex-direction: column;
-  height: 100%; /* Fill body */
-  overflow: hidden; /* Prevent container scroll */
+  height: 100%;
+  /* Fill body */
+  overflow: hidden;
+  /* Prevent container scroll */
 }
 
 /* Header & Glassmorphism */
@@ -89,11 +93,9 @@ body {
   right: -100px;
   width: 300px;
   height: 300px;
-  background: radial-gradient(
-    circle,
-    rgba(99, 102, 241, 0.15) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle,
+      rgba(99, 102, 241, 0.15) 0%,
+      transparent 70%);
   pointer-events: none;
   filter: blur(40px);
 }
@@ -105,11 +107,9 @@ body {
   left: -50px;
   width: 200px;
   height: 200px;
-  background: radial-gradient(
-    circle,
-    rgba(59, 130, 246, 0.1) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle,
+      rgba(59, 130, 246, 0.1) 0%,
+      transparent 70%);
   pointer-events: none;
   filter: blur(40px);
 }
@@ -217,7 +217,8 @@ body {
 /* Tabs */
 .tabs {
   display: flex;
-  background: rgba(30, 41, 59, 0.4); /* Subtle semi-transparent background */
+  background: rgba(30, 41, 59, 0.4);
+  /* Subtle semi-transparent background */
   padding: 4px;
   margin: 16px 20px;
   border-radius: 12px;
@@ -231,7 +232,8 @@ body {
   flex: 1;
   padding: 8px 12px;
   background: transparent;
-  border: 1px solid transparent; /* Reserve space for border transition */
+  border: 1px solid transparent;
+  /* Reserve space for border transition */
   color: var(--text-secondary);
   font-size: 13px;
   font-weight: 500;
@@ -256,23 +258,25 @@ body {
   color: #fff;
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 
-    0 4px 12px rgba(99, 102, 241, 0.4), 
+  box-shadow:
+    0 4px 12px rgba(99, 102, 241, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   font-weight: 600;
   opacity: 1;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Optional: Add a subtle indicator line for 'active' or keep the card style */
 .tab-btn.active::after {
-  /* content: ""; */ /* keeping it simple card style for now */
+  /* content: ""; */
+  /* keeping it simple card style for now */
 }
 
 /* Icons in tabs */
 .tab-btn span:first-child {
   font-size: 14px;
-  /* filter: grayscale(100%) opacity(0.7); */ /* Removed per user request */
+  /* filter: grayscale(100%) opacity(0.7); */
+  /* Removed per user request */
   transition: all 0.2s;
 }
 
@@ -287,10 +291,13 @@ body {
   display: none;
   /* padding: 0 20px 24px; REMOVE GENERAL PADDING */
   animation: slideIn 0.3s ease-out;
-  flex: 1; /* Take all remaining vertical space */
+  flex: 1;
+  /* Take all remaining vertical space */
   /* overflow: hidden;  Ensure panel itself doesn't scroll */
-  height: 100%; /* Ensure it fills parent */
-  min-height: 0; /* Important for scroll to work in nested flex */
+  height: 100%;
+  /* Ensure it fills parent */
+  min-height: 0;
+  /* Important for scroll to work in nested flex */
 
   /* Use flex column to manage children (header/list/footer) */
   flex-direction: column;
@@ -305,6 +312,7 @@ body {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -317,9 +325,11 @@ body {
   justify-content: space-between;
   align-items: center;
   /* margin-bottom: 16px; */
-  padding: 0 20px 16px; /* Moved padding here */
+  padding: 0 20px 16px;
+  /* Moved padding here */
   gap: 12px;
-  flex-shrink: 0; /* Fixed header */
+  flex-shrink: 0;
+  /* Fixed header */
 }
 
 .rules-count {
@@ -382,7 +392,7 @@ body {
   box-shadow: 0 0 0 3px var(--primary-glow);
 }
 
-.rules-search input:focus + .search-icon,
+.rules-search input:focus+.search-icon,
 .rules-search:focus-within .search-icon {
   color: var(--primary);
 }
@@ -498,7 +508,7 @@ body {
   content: "";
   position: absolute;
   top: 100%;
-  left: 50%;
+  left: calc(50% + var(--arrow-offset, 0px));
   margin-left: -5px;
   border-width: 5px;
   border-style: solid;
@@ -519,7 +529,8 @@ body {
 .rules-list {
   flex: 1;
   overflow-y: scroll;
-  padding: 0 10px 20px 20px; /* 10px pad + 10px scrollbar = 20px total */
+  padding: 0 10px 20px 20px;
+  /* 10px pad + 10px scrollbar = 20px total */
 }
 
 /* Rules List Scrollbar Styling */
@@ -543,7 +554,9 @@ body {
 .rules-list::-webkit-scrollbar-thumb:hover {
   background-color: var(--text-secondary);
   border: 2px solid transparent;
-} /* Make thumb slightly thicker on hover */
+}
+
+/* Make thumb slightly thicker on hover */
 
 .rules-list::-webkit-scrollbar-corner {
   background: transparent;
@@ -568,12 +581,10 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    45deg,
-    transparent,
-    rgba(99, 102, 241, 0.05),
-    transparent
-  );
+  background: linear-gradient(45deg,
+      transparent,
+      rgba(99, 102, 241, 0.05),
+      transparent);
   transform: translateX(-100%);
   transition: 0.5s;
 }
@@ -605,7 +616,8 @@ body {
 
 .rule-info {
   flex: 1;
-  min-width: 0; /* Enable truncation */
+  min-width: 0;
+  /* Enable truncation */
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -701,7 +713,7 @@ body {
   font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
-  background: rgba(99, 102, 241, 0.1); 
+  background: rgba(99, 102, 241, 0.1);
   color: var(--primary-light);
   border: 1px solid rgba(99, 102, 241, 0.2);
 }
@@ -750,7 +762,8 @@ body {
   font-size: 12px;
   color: var(--text-muted);
   margin-bottom: 6px;
-  margin-top: 8px; /* Added slight top margin to separate from URL */
+  margin-top: 8px;
+  /* Added slight top margin to separate from URL */
 }
 
 .response-header {
@@ -770,11 +783,13 @@ body {
   background: rgba(0, 0, 0, 0.3);
   border-radius: 6px;
   font-family: "JetBrains Mono", "Monaco", Consolas, monospace;
-  font-size: 11px; /* Slight font reduction for preview */
+  font-size: 11px;
+  /* Slight font reduction for preview */
   line-height: 1.4;
   border: 1px solid rgba(255, 255, 255, 0.05);
   overflow: hidden;
-  max-height: 200px; /* Limit max height to prevent one rule taking over */
+  max-height: 200px;
+  /* Limit max height to prevent one rule taking over */
   overflow-y: auto;
 }
 
@@ -966,14 +981,15 @@ body {
   margin: 0;
 }
 
-.checkbox-label input:checked + span {
+.checkbox-label input:checked+span {
   color: var(--text-primary);
   font-weight: 600;
 }
 
 /* Config Sections */
 .config-section {
-  background: transparent; /* Removed card background for cleaner look */
+  background: transparent;
+  /* Removed card background for cleaner look */
   border-radius: 0;
   padding: 0;
   margin-bottom: 20px;
@@ -1251,7 +1267,7 @@ body {
   bottom: 2px;
   background-color: var(--text-muted);
   transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .slider.round {
@@ -1262,18 +1278,19 @@ body {
   border-radius: 50%;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: var(--primary);
   border-color: var(--primary);
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   transform: translateX(20px);
   background-color: white;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
-  padding: 8px;
-  border-radius: 6px;
+
+padding: 8px;
+border-radius: 6px;
 }
 
 .header-item select {
@@ -1339,11 +1356,13 @@ input:checked + .slider:before {
 .logs-list::-webkit-scrollbar-corner {
   background: transparent;
 }
+
 .logs-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 20px 8px; /* Reduced bottom padding */
+  padding: 0 20px 8px;
+  /* Reduced bottom padding */
   flex-shrink: 0;
 }
 
@@ -1355,9 +1374,12 @@ input:checked + .slider:before {
 
 .log-item {
   background: var(--bg-card);
-  border-radius: 8px; /* Reduced from 12px */
-  padding: 10px 12px; /* Reduced padding */
-  margin-bottom: 8px; /* Reduced margin */
+  border-radius: 8px;
+  /* Reduced from 12px */
+  padding: 10px 12px;
+  /* Reduced padding */
+  margin-bottom: 8px;
+  /* Reduced margin */
   border: 1px solid var(--border);
   transition: var(--transition);
 }
@@ -1371,7 +1393,8 @@ input:checked + .slider:before {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px; /* Reduced margin */
+  margin-bottom: 4px;
+  /* Reduced margin */
 }
 
 .log-rule {
@@ -1389,7 +1412,8 @@ input:checked + .slider:before {
   color: var(--primary-light);
   font-size: 11px;
   word-break: break-all;
-  padding: 4px 6px; /* Reduced padding */
+  padding: 4px 6px;
+  /* Reduced padding */
   background: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
   font-family: inherit;
@@ -1403,7 +1427,8 @@ input:checked + .slider:before {
   gap: 12px;
   justify-content: flex-end;
   /* margin-top: 10px; */
-  padding: 12px 20px; /* Reduced vertical padding */
+  padding: 12px 20px;
+  /* Reduced vertical padding */
   border-top: 1px solid var(--border);
   background: var(--bg-main);
   flex-shrink: 0;
@@ -1500,7 +1525,7 @@ input:checked + .slider:before {
   background: linear-gradient(135deg, rgba(34, 197, 94, 0.95), rgba(22, 163, 74, 0.95));
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(34, 197, 94, 0.3),
     0 4px 12px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -1524,7 +1549,7 @@ input:checked + .slider:before {
 
 .toast.error {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95));
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(239, 68, 68, 0.3),
     0 4px 12px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -1539,9 +1564,11 @@ input:checked + .slider:before {
     transform: translate(-50%, 100px);
     opacity: 0;
   }
+
   70% {
     transform: translate(-50%, -8px);
   }
+
   to {
     transform: translate(-50%, 0);
     opacity: 1;
@@ -1646,7 +1673,8 @@ input:checked + .slider:before {
 .editor-modal-content {
   flex: 1;
   padding: 0;
-  overflow: hidden; /* Prevent overflow */
+  overflow: hidden;
+  /* Prevent overflow */
   display: flex;
   flex-direction: column;
 }
@@ -2021,31 +2049,38 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 
 /* JSON 语法高亮 - 深色主题 */
 .cm-s-default .cm-property {
-  color: #7dd3fc; /* 属性名 - 天蓝色 */
+  color: #7dd3fc;
+  /* 属性名 - 天蓝色 */
 }
 
 .cm-s-default .cm-string {
-  color: #a5d6a7; /* 字符串 - 柔和绿色 */
+  color: #a5d6a7;
+  /* 字符串 - 柔和绿色 */
 }
 
 .cm-s-default .cm-number {
-  color: #ffa726; /* 数字 - 橙色 */
+  color: #ffa726;
+  /* 数字 - 橙色 */
 }
 
 .cm-s-default .cm-atom {
-  color: #f472b6; /* true/false/null - 粉色 */
+  color: #f472b6;
+  /* true/false/null - 粉色 */
 }
 
 .cm-s-default .cm-keyword {
-  color: #f472b6; /* 关键字 */
+  color: #f472b6;
+  /* 关键字 */
 }
 
 .cm-s-default .cm-bracket {
-  color: var(--text-secondary); /* 括号 */
+  color: var(--text-secondary);
+  /* 括号 */
 }
 
 .cm-s-default .cm-punctuation {
-  color: var(--text-secondary); /* 标点 */
+  color: var(--text-secondary);
+  /* 标点 */
 }
 
 .cm-s-default .cm-error {
@@ -2086,7 +2121,8 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 /* 全屏编辑器中的 CodeMirror */
 .editor-modal-content .codemirror-wrapper {
   flex: 1;
-  height: 100%; /* Fallback */
+  height: 100%;
+  /* Fallback */
   border-radius: 0;
   border: none;
 }
@@ -2249,6 +2285,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   border-top: 1px solid var(--border);
   background: rgba(0, 0, 0, 0.1);
 }
+
 /* Inline Editor Styles */
 .inline-editor-wrapper {
   /* Counteract the padding of .response-content to utilize full space */
@@ -2263,7 +2300,8 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 }
 
 .inline-editor-wrapper .CodeMirror-scroll {
-  max-height: 300px; /* Limit height of inline editors */
+  max-height: 300px;
+  /* Limit height of inline editors */
   padding-bottom: 0;
 }
 
