@@ -535,5 +535,8 @@
   },
   "clickToDisable": {
     "message": "点击关闭规则"
+  },
+  "responseBodyPlaceholder": {
+    "message": "请输入 JSON 响应数据..."
   }
 }

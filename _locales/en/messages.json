@@ -535,5 +535,8 @@
   },
   "clickToDisable": {
     "message": "Click to disable rule"
+  },
+  "responseBodyPlaceholder": {
+    "message": "Enter JSON response data..."
   }
 }

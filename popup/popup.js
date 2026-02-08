@@ -63,6 +63,18 @@ function updatePlatformShortcutHints() {
   }
 }
 
+// Update CodeMirror placeholders after language change
+function updateCodeMirrorPlaceholders() {
+  if (window.i18n && formCodeMirror) {
+    const placeholder = window.i18n.t('responseBodyPlaceholder');
+    formCodeMirror.setOption('placeholder', placeholder);
+  }
+  if (window.i18n && modalCodeMirror) {
+    const placeholder = window.i18n.t('responseBodyPlaceholder');
+    modalCodeMirror.setOption('placeholder', placeholder);
+  }
+}
+
 // Init
 document.addEventListener('DOMContentLoaded', async () => {
   // Initialize i18n first
@@ -118,6 +130,9 @@ function initLanguageSelector() {
 
       // Update platform-specific hints with new language
       updatePlatformShortcutHints();
+
+      // Update CodeMirror placeholders
+      updateCodeMirrorPlaceholders();
     });
   }
 }
@@ -210,6 +225,7 @@ function initModalCodeMirror() {
   modalTextarea.classList.add('cm-hidden');
 
   // 初始化 CodeMirror
+  const placeholder = window.i18n ? window.i18n.t('responseBodyPlaceholder') : modalTextarea.placeholder;
   const cm = CodeMirror(wrapper, {
     mode: { name: 'javascript', json: true },
     lineNumbers: true,
@@ -222,6 +238,7 @@ function initModalCodeMirror() {
     tabSize: 2,
     indentWithTabs: false,
     value: '',
+    placeholder: placeholder,
     extraKeys: {
       'Tab': (cm) => {
         cm.replaceSelection('  ', 'end');
