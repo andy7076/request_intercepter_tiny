@@ -278,6 +278,9 @@ body {
   /* filter: grayscale(100%) opacity(0.7); */
   /* Removed per user request */
   transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tab-btn:hover span:first-child,
