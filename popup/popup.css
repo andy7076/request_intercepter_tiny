@@ -1507,7 +1507,7 @@ border-radius: 6px;
 }
 
 .empty-state p {
-  font-weight: normal;
+  font-weight: bold;
   color: var(--text-primary);
 }
 
