@@ -1,5 +1,7 @@
 # Request Interceptor Tiny
 
+[![Chrome Web Store](https://img.shields.io/badge/Chrome_Web_Store-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white)](https://chromewebstore.google.com/detail/request-interceptor-tiny/bdlpkfphbnijjdciolbnnbdchpbdkmik)
+
 **English | [中文](./README_CN.md)**
 
 **Lightweight API Mocking Tool**
@@ -41,14 +43,17 @@ Request Interceptor Tiny is a Chrome extension designed for developers, providin
 
 ## 📥 Installation Guide
 
-1. **Get the Source Code**  
-   Clone or download this project to your local machine.
+1. **Install from Chrome Web Store**  
+   [Click here to install from Chrome Web Store](https://chromewebstore.google.com/detail/request-interceptor-tiny/bdlpkfphbnijjdciolbnnbdchpbdkmik)
 
-2. **Load the Extension**
-   - Enter `chrome://extensions/` in Chrome's address bar and press Enter.
-   - Enable **"Developer mode"** toggle in the top right corner.
-   - Click the **"Load unpacked"** button in the top left corner.
-   - Select the root directory of this project.
+2. **Manual Installation (for development)**
+   - **Get the Source Code**  
+     Clone or download this project to your local machine.
+   - **Load the Extension**
+     - Enter `chrome://extensions/` in Chrome's address bar and press Enter.
+     - Enable **"Developer mode"** toggle in the top right corner.
+     - Click the **"Load unpacked"** button in the top left corner.
+     - Select the root directory of this project.
 
 3. **Start Using**  
    After installation, click the extension icon in the browser toolbar to start using it.
