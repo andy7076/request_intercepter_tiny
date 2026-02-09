@@ -1,7 +1,5 @@
 # Request Interceptor Tiny
 
-[![Chrome Web Store](https://img.shields.io/badge/Chrome_Web_Store-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white)](https://chromewebstore.google.com/detail/request-interceptor-tiny/bdlpkfphbnijjdciolbnnbdchpbdkmik)
-
 **[English](./README.md) | 中文**
 
 **轻量级接口模拟工具**
@@ -43,19 +41,20 @@ Request Interceptor Tiny 是一款专为开发者设计的 Chrome 扩展，旨�
 
 ## 📥 安装指南
 
-1. **从 Chrome 网上应用店安装**
-   [点击此处前往 Chrome 网上应用店安装](https://chromewebstore.google.com/detail/request-interceptor-tiny/bdlpkfphbnijjdciolbnnbdchpbdkmik)
+> **推荐：** [从 Chrome 应用商店安装](https://chromewebstore.google.com/detail/request-interceptor-tiny/bdlpkfphbnijjdciolbnnbdchpbdkmik)
 
-2. **手动安装 (用于开发)**
-   - **获取源码**
-     克隆或下载本项目到本地。
-   - **加载扩展**
-     - 在 Chrome 浏览器地址栏输入 `chrome://extensions/` 并回车。
-     - 打开右上角的 **"开发者模式" (Developer mode)** 开关。
-     - 点击左上角的 **"加载已解压的扩展程序" (Load unpacked)** 按钮。
-     - 选择本项目的根目录。
+### 手动安装
 
-3. **开始使用**
+1. **获取源码**  
+   克隆或下载本项目到本地。
+
+2. **加载扩展**
+   - 在 Chrome 浏览器地址栏输入 `chrome://extensions/` 并回车。
+   - 打开右上角的 **"开发者模式" (Developer mode)** 开关。
+   - 点击左上角的 **"加载已解压的扩展程序" (Load unpacked)** 按钮。
+   - 选择本项目的根目录。
+
+3. **开始使用**  
    安装完成后，点击浏览器工具栏的扩展图标即可使用。
 
 ## 📖 使用说明
