@@ -280,6 +280,11 @@
   border: 2px dashed rgba(15, 23, 42, 0.12);
 }
 
+[data-theme="light"] .empty-state p {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
 /* Light theme - Log items */
 [data-theme="light"] .log-url {
   background: rgba(241, 245, 249, 0.8);
