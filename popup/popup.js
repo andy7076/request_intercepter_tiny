@@ -1,3 +1,15 @@
+// 主题初始化（尽早执行避免闪烁）
+(function initThemeEarly() {
+  // 尝试从 chrome.storage.local 同步获取主题
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+    chrome.storage.local.get(['theme'], (result) => {
+      if (result.theme) {
+        document.documentElement.setAttribute('data-theme', result.theme);
+      }
+    });
+  }
+})();
+
 // DOM元素
 const tabBtns = document.querySelectorAll('.tab-btn');
 const panels = document.querySelectorAll('.panel');
@@ -604,15 +616,46 @@ function setupEventListeners() {
       });
     });
   }
+
+  // Theme Toggle
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', toggleTheme);
+  }
 }
 
 // Load Settings
 function loadSettings() {
-  chrome.storage.local.get(['consoleLogs'], (result) => {
+  chrome.storage.local.get(['consoleLogs', 'theme'], (result) => {
     if (settingConsoleLog) {
       settingConsoleLog.checked = result.consoleLogs || false;
     }
+    // 加载主题设置
+    if (result.theme) {
+      document.documentElement.setAttribute('data-theme', result.theme);
+    }
   });
+}
+
+// 切换主题
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+  // 添加过渡动画
+  document.documentElement.setAttribute('data-theme-transition', '');
+  document.documentElement.setAttribute('data-theme', newTheme);
+
+  // 移除过渡标记（避免后续正常操作也带过渡效果）
+  setTimeout(() => {
+    document.documentElement.removeAttribute('data-theme-transition');
+  }, 400);
+
+  // 持久化保存
+  chrome.storage.local.set({ theme: newTheme });
+
+  // 提示用户
+  showToast(newTheme === 'light' ? window.i18n.t('switchedToLight') : window.i18n.t('switchedToDark'));
 }
 
 // 切换Tab

@@ -538,5 +538,20 @@
   },
   "responseBodyPlaceholder": {
     "message": "请输入 JSON 响应数据..."
+  },
+  "themeMode": {
+    "message": "主题模式"
+  },
+  "themeModeDesc": {
+    "message": "切换浅色和深色主题"
+  },
+  "themeToggle": {
+    "message": "切换主题"
+  },
+  "switchedToLight": {
+    "message": "已切换到浅色模式"
+  },
+  "switchedToDark": {
+    "message": "已切换到深色模式"
   }
 }

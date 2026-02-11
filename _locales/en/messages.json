@@ -538,5 +538,20 @@
   },
   "responseBodyPlaceholder": {
     "message": "Enter JSON response data..."
+  },
+  "themeMode": {
+    "message": "Theme"
+  },
+  "themeModeDesc": {
+    "message": "Switch between light and dark mode"
+  },
+  "themeToggle": {
+    "message": "Toggle theme"
+  },
+  "switchedToLight": {
+    "message": "Switched to light mode"
+  },
+  "switchedToDark": {
+    "message": "Switched to dark mode"
   }
 }
