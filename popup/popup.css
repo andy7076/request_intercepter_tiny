@@ -464,30 +464,7 @@
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
 }
 
-/* Theme toggle icon animation */
-.theme-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
 
-[data-theme="light"] .theme-icon .moon-icon {
-  display: none;
-}
-
-[data-theme="light"] .theme-icon .sun-icon {
-  display: inline-flex;
-}
-
-.theme-icon .sun-icon {
-  display: none;
-}
-
-.theme-icon .moon-icon {
-  display: inline-flex;
-}
 
 body {
   width: 100%;

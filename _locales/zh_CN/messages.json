@@ -545,13 +545,13 @@
   "themeModeDesc": {
     "message": "切换浅色和深色主题"
   },
-  "themeToggle": {
-    "message": "切换主题"
+  "themeSystem": {
+    "message": "跟随系统"
   },
-  "switchedToLight": {
-    "message": "已切换到浅色模式"
+  "themeLight": {
+    "message": "浅色"
   },
-  "switchedToDark": {
-    "message": "已切换到深色模式"
+  "themeDark": {
+    "message": "深色"
   }
 }

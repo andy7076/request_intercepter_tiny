@@ -1,10 +1,13 @@
 // 主题初始化（尽早执行避免闪烁）
 (function initThemeEarly() {
-  // 尝试从 chrome.storage.local 同步获取主题
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
     chrome.storage.local.get(['theme'], (result) => {
-      if (result.theme) {
-        document.documentElement.setAttribute('data-theme', result.theme);
+      const pref = result.theme || 'system';
+      if (pref === 'system') {
+        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      } else {
+        document.documentElement.setAttribute('data-theme', pref);
       }
     });
   }
@@ -617,10 +620,14 @@ function setupEventListeners() {
     });
   }
 
-  // Theme Toggle
-  const themeToggleBtn = document.getElementById('theme-toggle-btn');
-  if (themeToggleBtn) {
-    themeToggleBtn.addEventListener('click', toggleTheme);
+  // Theme Select
+  const themeSelect = document.getElementById('setting-theme');
+  if (themeSelect) {
+    themeSelect.addEventListener('change', (e) => {
+      const newPref = e.target.value;
+      chrome.storage.local.set({ theme: newPref });
+      applyTheme(newPref, true);
+    });
   }
 }
 
@@ -631,32 +638,44 @@ function loadSettings() {
       settingConsoleLog.checked = result.consoleLogs || false;
     }
     // 加载主题设置
-    if (result.theme) {
-      document.documentElement.setAttribute('data-theme', result.theme);
+    const themePref = result.theme || 'system';
+    const themeSelect = document.getElementById('setting-theme');
+    if (themeSelect) {
+      themeSelect.value = themePref;
     }
+    applyTheme(themePref, false);
   });
 }
 
-// 切换主题
-function toggleTheme() {
-  const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
-  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+// 应用主题
+function applyTheme(pref, withTransition) {
+  let resolvedTheme;
+  if (pref === 'system') {
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    resolvedTheme = isDark ? 'dark' : 'light';
+  } else {
+    resolvedTheme = pref;
+  }
 
-  // 添加过渡动画
-  document.documentElement.setAttribute('data-theme-transition', '');
-  document.documentElement.setAttribute('data-theme', newTheme);
+  if (withTransition) {
+    document.documentElement.setAttribute('data-theme-transition', '');
+    setTimeout(() => {
+      document.documentElement.removeAttribute('data-theme-transition');
+    }, 400);
+  }
 
-  // 移除过渡标记（避免后续正常操作也带过渡效果）
-  setTimeout(() => {
-    document.documentElement.removeAttribute('data-theme-transition');
-  }, 400);
-
-  // 持久化保存
-  chrome.storage.local.set({ theme: newTheme });
-
-  // 提示用户
-  showToast(newTheme === 'light' ? window.i18n.t('switchedToLight') : window.i18n.t('switchedToDark'));
+  document.documentElement.setAttribute('data-theme', resolvedTheme);
 }
+
+// 监听系统主题切换（仅在 system 模式下生效）
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+  chrome.storage.local.get(['theme'], (result) => {
+    const pref = result.theme || 'system';
+    if (pref === 'system') {
+      applyTheme('system', true);
+    }
+  });
+});
 
 // 切换Tab
 function switchTab(tab) {

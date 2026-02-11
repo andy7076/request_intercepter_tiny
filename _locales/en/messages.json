@@ -545,13 +545,13 @@
   "themeModeDesc": {
     "message": "Switch between light and dark mode"
   },
-  "themeToggle": {
-    "message": "Toggle theme"
+  "themeSystem": {
+    "message": "System"
   },
-  "switchedToLight": {
-    "message": "Switched to light mode"
+  "themeLight": {
+    "message": "Light"
   },
-  "switchedToDark": {
-    "message": "Switched to dark mode"
+  "themeDark": {
+    "message": "Dark"
   }
 }
