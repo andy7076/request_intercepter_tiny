@@ -1164,9 +1164,6 @@ body {
   line-height: 1.4;
   border: 1px solid rgba(255, 255, 255, 0.05);
   overflow: hidden;
-  max-height: 200px;
-  /* Limit max height to prevent one rule taking over */
-  overflow-y: auto;
 }
 
 /* Form Styles */
