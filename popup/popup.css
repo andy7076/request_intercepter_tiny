@@ -388,6 +388,61 @@
   background-color: rgba(15, 23, 42, 0.25);
 }
 
+/* Light theme - renderjson scrollbar */
+[data-theme="light"] .response-content .renderjson-container {
+  scrollbar-color: rgba(15, 23, 42, 0.2) transparent;
+}
+
+[data-theme="light"] .response-content .renderjson-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-theme="light"] .response-content .renderjson-container::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.2);
+}
+
+[data-theme="light"] .response-content .renderjson-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.35);
+}
+
+/* Light theme - CodeMirror scrollbar */
+[data-theme="light"] .CodeMirror-vscrollbar::-webkit-scrollbar-track,
+[data-theme="light"] .CodeMirror-hscrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-theme="light"] .CodeMirror-vscrollbar::-webkit-scrollbar-thumb,
+[data-theme="light"] .CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.15);
+}
+
+[data-theme="light"] .CodeMirror-vscrollbar::-webkit-scrollbar-thumb:hover,
+[data-theme="light"] .CodeMirror-hscrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.25);
+}
+
+/* Light theme - Editor modal textarea scrollbar */
+[data-theme="light"] .editor-modal-content textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-theme="light"] .editor-modal-content textarea::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.15);
+}
+
+[data-theme="light"] .editor-modal-content textarea::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.25);
+}
+
+/* Light theme - cURL textarea scrollbar */
+[data-theme="light"] .curl-input-group textarea::-webkit-scrollbar-thumb {
+  background-color: rgba(15, 23, 42, 0.15);
+}
+
+[data-theme="light"] .curl-input-group textarea::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(15, 23, 42, 0.25);
+}
+
 /* Theme transition for smooth switching */
 [data-theme-transition] * {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
