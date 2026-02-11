@@ -281,7 +281,7 @@
 }
 
 [data-theme="light"] .empty-state p {
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
