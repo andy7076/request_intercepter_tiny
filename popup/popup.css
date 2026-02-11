@@ -256,6 +256,10 @@
   color: var(--text-secondary);
 }
 
+[data-theme="light"] .btn-search-text:hover {
+  color: var(--primary-dark);
+}
+
 [data-theme="light"] .btn-search-text:hover kbd {
   background: rgba(15, 23, 42, 0.1);
   border-color: rgba(15, 23, 42, 0.18);
