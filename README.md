@@ -34,7 +34,7 @@ Request Interceptor Tiny is a Chrome extension designed for developers, providin
   Copy a request's cURL command from browser DevTools and parse it with one click to create a rule. Automatically fetches the real response to use as a Mock data template.
 
 - **🎨 Minimalist Modern UI**  
-  Dark mode design with glassmorphism style, featuring a refined interface and smooth interactions.
+  Supports three theme modes — **System**, **Light**, and **Dark** — with smooth switching transitions. Glassmorphism design style with refined interface and fluid interactions.
 
 - **🚀 Lightweight & Secure**  
   Built on Chrome Manifest V3 specification, pure native JavaScript implementation with no additional dependencies, zero performance overhead.
