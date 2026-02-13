@@ -57,14 +57,23 @@ function renderLogs(logs) {
     `;
   }).join('');
 
-  // 为可点击的日志项添加事件
-  logsList.querySelectorAll('.log-item-clickable').forEach(item => {
-    item.addEventListener('click', () => {
-      const index = parseInt(item.dataset.logIndex);
-      const log = cachedLogs[index];
-      if (log) { openDiffModal(log); }
+
+
+  // 优化：使用事件委托处理点击事件
+  // 移除旧的事件监听（如果有）可以避免重复，但这里是重新渲染 innerHTML，旧的元素已经被销毁，所以不需要手动移除旧元素的监听器
+  // 但是需要在 logsList 上绑定一次监听器。为了避免多次绑定，可以先检查或在 init 时绑定。
+  // 简单起见，这里我们确保 logsList 的点击事件只处理 .log-item-clickable
+  if (!logsList._hasClickListener) {
+    logsList.addEventListener('click', (e) => {
+      const item = e.target.closest('.log-item-clickable');
+      if (item) {
+        const index = parseInt(item.dataset.logIndex);
+        const log = cachedLogs[index];
+        if (log) { openDiffModal(log); }
+      }
     });
-  });
+    logsList._hasClickListener = true;
+  }
 }
 
 // 清空日志

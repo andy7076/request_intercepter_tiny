@@ -158,8 +158,9 @@ function setupEventListeners() {
   }
   if (clearSearchBtn) { clearSearchBtn.addEventListener('click', clearSearch); }
 
-  // JSON 实时验证（回退）
-  responseBody.addEventListener('input', validateJsonRealtime);
+  // JSON 实时验证（防抖）
+  const debouncedValidate = window.App.utils.debounce(validateJsonRealtime, 300);
+  responseBody.addEventListener('input', debouncedValidate);
   modalTextarea.addEventListener('input', () => {
     const modalCM = window.App.editor.getModalCodeMirror();
     if (!modalCM) {
@@ -167,7 +168,7 @@ function setupEventListeners() {
       const formCM = getFormCodeMirror();
       if (formCM) { formCM.setValue(modalTextarea.value); }
     }
-    validateJsonRealtime();
+    debouncedValidate();
   });
 
   // Tab 键缩进（回退）

@@ -80,7 +80,11 @@ function initFormCodeMirror(config) {
   formCodeMirror.on('change', (cm) => {
     textarea.value = cm.getValue();
     if (window.App && window.App.editor) {
-      window.App.editor.validateJsonRealtime();
+      // 使用防抖验证
+      if (!window.App.editor._debouncedValidate) {
+        window.App.editor._debouncedValidate = window.App.utils.debounce(window.App.editor.validateJsonRealtime, 300);
+      }
+      window.App.editor._debouncedValidate();
     }
   });
 }
@@ -150,7 +154,11 @@ function initModalCodeMirror() {
     }
 
     if (window.App && window.App.editor) {
-      window.App.editor.validateJsonRealtime();
+      // 使用防抖验证
+      if (!window.App.editor._debouncedValidate) {
+        window.App.editor._debouncedValidate = window.App.utils.debounce(window.App.editor.validateJsonRealtime, 300);
+      }
+      window.App.editor._debouncedValidate();
     }
   });
 

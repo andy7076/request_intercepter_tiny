@@ -13,6 +13,9 @@
     }
   }
   
+  // 规则数量状态（默认为 1 以确保初始化期间不漏掉请求，直到收到准确数量）
+  let activeRulesCount = 1;
+
   // 生成唯一 ID
   let requestIdCounter = 0;
   function generateRequestId() {
@@ -80,6 +83,7 @@
     
     // 监听规则更新通知
     if (event.data.type === 'REQUEST_INTERCEPTOR_RULES_UPDATED') {
+      activeRulesCount = event.data.rulesCount;
       log(`[Request Interceptor Tiny] 🔄 Rules have been updated! Current enabled rules count: ${event.data.rulesCount}`);
       log('[Request Interceptor Tiny] 💡 New requests will use updated rules');
     }
@@ -98,6 +102,11 @@
   
   // 检查 URL 是否需要被 mock
   function checkMockRule(url) {
+    // 性能优化：如果没有启用任何规则，直接放行，不进行 postMessage通信
+    if (activeRulesCount === 0) {
+      return Promise.resolve(null);
+    }
+
     return new Promise((resolve) => {
       const requestId = generateRequestId();
       

@@ -82,6 +82,11 @@ function loadSettings() {
 log('[Request Interceptor Tiny] 🚀', 'Initializing content script...');
 loadMockRules().then(() => {
   log('[Request Interceptor Tiny] ✨', 'Initialization complete');
+  // Send initial rules count to injected script
+  window.postMessage({
+    type: 'REQUEST_INTERCEPTOR_RULES_UPDATED',
+    rulesCount: mockRules.length
+  }, '*');
 });
 loadSettings();
 
