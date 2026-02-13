@@ -61,10 +61,10 @@
     if (event.source !== window) return;
     
     if (event.data.type === 'REQUEST_INTERCEPTOR_MOCK') {
-      const { requestId, mockResponse } = event.data;
+      const { requestId, mockResponse, logRequestId } = event.data;
       const pending = pendingRequests.get(requestId);
       if (pending) {
-        pending.resolve(mockResponse);
+        pending.resolve({ mockResponse, logRequestId });
         pendingRequests.delete(requestId);
       }
     }
@@ -133,9 +133,10 @@
     
     try {
       // 检查是否有匹配的 mock 规则
-      const mockResponse = await checkMockRule(url);
+      const mockResult = await checkMockRule(url);
       
-      if (mockResponse) {
+      if (mockResult) {
+        const { mockResponse, logRequestId } = mockResult;
         log('[Request Interceptor Tiny] 🎭 Will mock fetch response:', url);
         
         let realResponse = null;
@@ -158,7 +159,7 @@
         if (originalBody !== null) {
           window.postMessage({
             type: 'REQUEST_INTERCEPTOR_ORIGINAL_RESPONSE',
-            url: url,
+            logRequestId: logRequestId,
             originalBody: originalBody
           }, '*');
         }
@@ -238,8 +239,9 @@
     }
     
     // 异步检查 mock 规则
-    checkMockRule(url).then(mockResponse => {
-      if (mockResponse) {
+    checkMockRule(url).then(mockResult => {
+      if (mockResult) {
+        const { mockResponse, logRequestId } = mockResult;
         log('[Request Interceptor Tiny] 🎭 Will mock XHR response:', url);
         
         // 保存原始的事件处理器
@@ -263,7 +265,7 @@
               if (originalXHRBody) {
                 window.postMessage({
                   type: 'REQUEST_INTERCEPTOR_ORIGINAL_RESPONSE',
-                  url: url,
+                  logRequestId: logRequestId,
                   originalBody: originalXHRBody
                 }, '*');
               }
@@ -310,7 +312,7 @@
                 return mock.contentType || 'application/json';
               }
               if (header.toLowerCase() === 'x-mocked-by') {
-                return 'Request-Interceptor-Pro';
+                return 'Request-Interceptor-Tiny';
               }
               return originalGetResponseHeader(header);
             };

@@ -31,84 +31,42 @@ chrome.action.onClicked.addListener((tab) => {
 });
 
 // 监听来自 side panel 和 content script 的消息
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'GET_RULES') {
-    getRules().then(sendResponse);
-    return true;
-  }
-  
-  if (message.type === 'ADD_RULE') {
-    addRule(message.rule).then(sendResponse);
-    return true;
-  }
-  
-  if (message.type === 'UPDATE_RULE') {
-    updateRule(message.ruleId, message.rule).then(sendResponse);
-    return true;
-  }
-  
-  if (message.type === 'DELETE_RULE') {
-    deleteRule(message.ruleId).then(sendResponse);
-    return true;
-  }
-  
-  if (message.type === 'TOGGLE_RULE') {
-    toggleRule(message.ruleId).then(sendResponse);
-    return true;
-  }
-  
-  if (message.type === 'GET_LOGS') {
-    getLogs().then(sendResponse);
-    return true;
-  }
-  
-  if (message.type === 'CLEAR_LOGS') {
-    clearLogs().then(sendResponse);
-    return true;
-  }
-  
-  if (message.type === 'CLEAR_ALL_RULES') {
-    clearAllRules().then(sendResponse);
-    return true;
-  }
-
-  if (message.type === 'DISABLE_ALL_RULES') {
-    disableAllRules().then(sendResponse);
-    return true;
-  }
-  
-  // Content Script 请求获取 mock 规则
-  if (message.type === 'GET_MOCK_RULES') {
-    getMockRules().then(sendResponse);
-    return true;
-  }
-  
-  // Content Script 记录 mock 请求日志
-  if (message.type === 'LOG_MOCK_REQUEST') {
+// 使用 handler map 替代 if-else 链
+const messageHandlers = {
+  GET_RULES: () => getRules(),
+  ADD_RULE: (msg) => addRule(msg.rule),
+  UPDATE_RULE: (msg) => updateRule(msg.ruleId, msg.rule),
+  DELETE_RULE: (msg) => deleteRule(msg.ruleId),
+  TOGGLE_RULE: (msg) => toggleRule(msg.ruleId),
+  GET_LOGS: () => getLogs(),
+  CLEAR_LOGS: () => clearLogs(),
+  CLEAR_ALL_RULES: () => clearAllRules(),
+  DISABLE_ALL_RULES: () => disableAllRules(),
+  GET_MOCK_RULES: () => getMockRules(),
+  LOG_MOCK_REQUEST: (msg, sender) => {
     addLog({
-      ruleName: message.ruleName,
-      ruleType: message.ruleType,
-      url: message.url,
+      ruleName: msg.ruleName,
+      ruleType: msg.ruleType,
+      url: msg.url,
       method: 'GET',
-      mockedBody: message.mockedBody || '',
-      logTimestamp: message.logTimestamp || '',
+      mockedBody: msg.mockedBody || '',
+      logTimestamp: msg.logTimestamp || '',
       tabId: sender.tab?.id,
       frameId: sender.frameId
     });
-    sendResponse({ success: true });
-    return true;
-  }
+    return { success: true };
+  },
+  UPDATE_LOG_ORIGINAL_BODY: (msg) => {
+    updateLogOriginalBody(msg.logTimestamp, msg.originalBody);
+    return { success: true };
+  },
+  FETCH_URL: (msg) => executeFetch(msg.request)
+};
 
-  // 更新日志的原始响应体
-  if (message.type === 'UPDATE_LOG_ORIGINAL_BODY') {
-    updateLogOriginalBody(message.logTimestamp, message.originalBody);
-    sendResponse({ success: true });
-    return true;
-  }
-
-  // 执行 HTTP 请求（用于 cURL 导入功能）
-  if (message.type === 'FETCH_URL') {
-    executeFetch(message.request)
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  const handler = messageHandlers[message.type];
+  if (handler) {
+    Promise.resolve(handler(message, sender))
       .then(sendResponse)
       .catch(err => sendResponse({ error: err.message }));
     return true;
@@ -210,7 +168,7 @@ async function notifyMockRulesUpdated() {
 async function addRule(rule) {
   const rules = await getRules();
   const newRule = {
-    id: Date.now().toString(),
+    id: crypto.randomUUID(),
     enabled: true,
     createdAt: new Date().toISOString(),
     ...rule
@@ -312,7 +270,7 @@ async function clearLogs() {
 async function addLog(logEntry) {
   const logs = await getLogs();
   logs.unshift({
-    id: Date.now().toString(),
+    id: crypto.randomUUID(),
     timestamp: new Date().toISOString(),
     ...logEntry
   });

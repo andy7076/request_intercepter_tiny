@@ -25,8 +25,8 @@ function log(...args) {
 let mockRules = [];
 let isInitialized = false;
 
-// 存储待关联的日志 URL，用于将原始响应体与日志关联
-const pendingLogUrls = new Map();
+// 存储待关联的日志，用于将原始响应体与日志关联
+const pendingLogs = new Map();
 
 // 从 storage 直接获取规则（不依赖 background）
 function loadMockRules() {
@@ -209,7 +209,7 @@ window.addEventListener('message', async (event) => {
   if (event.data.type === 'REQUEST_INTERCEPTOR_CHECK') {
     const { url, requestId } = event.data;
     
-    log('[Request Interceptor Tiny]', 'Checking URL:', url);
+    log('[Request Interceptor Tiny]', 'Checking URL:', url, '| Rules count:', mockRules.length);
     
     // 检查扩展上下文是否有效
     if (!isExtensionContextValid()) {
@@ -220,18 +220,6 @@ window.addEventListener('message', async (event) => {
       }, '*');
       return;
     }
-    
-    // 每次检查时从 storage 加载最新规则，确保规则是最新的
-    try {
-      const result = await chrome.storage.local.get('interceptRules');
-      const allRules = result.interceptRules || [];
-      mockRules = allRules.filter(r => r.enabled && r.type === 'mockResponse');
-    } catch (e) {
-      // 如果加载失败，使用缓存的规则
-      log('[Request Interceptor Tiny]', 'Failed to reload rules, using cached');
-    }
-    
-    log('[Request Interceptor Tiny]', 'Checking URL:', url, '| Rules count:', mockRules.length);
     
     const mockRule = findMockRule(url);
     log('[Request Interceptor Tiny]', 'Match result:', mockRule ? `Matched: ${mockRule.name}` : 'No match');
@@ -246,16 +234,17 @@ window.addEventListener('message', async (event) => {
           contentType: mockRule.contentType || 'application/json',
           status: 200,
           statusText: 'OK (Mocked)'
-        }
+        },
+        logRequestId: requestId
       }, '*');
       
       // 记录日志（包裹在 try-catch 中防止崩溃）
       try {
         const logTimestamp = Date.now().toString();
-        // 记录待关联的 URL，等待原始响应体
-        pendingLogUrls.set(url, logTimestamp);
+        // 使用 requestId 作为 key，避免同 URL 并发请求时碰撞
+        pendingLogs.set(requestId, logTimestamp);
         // 5秒后清理，避免内存泄漏
-        setTimeout(() => pendingLogUrls.delete(url), 5000);
+        setTimeout(() => pendingLogs.delete(requestId), 5000);
         
         chrome.runtime.sendMessage({
           type: 'LOG_MOCK_REQUEST',
@@ -283,13 +272,13 @@ window.addEventListener('message', (event) => {
   if (event.source !== window) return;
   
   if (event.data.type === 'REQUEST_INTERCEPTOR_ORIGINAL_RESPONSE') {
-    const { url, originalBody } = event.data;
+    const { logRequestId, originalBody } = event.data;
     
     if (!isExtensionContextValid()) return;
     
-    const logTimestamp = pendingLogUrls.get(url);
+    const logTimestamp = pendingLogs.get(logRequestId);
     if (logTimestamp) {
-      pendingLogUrls.delete(url);
+      pendingLogs.delete(logRequestId);
       try {
         chrome.runtime.sendMessage({
           type: 'UPDATE_LOG_ORIGINAL_BODY',
