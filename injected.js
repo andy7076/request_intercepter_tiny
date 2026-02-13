@@ -139,11 +139,28 @@
         log('[Request Interceptor Tiny] 🎭 Will mock fetch response:', url);
         
         let realResponse = null;
+        let originalBody = null;
         try {
           // 尝试发出真实请求（Network 面板显示原始请求和响应）
           realResponse = await originalFetch.apply(this, arguments);
+          // 读取原始响应体用于 diff 对比
+          try {
+            const clonedResponse = realResponse.clone();
+            originalBody = await clonedResponse.text();
+          } catch (bodyErr) {
+            log('[Request Interceptor Tiny] ⚠️ Failed to read original response body:', bodyErr);
+          }
         } catch (err) {
           log('[Request Interceptor Tiny] ⚠️ Real request failed (likely blocked by CSP/Network), using fallback properties:', err);
+        }
+        
+        // 将原始响应体发送回 content script 用于日志记录
+        if (originalBody !== null) {
+          window.postMessage({
+            type: 'REQUEST_INTERCEPTOR_ORIGINAL_RESPONSE',
+            url: url,
+            originalBody: originalBody
+          }, '*');
         }
         
         // 创建一个伪装的 Response 对象，它保留原始响应的属性，但返回 mock 的内容
@@ -239,6 +256,20 @@
             // 在请求完成后，覆盖响应属性（Network 面板显示原始响应，代码读取 mock 数据）
             log('[Request Interceptor Tiny] ✅ Response mocked for XHR:', url);
             const mock = xhr._mockResponse;
+            
+            // 读取原始响应体用于 diff 对比
+            try {
+              const originalXHRBody = xhr.responseText;
+              if (originalXHRBody) {
+                window.postMessage({
+                  type: 'REQUEST_INTERCEPTOR_ORIGINAL_RESPONSE',
+                  url: url,
+                  originalBody: originalXHRBody
+                }, '*');
+              }
+            } catch (bodyErr) {
+              log('[Request Interceptor Tiny] ⚠️ Failed to read original XHR response body:', bodyErr);
+            }
             
             try {
               Object.defineProperty(xhr, 'responseText', {

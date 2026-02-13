@@ -90,9 +90,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       ruleType: message.ruleType,
       url: message.url,
       method: 'GET',
+      mockedBody: message.mockedBody || '',
+      logTimestamp: message.logTimestamp || '',
       tabId: sender.tab?.id,
       frameId: sender.frameId
     });
+    sendResponse({ success: true });
+    return true;
+  }
+
+  // 更新日志的原始响应体
+  if (message.type === 'UPDATE_LOG_ORIGINAL_BODY') {
+    updateLogOriginalBody(message.logTimestamp, message.originalBody);
     sendResponse({ success: true });
     return true;
   }
@@ -314,6 +323,18 @@ async function addLog(logEntry) {
   }
   
   await chrome.storage.local.set({ [LOGS_STORAGE_KEY]: logs });
+}
+
+// 更新日志的原始响应体
+async function updateLogOriginalBody(logTimestamp, originalBody) {
+  if (!logTimestamp || !originalBody) return;
+  
+  const logs = await getLogs();
+  const log = logs.find(l => l.logTimestamp === logTimestamp);
+  if (log) {
+    log.originalBody = originalBody;
+    await chrome.storage.local.set({ [LOGS_STORAGE_KEY]: logs });
+  }
 }
 
 

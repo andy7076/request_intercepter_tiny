@@ -25,6 +25,9 @@ function log(...args) {
 let mockRules = [];
 let isInitialized = false;
 
+// 存储待关联的日志 URL，用于将原始响应体与日志关联
+const pendingLogUrls = new Map();
+
 // 从 storage 直接获取规则（不依赖 background）
 function loadMockRules() {
   if (!isExtensionContextValid()) return Promise.resolve([]);
@@ -248,11 +251,19 @@ window.addEventListener('message', async (event) => {
       
       // 记录日志（包裹在 try-catch 中防止崩溃）
       try {
+        const logTimestamp = Date.now().toString();
+        // 记录待关联的 URL，等待原始响应体
+        pendingLogUrls.set(url, logTimestamp);
+        // 5秒后清理，避免内存泄漏
+        setTimeout(() => pendingLogUrls.delete(url), 5000);
+        
         chrome.runtime.sendMessage({
           type: 'LOG_MOCK_REQUEST',
           ruleName: mockRule.name,
           ruleType: mockRule.type,
-          url: url
+          url: url,
+          mockedBody: mockRule.responseBody,
+          logTimestamp: logTimestamp
         });
       } catch (e) {
         // 上下文失效，忽略日志记录错误
@@ -263,6 +274,31 @@ window.addEventListener('message', async (event) => {
         type: 'REQUEST_INTERCEPTOR_PASSTHROUGH',
         requestId: requestId
       }, '*');
+    }
+  }
+});
+
+// 监听原始响应体消息（用于关联到日志）
+window.addEventListener('message', (event) => {
+  if (event.source !== window) return;
+  
+  if (event.data.type === 'REQUEST_INTERCEPTOR_ORIGINAL_RESPONSE') {
+    const { url, originalBody } = event.data;
+    
+    if (!isExtensionContextValid()) return;
+    
+    const logTimestamp = pendingLogUrls.get(url);
+    if (logTimestamp) {
+      pendingLogUrls.delete(url);
+      try {
+        chrome.runtime.sendMessage({
+          type: 'UPDATE_LOG_ORIGINAL_BODY',
+          logTimestamp: logTimestamp,
+          originalBody: originalBody
+        });
+      } catch (e) {
+        // 忽略错误
+      }
     }
   }
 });

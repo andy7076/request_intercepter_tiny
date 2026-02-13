@@ -1599,8 +1599,12 @@ async function loadLogs() {
   renderLogs(logs);
 }
 
+// 缓存日志数据用于 diff 查看
+let cachedLogs = [];
+
 // 渲染日志列表
 function renderLogs(logs) {
+  cachedLogs = logs;
   logCount.textContent = window.i18n.t('recentMatchRecords', logs.length);
 
   if (logs.length === 0) {
@@ -1614,7 +1618,7 @@ function renderLogs(logs) {
     return;
   }
 
-  logsList.innerHTML = logs.map(log => {
+  logsList.innerHTML = logs.map((log, index) => {
     const locale = window.i18n && window.i18n.getCurrentLanguage() === 'zh_CN' ? 'zh-CN' : 'en-US';
     const time = new Date(log.timestamp).toLocaleString(locale, {
       hour: '2-digit',
@@ -1622,20 +1626,246 @@ function renderLogs(logs) {
       second: '2-digit'
     });
 
+    const hasDiffData = log.mockedBody || log.originalBody;
+    const clickableClass = hasDiffData ? 'log-item-clickable' : '';
+    const diffHint = hasDiffData ? `<span class="log-diff-badge" data-i18n="viewDiff">${window.i18n.t('viewDiff')}</span>` : '';
+
     return `
-      <div class="log-item">
+      <div class="log-item ${clickableClass}" data-log-index="${index}">
         <div class="log-header">
           <span>
             <span class="log-type mockResponse">🎯 Mock</span>
             <span class="log-rule">${escapeHtml(log.ruleName)}</span>
           </span>
-          <span class="log-time">${time}</span>
+          <span class="log-header-right">
+            ${diffHint}
+            <span class="log-time">${time}</span>
+          </span>
         </div>
         <div class="log-url">${log.method || 'GET'} ${escapeHtml(log.url)}</div>
       </div>
     `;
   }).join('');
+
+  // 为可点击的日志项添加事件
+  logsList.querySelectorAll('.log-item-clickable').forEach(item => {
+    item.addEventListener('click', () => {
+      const index = parseInt(item.dataset.logIndex);
+      const log = cachedLogs[index];
+      if (log) {
+        openDiffModal(log);
+      }
+    });
+  });
 }
+
+// ==================== Diff 查看器 ====================
+
+// 格式化 JSON 字符串
+function formatJson(str) {
+  if (!str) return '';
+  try {
+    const parsed = JSON.parse(str);
+    return JSON.stringify(parsed, null, 2);
+  } catch {
+    return str;
+  }
+}
+
+// 简单的行级 diff 算法（LCS-based）
+function computeDiff(oldText, newText) {
+  const oldLines = oldText.split('\n');
+  const newLines = newText.split('\n');
+  
+  // 使用 LCS 算法找到公共行
+  const m = oldLines.length;
+  const n = newLines.length;
+  
+  // 构建 LCS 表（优化内存，只保留相关结果）
+  const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+  
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (oldLines[i - 1] === newLines[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1] + 1;
+      } else {
+        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+  }
+  
+  // 回溯生成 diff 结果
+  const result = [];
+  let i = m, j = n;
+  const temp = [];
+  
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && oldLines[i - 1] === newLines[j - 1]) {
+      temp.push({ type: 'equal', content: oldLines[i - 1], oldLine: i, newLine: j });
+      i--;
+      j--;
+    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+      temp.push({ type: 'add', content: newLines[j - 1], newLine: j });
+      j--;
+    } else {
+      temp.push({ type: 'remove', content: oldLines[i - 1], oldLine: i });
+      i--;
+    }
+  }
+  
+  // 反转得到正确顺序
+  return temp.reverse();
+}
+
+// 渲染 diff 内容
+function renderDiffContent(diff) {
+  if (diff.length === 0) {
+    return `<div class="diff-empty">${window.i18n.t('diffEmpty')}</div>`;
+  }
+  
+  let html = '<div class="diff-lines">';
+  let lineNum = 0;
+  
+  diff.forEach(item => {
+    lineNum++;
+    const escapedContent = escapeHtml(item.content);
+    
+    if (item.type === 'equal') {
+      html += `<div class="diff-line diff-equal">
+        <span class="diff-line-num">${lineNum}</span>
+        <span class="diff-line-marker">&nbsp;</span>
+        <span class="diff-line-content">${escapedContent || '&nbsp;'}</span>
+      </div>`;
+    } else if (item.type === 'remove') {
+      html += `<div class="diff-line diff-remove">
+        <span class="diff-line-num">${lineNum}</span>
+        <span class="diff-line-marker">−</span>
+        <span class="diff-line-content">${escapedContent || '&nbsp;'}</span>
+      </div>`;
+    } else if (item.type === 'add') {
+      html += `<div class="diff-line diff-add">
+        <span class="diff-line-num">${lineNum}</span>
+        <span class="diff-line-marker">+</span>
+        <span class="diff-line-content">${escapedContent || '&nbsp;'}</span>
+      </div>`;
+    }
+  });
+  
+  html += '</div>';
+  return html;
+}
+
+// 渲染原文或修改后内容
+function renderJsonContent(text) {
+  if (!text) {
+    return `<div class="diff-empty">${window.i18n.t('diffNoData')}</div>`;
+  }
+  
+  const formatted = formatJson(text);
+  const lines = formatted.split('\n');
+  
+  let html = '<div class="diff-lines">';
+  lines.forEach((line, index) => {
+    const escapedContent = escapeHtml(line);
+    html += `<div class="diff-line diff-equal">
+      <span class="diff-line-num">${index + 1}</span>
+      <span class="diff-line-marker">&nbsp;</span>
+      <span class="diff-line-content">${escapedContent || '&nbsp;'}</span>
+    </div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+// 当前 diff 数据
+let currentDiffLog = null;
+
+// 打开 diff 模态框
+function openDiffModal(log) {
+  currentDiffLog = log;
+  const diffModal = document.getElementById('diff-modal');
+  if (!diffModal) return;
+  
+  diffModal.classList.add('active');
+  
+  // 默认显示 diff 视图
+  switchDiffTab('diff');
+}
+
+// 关闭 diff 模态框
+function closeDiffModal() {
+  const diffModal = document.getElementById('diff-modal');
+  if (diffModal) {
+    diffModal.classList.remove('active');
+  }
+  currentDiffLog = null;
+}
+
+// 切换 diff 视图标签
+function switchDiffTab(tab) {
+  // 更新标签按钮状态
+  document.querySelectorAll('.diff-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.diffTab === tab);
+  });
+  
+  const diffContent = document.getElementById('diff-content');
+  if (!diffContent || !currentDiffLog) return;
+  
+  const original = currentDiffLog.originalBody || '';
+  const modified = currentDiffLog.mockedBody || '';
+  
+  if (tab === 'diff') {
+    if (!original && !modified) {
+      diffContent.innerHTML = `<div class="diff-empty">${window.i18n.t('diffNoData')}</div>`;
+    } else if (!original) {
+      diffContent.innerHTML = `<div class="diff-notice">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <span data-i18n="diffNoOriginal">${window.i18n.t('diffNoOriginal')}</span>
+      </div>` + renderJsonContent(modified);
+    } else {
+      const formattedOriginal = formatJson(original);
+      const formattedModified = formatJson(modified);
+      const diff = computeDiff(formattedOriginal, formattedModified);
+      diffContent.innerHTML = renderDiffContent(diff);
+    }
+  } else if (tab === 'original') {
+    diffContent.innerHTML = renderJsonContent(original);
+  } else if (tab === 'modified') {
+    diffContent.innerHTML = renderJsonContent(modified);
+  }
+}
+
+// 初始化 Diff 模态框事件
+document.addEventListener('DOMContentLoaded', () => {
+  const diffModal = document.getElementById('diff-modal');
+  const diffCloseBtn = document.getElementById('diff-modal-close');
+  
+  if (diffCloseBtn) {
+    diffCloseBtn.addEventListener('click', closeDiffModal);
+  }
+  
+  if (diffModal) {
+    diffModal.addEventListener('click', (e) => {
+      if (e.target === diffModal) {
+        closeDiffModal();
+      }
+    });
+  }
+  
+  // Diff 标签切换
+  document.querySelectorAll('.diff-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      switchDiffTab(btn.dataset.diffTab);
+    });
+  });
+  
+  // ESC 关闭
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && diffModal && diffModal.classList.contains('active')) {
+      closeDiffModal();
+    }
+  });
+});
 
 // 清空日志
 async function handleClearLogs() {
@@ -1653,6 +1883,7 @@ setInterval(() => {
     loadLogs();
   }
 }, 3000);
+
 
 // 清空所有规则
 async function handleClearRules() {

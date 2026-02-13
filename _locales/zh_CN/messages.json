@@ -553,5 +553,29 @@
   },
   "themeDark": {
     "message": "深色"
+  },
+  "diffViewerTitle": {
+    "message": "响应数据对比"
+  },
+  "diffTabDiff": {
+    "message": "对比"
+  },
+  "diffTabOriginal": {
+    "message": "原始数据"
+  },
+  "diffTabModified": {
+    "message": "修改后数据"
+  },
+  "viewDiff": {
+    "message": "查看差异"
+  },
+  "diffNoData": {
+    "message": "暂无响应数据"
+  },
+  "diffNoOriginal": {
+    "message": "未捕获原始响应（可能请求失败或被阻止）"
+  },
+  "diffEmpty": {
+    "message": "无差异"
   }
 }

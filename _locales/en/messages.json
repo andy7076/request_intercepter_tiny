@@ -553,5 +553,29 @@
   },
   "themeDark": {
     "message": "Dark"
+  },
+  "diffViewerTitle": {
+    "message": "Response Diff"
+  },
+  "diffTabDiff": {
+    "message": "Diff"
+  },
+  "diffTabOriginal": {
+    "message": "Original"
+  },
+  "diffTabModified": {
+    "message": "Modified"
+  },
+  "viewDiff": {
+    "message": "View Diff"
+  },
+  "diffNoData": {
+    "message": "No response data available"
+  },
+  "diffNoOriginal": {
+    "message": "Original response not captured (e.g. request failed or was blocked)"
+  },
+  "diffEmpty": {
+    "message": "No differences found"
   }
 }
