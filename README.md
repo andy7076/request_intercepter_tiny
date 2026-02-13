@@ -11,6 +11,8 @@ Request Interceptor Tiny is a Chrome extension designed for developers, providin
 - **🔌 API Mocking (Mock Response)**  
   Intercept any HTTP/HTTPS request and return your custom JSON response data. Supports wildcard `*` for URL matching.
 
+  > **Note:** The browser Network tab will still show the original request/response (transparent interception), but your application will receive the mocked data.
+
 - **🛠️ Powerful JSON Editor**  
   Built-in professional editor (based on CodeMirror) with support for:
   - **Smart Assistance**: Real-time JSON syntax validation, error prompts, code folding/expanding, and line numbers.
@@ -24,7 +26,7 @@ Request Interceptor Tiny is a Chrome extension designed for developers, providin
   Native support for English and Chinese interfaces, automatically adapting to your browser language or manual setting.
 
 - **📊 Request Log Monitoring**  
-  Real-time logging of all intercepted request details (URL, method, timestamp), giving you clear visibility into which requests have been successfully mocked.
+  Real-time logging of all intercepted request details. Supports viewing response bodies and comparing original vs mock data (Diff View), giving you clear visibility into the mocking results.
 
 - **🔁 Rule Management**
   - Quick creation, editing, deletion, and one-click enable/disable of rules.
