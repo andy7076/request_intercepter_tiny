@@ -566,8 +566,8 @@
   "diffTabModified": {
     "message": "修改后数据"
   },
-  "viewDiff": {
-    "message": "查看差异"
+  "clickToViewDiff": {
+    "message": "点击查看响应数据对比"
   },
   "diffNoData": {
     "message": "暂无响应数据"

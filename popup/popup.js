@@ -1628,19 +1628,16 @@ function renderLogs(logs) {
 
     const hasDiffData = log.mockedBody || log.originalBody;
     const clickableClass = hasDiffData ? 'log-item-clickable' : '';
-    const diffHint = hasDiffData ? `<span class="log-diff-badge" data-i18n="viewDiff">${window.i18n.t('viewDiff')}</span>` : '';
+    const titleAttr = hasDiffData ? `title="${window.i18n.t('clickToViewDiff')}"` : '';
 
     return `
-      <div class="log-item ${clickableClass}" data-log-index="${index}">
+      <div class="log-item ${clickableClass}" data-log-index="${index}" ${titleAttr}>
         <div class="log-header">
           <span>
             <span class="log-type mockResponse">🎯 Mock</span>
             <span class="log-rule">${escapeHtml(log.ruleName)}</span>
           </span>
-          <span class="log-header-right">
-            ${diffHint}
-            <span class="log-time">${time}</span>
-          </span>
+          <span class="log-time">${time}</span>
         </div>
         <div class="log-url">${log.method || 'GET'} ${escapeHtml(log.url)}</div>
       </div>

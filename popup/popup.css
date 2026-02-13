@@ -1833,32 +1833,6 @@ border-radius: 6px;
   margin-bottom: 4px;
 }
 
-.log-header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.log-diff-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 1px 6px;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--primary-light);
-  background: rgba(99, 102, 241, 0.12);
-  border-radius: 4px;
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  letter-spacing: 0.02em;
-  transition: var(--transition);
-}
-
-.log-item-clickable:hover .log-diff-badge {
-  background: rgba(99, 102, 241, 0.2);
-  border-color: rgba(99, 102, 241, 0.4);
-  color: #fff;
-}
-
 .log-rule {
   font-weight: 600;
   font-size: 13px;

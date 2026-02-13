@@ -566,8 +566,8 @@
   "diffTabModified": {
     "message": "Modified"
   },
-  "viewDiff": {
-    "message": "View Diff"
+  "clickToViewDiff": {
+    "message": "Click to view response diff"
   },
   "diffNoData": {
     "message": "No response data available"
