@@ -2851,3 +2851,48 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   text-align: center;
   margin-right: 2px;
 }
+
+
+/* Input Validation Styles */
+.input-error-msg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 500;
+  animation: slideDown 0.2s ease-out;
+}
+
+.input-error-msg svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.form-group input.error {
+  border-color: var(--danger) !important;
+  background-color: var(--danger-bg);
+}
+
+.form-group input.error:focus {
+  box-shadow: 0 0 0 2px var(--danger-bg), 0 0 0 4px var(--danger-bg);
+  border-color: var(--danger) !important;
+}
+
+[data-theme="light"] .form-group input.error {
+  background-color: #fef2f2; /* Light red background */
+  border-color: var(--danger) !important;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
