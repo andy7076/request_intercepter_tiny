@@ -15,10 +15,10 @@ Request Interceptor Tiny is a Chrome extension designed for developers, providin
   Built-in professional editor (based on CodeMirror) with support for:
   - **Smart Assistance**: Real-time JSON syntax validation, error prompts, code folding/expanding, and line numbers.
   - **Enhanced Search & Replace**: Precise regex matching, real-time highlighting, and smart cursor tracking for a seamless editing flow.
-  - **Immersive Editing**: Supports in-popup fullscreen mode and independent Tab mode with responsive layout, perfect for large JSON files.
+  - **Immersive Editing**: Supports in-panel fullscreen mode and independent Tab mode with responsive layout, perfect for large JSON files.
 
 - **🖥️ Side Panel Mode**
-  Utilizes Chrome Side Panel API to provide a persistent interface that doesn't disrupt your browsing experience, eliminating the need to repeatedly open popups.
+  Utilizes Chrome Side Panel API to provide a persistent interface that doesn't disrupt your browsing experience, eliminating the need for separate pop-up windows.
 
 - **🌍 Internationalization Support**
   Native support for English and Chinese interfaces, automatically adapting to your browser language or manual setting.

@@ -30,7 +30,7 @@ chrome.action.onClicked.addListener((tab) => {
   chrome.sidePanel.open({ tabId: tab.id });
 });
 
-// 监听来自popup和content script的消息
+// 监听来自 side panel 和 content script 的消息
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'GET_RULES') {
     getRules().then(sendResponse);

@@ -1,7 +1,7 @@
 /**
  * Request Interceptor Tiny - 主入口
  * 
- * 模块加载顺序（在 popup.html 中按此顺序引入）：
+ * 模块加载顺序（在 panel.html 中按此顺序引入）：
  * 1. modules/utils.js      - 工具函数（无依赖）
  * 2. modules/toast.js      - Toast/Alert 通知（无依赖）
  * 3. modules/theme.js      - 主题管理（无依赖，包含早期初始化）
@@ -13,7 +13,7 @@
  * 9. modules/form.js       - 表单处理（依赖 utils, editor, rules, tabs, validation）
  * 10. modules/logs.js      - 日志管理（依赖 utils）
  * 11. modules/curl.js      - cURL 导入（依赖 utils, editor, validation）
- * 12. popup.js             - 主入口（协调所有模块）
+ * 12. panel.js             - 主入口（协调所有模块）
  */
 
 // Update platform-specific keyboard shortcut hints
@@ -213,7 +213,7 @@ function setupEventListeners() {
       if (currentTab === 'add' && checkFormDirty()) {
         if (!confirm(window.i18n.t('confirmDiscardChanges'))) return;
       }
-      chrome.tabs.create({ url: chrome.runtime.getURL('popup/popup.html?type=tab') });
+      chrome.tabs.create({ url: chrome.runtime.getURL('panel/panel.html?type=tab') });
       window.close();
     });
   }
