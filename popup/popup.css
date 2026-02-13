@@ -292,9 +292,11 @@
 
 /* Light theme - Toast */
 [data-theme="light"] .toast {
-  box-shadow:
-    0 8px 32px rgba(34, 197, 94, 0.2),
-    0 4px 12px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 
+    0 12px 36px -8px rgba(0, 0, 0, 0.12),
+    0 4px 12px -4px rgba(0, 0, 0, 0.06);
 }
 
 /* Light theme - CodeMirror */
@@ -1942,47 +1944,54 @@ border-radius: 6px;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 20px;
-  border-radius: 14px;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 12px;
   font-size: 13px;
   font-weight: 500;
-  color: white;
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.95), rgba(22, 163, 74, 0.95));
+  color: var(--text-primary);
+  background: rgba(15, 23, 42, 0.95);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow:
-    0 8px 32px rgba(34, 197, 94, 0.3),
-    0 4px 12px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* Added left border accent for better visibility */
+  border-left: 4px solid var(--success);
+  box-shadow: 
+    0 12px 36px -8px rgba(0, 0, 0, 0.4),
+    0 4px 12px -4px rgba(0, 0, 0, 0.2);
   z-index: 2000;
   animation: toastIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   max-width: 90%;
+  white-space: nowrap;
 }
 
 .toast::before {
+  /* Restore icon but keep it clean */
   content: '✓';
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  background: rgba(255, 255, 255, 0.2);
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
+  background-color: var(--success-bg);
+  color: var(--success);
   font-size: 12px;
+  font-weight: bold;
   flex-shrink: 0;
+  box-shadow: none; /* Removed glow to be cleaner */
 }
 
 .toast.error {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95));
-  box-shadow:
-    0 8px 32px rgba(239, 68, 68, 0.3),
-    0 4px 12px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-left-color: var(--danger);
+  /* Subtle red tint background can be added if needed, but border is strong enough */
 }
 
 .toast.error::before {
   content: '✕';
+  background-color: var(--danger-bg);
+  color: var(--danger);
+  box-shadow: none;
 }
 
 @keyframes toastIn {
