@@ -181,6 +181,9 @@ function switchDiffTab(tab) {
   } else if (tab === 'modified') {
     diffContent.innerHTML = renderJsonContent(modified);
   }
+
+  // 每次切换内容后重置滚动位置到顶部
+  diffContent.scrollTop = 0;
 }
 
 // 初始化 Diff 模态框事件
