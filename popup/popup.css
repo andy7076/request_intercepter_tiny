@@ -1977,8 +1977,8 @@ border-radius: 6px;
 .diff-line-content {
   flex: 1;
   padding: 1px 8px;
-  white-space: pre;
-  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 
 /* Diff line types */
