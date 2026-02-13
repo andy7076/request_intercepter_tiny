@@ -982,16 +982,32 @@ function filterAndRenderRules() {
   renderRules(filteredRules, searchQuery);
 }
 
+// 防抖函数
+function debounce(func, wait) {
+  let timeout;
+  return function(...args) {
+    const context = this;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(context, args), wait);
+  };
+}
+
+// 实际执行搜索过滤的函数（将被防抖处理）
+const performSearch = debounce(() => {
+  filterAndRenderRules();
+}, 300);
+
 // 处理搜索输入
 function handleSearchInput(e) {
   searchQuery = e.target.value.trim();
 
-  // 显示/隐藏清除按钮
+  // 显示/隐藏清除按钮（立即响应）
   if (clearSearchBtn) {
     clearSearchBtn.classList.toggle('visible', searchQuery.length > 0);
   }
 
-  filterAndRenderRules();
+  // 延迟执行搜索
+  performSearch();
 }
 
 // 清除搜索
@@ -1003,6 +1019,7 @@ function clearSearch() {
   if (clearSearchBtn) {
     clearSearchBtn.classList.remove('visible');
   }
+  // 立即清除，不需要防抖
   filterAndRenderRules();
 }
 
