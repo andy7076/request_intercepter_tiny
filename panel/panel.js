@@ -271,6 +271,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     await window.i18n.init();
   }
 
+  // Check for updates banner
+  chrome.storage.local.get(['justUpdated'], (result) => {
+    if (result.justUpdated) {
+      const banner = document.getElementById('update-banner');
+      const closeBtn = document.getElementById('close-update-banner');
+      if (banner && closeBtn) {
+        banner.style.display = 'flex';
+        closeBtn.addEventListener('click', () => {
+          banner.style.display = 'none';
+          chrome.storage.local.set({ justUpdated: false });
+        });
+      }
+    }
+  });
+
   // 2. 更新平台特定提示
   updatePlatformShortcutHints();
 

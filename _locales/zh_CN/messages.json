@@ -577,5 +577,8 @@
   },
   "diffEmpty": {
     "message": "无差异"
+  },
+  "updateBannerText": {
+    "message": "插件已安装或更新！刷新您的目标网页以确保拦截生效 🔄"
   }
 }

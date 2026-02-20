@@ -17,12 +17,18 @@ const LOGS_STORAGE_KEY = 'requestLogs';
 const MAX_LOGS = 100; // 最大日志条数
 
 // 初始化规则
-chrome.runtime.onInstalled.addListener(async () => {
+chrome.runtime.onInstalled.addListener(async (details) => {
   const result = await chrome.storage.local.get(RULES_STORAGE_KEY);
   if (!result[RULES_STORAGE_KEY]) {
     await chrome.storage.local.set({ [RULES_STORAGE_KEY]: [] });
   }
-  console.log('[Request Interceptor Tiny]', 'Extension installed');
+  
+  // Set flag for update banner
+  if (details.reason === 'install' || details.reason === 'update') {
+    await chrome.storage.local.set({ justUpdated: true });
+  }
+
+  console.log('[Request Interceptor Tiny]', `Extension ${details.reason} action triggered`);
 });
 
 // 点击扩展图标时打开 Side Panel

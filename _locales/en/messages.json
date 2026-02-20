@@ -577,5 +577,8 @@
   },
   "diffEmpty": {
     "message": "No differences found"
+  },
+  "updateBannerText": {
+    "message": "Extension installed/updated! 🔄 Please refresh your target pages for interception to work."
   }
 }

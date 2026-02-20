@@ -167,6 +167,55 @@ body {
 }
 
 /* Tabs */
+/* Update Banner */
+.update-banner {
+  margin: 16px 20px 0;
+  padding: 10px 14px;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slideIn 0.3s ease-out;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+  flex-shrink: 0;
+}
+
+.update-banner .update-icon {
+  font-size: 16px;
+  animation: spin 4s linear infinite;
+}
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+.update-banner .update-text {
+  font-size: 13px;
+  color: var(--primary-light);
+  line-height: 1.4;
+  flex: 1;
+}
+
+.update-banner .btn-banner-close {
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.update-banner .btn-banner-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
 /* Tabs */
 .tabs {
   display: flex;
