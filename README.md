@@ -43,7 +43,7 @@ Request Interceptor Tiny is a Chrome extension designed for developers, providin
 
 ## 📥 Installation Guide
 
-> **Recommended:** [Install from Chrome Web Store](https://chromewebstore.google.com/detail/request-interceptor-tiny/bdlpkfphbnijjdciolbnnbdchpbdkmik)
+> **Recommended:** [Install from Chrome Web Store](https://chromewebstore.google.com/detail/request-interceptor-tiny/nhofohmjmciklmcompcjoemkbahdipco)
 
 ### Manual Installation
 
