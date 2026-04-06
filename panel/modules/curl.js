@@ -98,37 +98,91 @@ function parseCurlCommand(curlCommand) {
   return result;
 }
 
+function normalizeNamePart(value) {
+  return value
+    .replace(/\.\w+$/, '')
+    .replace(/([a-z\d])([A-Z])/g, '$1 $2')
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function toTitleCase(value) {
+  return value
+    .split(' ')
+    .filter(Boolean)
+    .map(token => {
+      if (/^[A-Z0-9]{2,}$/.test(token)) {
+        return token;
+      }
+      return token.charAt(0).toUpperCase() + token.slice(1).toLowerCase();
+    })
+    .join(' ');
+}
+
+function getHostLabel(hostname) {
+  const ignoredLabels = new Set(['www', 'api', 'm', 'open', 'rest', 'gateway', 'com', 'cn', 'net', 'org', 'io', 'co', 'uk', 'dev', 'app']);
+  const labels = hostname.split('.').filter(Boolean);
+
+  for (let i = labels.length - 1; i >= 0; i--) {
+    const label = labels[i].toLowerCase();
+    if (!ignoredLabels.has(label)) {
+      return labels[i];
+    }
+  }
+
+  return labels[0] || 'API';
+}
+
+function isIgnoredPathPart(part) {
+  const lowerPart = part.toLowerCase();
+  const ignoredParts = new Set(['api', 'rest', 'ajax', 'json', 'data', 'service', 'services', 'openapi', 'gateway', 'internal']);
+
+  if (!lowerPart) { return true; }
+  if (/^v\d+(\.\d+)?$/i.test(lowerPart)) { return true; }
+  if (/^\d+$/.test(lowerPart)) { return true; }
+  if (/^[0-9a-f]{8,}$/i.test(lowerPart)) { return true; }
+  if (/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(lowerPart)) { return true; }
+  if (ignoredParts.has(lowerPart)) { return true; }
+
+  return false;
+}
+
 function generateRuleNameFromUrl(url) {
   try {
     const urlObj = new URL(url);
-    const pathParts = urlObj.pathname.split('/').filter(Boolean);
-    if (pathParts.length === 0) { return urlObj.hostname.replace('www.', '').split('.')[0]; }
-    const ignoreParts = ['api', 'v1', 'v2', 'v3', 'v4', 'rest', 'ajax', 'json', 'data', 'service', 'services'];
-    const meaningfulParts = pathParts.filter(part => {
-      const lowerPart = part.toLowerCase();
-      if (/^v\d+(\.\d+)?$/i.test(part)) return false;
-      if (ignoreParts.includes(lowerPart)) return false;
-      if (/^\d+$/.test(part)) return false;
-      return true;
-    });
-    let nameParts;
-    if (meaningfulParts.length >= 2) { nameParts = meaningfulParts.slice(-2); }
-    else if (meaningfulParts.length === 1) { nameParts = meaningfulParts; }
-    else { nameParts = [pathParts[pathParts.length - 1]]; }
-    const formattedParts = nameParts.map(part => {
-      return part.replace(/\.\w+$/, '').replace(/[-_]/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\b\w/g, c => c.toUpperCase()).trim();
-    });
-    let name = formattedParts.join(' ').trim();
-    if (!name) { return urlObj.hostname.replace('www.', '').split('.')[0]; }
-    return name;
-  } catch { return 'API Rule'; }
+    const pathParts = urlObj.pathname
+      .split('/')
+      .filter(Boolean)
+      .map(part => {
+        try {
+          return decodeURIComponent(part);
+        } catch {
+          return part;
+        }
+      });
+    const meaningfulParts = pathParts.filter(part => !isIgnoredPathPart(part));
+
+    let coreName = '';
+    if (meaningfulParts.length > 0) {
+      coreName = meaningfulParts[meaningfulParts.length - 1];
+    } else if (urlObj.searchParams.size > 0) {
+      coreName = Array.from(urlObj.searchParams.keys()).find(key => key && !isIgnoredPathPart(key)) || 'Request';
+    } else if (pathParts.length > 0) {
+      coreName = pathParts[pathParts.length - 1];
+    } else {
+      coreName = 'Request';
+    }
+
+    const formattedName = toTitleCase(normalizeNamePart(coreName));
+    return formattedName || 'API Rule';
+  } catch {
+    return 'API Rule';
+  }
 }
 
 function generateUrlPattern(url) {
-  try {
-    const urlObj = new URL(url);
-    return `*://${urlObj.host}${urlObj.pathname}*`;
-  } catch { return url; }
+  return url;
 }
 
 async function parseAndFillCurl() {
