@@ -16,6 +16,15 @@ const RULES_STORAGE_KEY = 'interceptRules';
 const LOGS_STORAGE_KEY = 'requestLogs';
 const MAX_LOGS = 100; // 最大日志条数
 
+const BADGE_BACKGROUND_COLOR = '#16a34a';
+
+async function updateActionBadge(rules) {
+  const currentRules = Array.isArray(rules) ? rules : await getRules();
+  const enabledRuleCount = currentRules.filter(rule => rule.enabled).length;
+  await chrome.action.setBadgeBackgroundColor({ color: BADGE_BACKGROUND_COLOR });
+  await chrome.action.setBadgeText({ text: enabledRuleCount > 0 ? String(enabledRuleCount) : '' });
+}
+
 // 初始化规则
 chrome.runtime.onInstalled.addListener(async (details) => {
   const result = await chrome.storage.local.get(RULES_STORAGE_KEY);
@@ -28,12 +37,24 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     await chrome.storage.local.set({ justUpdated: true });
   }
 
+  await updateActionBadge(result[RULES_STORAGE_KEY] || []);
+
   console.log('[Request Interceptor Tiny]', `Extension ${details.reason} action triggered`);
 });
 
 // 点击扩展图标时打开 Side Panel
 chrome.action.onClicked.addListener((tab) => {
   chrome.sidePanel.open({ tabId: tab.id });
+});
+
+updateActionBadge();
+
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== 'local' || !changes[RULES_STORAGE_KEY]) {
+    return;
+  }
+
+  updateActionBadge(changes[RULES_STORAGE_KEY].newValue || []);
 });
 
 // 监听来自 side panel 和 content script 的消息
