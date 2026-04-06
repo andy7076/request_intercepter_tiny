@@ -6,6 +6,7 @@
 // 缓存日志数据用于 diff 查看
 let cachedLogs = [];
 let currentDiffLog = null;
+let hasDiffIndexResizeListener = false;
 
 // 加载日志
 async function loadLogs() {
@@ -119,23 +120,81 @@ function computeDiff(oldText, newText) {
   return temp.reverse();
 }
 
+function buildDiffChangeIndex(diff) {
+  const changes = [];
+  let currentChange = null;
+
+  diff.forEach((item, index) => {
+    const lineNumber = index + 1;
+
+    if (item.type === 'equal') {
+      if (currentChange) {
+        changes.push(currentChange);
+        currentChange = null;
+      }
+      return;
+    }
+
+    if (!currentChange || currentChange.type !== item.type) {
+      if (currentChange) {
+        changes.push(currentChange);
+      }
+
+      currentChange = {
+        startLine: lineNumber,
+        endLine: lineNumber,
+        type: item.type
+      };
+      return;
+    }
+
+    currentChange.endLine = lineNumber;
+  });
+
+  if (currentChange) {
+    changes.push(currentChange);
+  }
+
+  return changes;
+}
+
+function renderDiffIndex(changes, totalLines) {
+  if (changes.length === 0 || totalLines === 0) {
+    return '';
+  }
+
+  let html = '<div class="diff-index"><div class="diff-index-track">';
+  changes.forEach(change => {
+    const lineSpan = change.endLine - change.startLine + 1;
+    const centerLine = change.startLine + ((lineSpan - 1) / 2);
+    const top = Math.min(Math.max((centerLine / totalLines) * 100, 0.5), 99.5);
+    const height = Math.min(Math.max(lineSpan * 2, 4), 12);
+
+    html += `<button type="button" class="diff-index-marker diff-index-marker-${change.type}" data-change-type="${change.type}" data-target-line="${change.startLine}" style="top: ${top}%; height: ${height}px;"></button>`;
+  });
+  html += '</div></div>';
+
+  return html;
+}
+
 function renderDiffContent(diff) {
   const { escapeHtml } = window.App.utils;
   if (diff.length === 0) { return `<div class="diff-empty">${window.i18n.t('diffEmpty')}</div>`; }
-  let html = '<div class="diff-lines">';
+  const changes = buildDiffChangeIndex(diff);
+  let html = '<div class="diff-layout"><div class="diff-main"><div class="diff-lines">';
   let lineNum = 0;
   diff.forEach(item => {
     lineNum++;
     const escapedContent = escapeHtml(item.content);
     if (item.type === 'equal') {
-      html += `<div class="diff-line diff-equal"><span class="diff-line-num">${lineNum}</span><span class="diff-line-marker">&nbsp;</span><span class="diff-line-content">${escapedContent || '&nbsp;'}</span></div>`;
+      html += `<div class="diff-line diff-equal" data-diff-line="${lineNum}"><span class="diff-line-num">${lineNum}</span><span class="diff-line-marker">&nbsp;</span><span class="diff-line-content">${escapedContent || '&nbsp;'}</span></div>`;
     } else if (item.type === 'remove') {
-      html += `<div class="diff-line diff-remove"><span class="diff-line-num">${lineNum}</span><span class="diff-line-marker">−</span><span class="diff-line-content">${escapedContent || '&nbsp;'}</span></div>`;
+      html += `<div class="diff-line diff-remove" data-diff-line="${lineNum}"><span class="diff-line-num">${lineNum}</span><span class="diff-line-marker">−</span><span class="diff-line-content">${escapedContent || '&nbsp;'}</span></div>`;
     } else if (item.type === 'add') {
-      html += `<div class="diff-line diff-add"><span class="diff-line-num">${lineNum}</span><span class="diff-line-marker">+</span><span class="diff-line-content">${escapedContent || '&nbsp;'}</span></div>`;
+      html += `<div class="diff-line diff-add" data-diff-line="${lineNum}"><span class="diff-line-num">${lineNum}</span><span class="diff-line-marker">+</span><span class="diff-line-content">${escapedContent || '&nbsp;'}</span></div>`;
     }
   });
-  html += '</div>';
+  html += `</div></div>${renderDiffIndex(changes, lineNum)}</div>`;
   return html;
 }
 
@@ -151,6 +210,72 @@ function renderJsonContent(text) {
   });
   html += '</div>';
   return html;
+}
+
+function getDiffIndexStatusLabel(type) {
+  if (type === 'add') {
+    return window.i18n.t('diffIndexStatusAdd');
+  }
+  if (type === 'remove') {
+    return window.i18n.t('diffIndexStatusRemove');
+  }
+  return window.i18n.t('diffIndexStatusMixed');
+}
+
+function updateDiffIndexLayout() {
+  const diffContent = document.getElementById('diff-content');
+  const scrollContainer = diffContent ? diffContent.parentElement : null;
+  const diffIndex = diffContent ? diffContent.querySelector('.diff-index') : null;
+
+  if (!diffContent || !scrollContainer || !diffIndex) {
+    return;
+  }
+
+  const indexHeight = Math.max(scrollContainer.clientHeight - 24, 160);
+  diffContent.style.setProperty('--diff-index-height', `${indexHeight}px`);
+}
+
+function setActiveDiffIndexMarker(targetLine) {
+  document.querySelectorAll('.diff-index-marker').forEach(marker => {
+    marker.classList.toggle('active', marker.dataset.targetLine === String(targetLine));
+  });
+}
+
+function scrollToDiffLine(targetLine) {
+  const diffContent = document.getElementById('diff-content');
+  const scrollContainer = diffContent ? diffContent.parentElement : null;
+  const target = diffContent ? diffContent.querySelector(`[data-diff-line="${targetLine}"]`) : null;
+
+  if (!diffContent || !scrollContainer || !target) {
+    return;
+  }
+
+  const top = target.getBoundingClientRect().top - scrollContainer.getBoundingClientRect().top + scrollContainer.scrollTop - 12;
+  scrollContainer.scrollTo({ top, behavior: 'smooth' });
+  setActiveDiffIndexMarker(targetLine);
+}
+
+function bindDiffIndexNavigation() {
+  const diffContent = document.getElementById('diff-content');
+  const diffIndexMarkers = diffContent ? diffContent.querySelectorAll('.diff-index-marker') : [];
+
+  if (!diffContent || diffIndexMarkers.length === 0) {
+    return;
+  }
+
+  updateDiffIndexLayout();
+
+  diffIndexMarkers.forEach(marker => {
+    const targetLine = parseInt(marker.dataset.targetLine, 10);
+    const label = window.i18n.t('diffIndexJumpTo', getDiffIndexStatusLabel(marker.dataset.changeType), String(targetLine));
+    marker.title = label;
+    marker.setAttribute('aria-label', label);
+    marker.addEventListener('click', () => {
+      scrollToDiffLine(targetLine);
+    });
+  });
+
+  setActiveDiffIndexMarker(diffIndexMarkers[0].dataset.targetLine);
 }
 
 function openDiffModal(log) {
@@ -191,6 +316,8 @@ function switchDiffTab(tab) {
     diffContent.innerHTML = renderJsonContent(modified);
   }
 
+  bindDiffIndexNavigation();
+
   // 每次切换内容后重置滚动位置到顶部（可滚动容器是 .diff-modal-body）
   const scrollContainer = diffContent.parentElement;
   if (scrollContainer) { scrollContainer.scrollTop = 0; }
@@ -210,6 +337,10 @@ function initDiffModal() {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && diffModal && diffModal.classList.contains('active')) { closeDiffModal(); }
   });
+  if (!hasDiffIndexResizeListener) {
+    window.addEventListener('resize', updateDiffIndexLayout);
+    hasDiffIndexResizeListener = true;
+  }
 }
 
 // 定时刷新日志（在日志面板激活时）

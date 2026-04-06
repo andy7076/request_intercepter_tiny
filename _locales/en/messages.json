@@ -578,6 +578,26 @@
   "diffEmpty": {
     "message": "No differences found"
   },
+  "diffIndexStatusAdd": {
+    "message": "added change"
+  },
+  "diffIndexStatusRemove": {
+    "message": "removed change"
+  },
+  "diffIndexStatusMixed": {
+    "message": "mixed change"
+  },
+  "diffIndexJumpTo": {
+    "message": "Jump to $TYPE$ at line $LINE$",
+    "placeholders": {
+      "type": {
+        "content": "$1"
+      },
+      "line": {
+        "content": "$2"
+      }
+    }
+  },
   "updateBannerText": {
     "message": "Extension installed/updated! 🔄 Please refresh your target pages for interception to work."
   }

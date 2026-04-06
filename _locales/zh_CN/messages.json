@@ -578,6 +578,26 @@
   "diffEmpty": {
     "message": "无差异"
   },
+  "diffIndexStatusAdd": {
+    "message": "新增变更"
+  },
+  "diffIndexStatusRemove": {
+    "message": "删除变更"
+  },
+  "diffIndexStatusMixed": {
+    "message": "混合变更"
+  },
+  "diffIndexJumpTo": {
+    "message": "跳转到第 $LINE$ 行的 $TYPE$",
+    "placeholders": {
+      "type": {
+        "content": "$1"
+      },
+      "line": {
+        "content": "$2"
+      }
+    }
+  },
   "updateBannerText": {
     "message": "插件已安装或更新！刷新您的目标网页以确保拦截生效 🔄"
   }
