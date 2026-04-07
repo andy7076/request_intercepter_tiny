@@ -30,6 +30,12 @@ function switchTab(tab) {
       }, 50);
     }
   }
+
+  if (tab === 'logs' && window.App.logs && typeof window.App.logs.loadLogs === 'function') {
+    requestAnimationFrame(() => {
+      window.App.logs.loadLogs();
+    });
+  }
 }
 
 // 导出到全局

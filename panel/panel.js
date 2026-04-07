@@ -156,7 +156,11 @@ function setupEventListeners() {
 
   // JSON 实时验证（防抖）
   const debouncedValidate = window.App.utils.debounce(validateJsonRealtime, 300);
-  responseBody.addEventListener('input', debouncedValidate);
+  const debouncedUpdateNavigationWarning = window.App.utils.debounce(window.App.form.updateNavigationRequestWarning, 150);
+  responseBody.addEventListener('input', () => {
+    debouncedValidate();
+    debouncedUpdateNavigationWarning();
+  });
   modalTextarea.addEventListener('input', () => {
     const modalCM = window.App.editor.getModalCodeMirror();
     if (!modalCM) {
@@ -165,6 +169,7 @@ function setupEventListeners() {
       if (formCM) { formCM.setValue(modalTextarea.value); }
     }
     debouncedValidate();
+    debouncedUpdateNavigationWarning();
   });
 
   // Tab 键缩进（回退）

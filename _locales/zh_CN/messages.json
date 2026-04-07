@@ -91,6 +91,15 @@
   "responseContentHint": {
     "message": "输入要返回的响应内容，支持文本、JSON、HTML、XML 等"
   },
+  "requestScopeNotice": {
+    "message": "仅支持 fetch/XHR 请求。地址栏直接打开页面、链接跳转、iframe src 等页面导航请求不支持拦截。"
+  },
+  "navigationRequestWarning": {
+    "message": "当前规则看起来更像页面导航 HTML 请求，扩展中大概率不会生效。"
+  },
+  "navigationRequestConfirm": {
+    "message": "当前规则看起来像页面导航 HTML 请求。扩展仅支持拦截 fetch/XHR 请求，不支持页面导航请求。仍要继续保存吗？"
+  },
   "expandEdit": {
     "message": "放大编辑"
   },
@@ -121,7 +130,7 @@
     "message": "暂无日志"
   },
   "noLogsHint": {
-    "message": "当规则匹配到请求时会在这里显示"
+    "message": "命中的 fetch/XHR 请求会显示在这里，页面导航请求不会记录"
   },
   "noNetworkLogs": {
     "message": "暂无网络日志"
@@ -714,6 +723,6 @@
     "message": "未知规则"
   },
   "updateBannerText": {
-    "message": "插件已更新。请刷新目标页面以应用拦截。"
+    "message": "插件已安装或更新，请刷新目标页面以确保请求修改生效。"
   }
 }

@@ -8,6 +8,7 @@ let cachedLogs = [];
 let currentDiffLog = null;
 let hasDiffIndexResizeListener = false;
 const expandedLogUrlKeys = new Set();
+let pendingLogUrlToggleFrame = 0;
 
 function getLogKey(log) {
   if (!log) return '';
@@ -71,6 +72,19 @@ function setupLogUrlToggles() {
         if (nextExpanded) expandedLogUrlKeys.add(logKey);
         else expandedLogUrlKeys.delete(logKey);
       }
+    });
+  });
+}
+
+function scheduleLogUrlToggleSetup() {
+  if (pendingLogUrlToggleFrame) {
+    cancelAnimationFrame(pendingLogUrlToggleFrame);
+  }
+
+  pendingLogUrlToggleFrame = requestAnimationFrame(() => {
+    pendingLogUrlToggleFrame = requestAnimationFrame(() => {
+      pendingLogUrlToggleFrame = 0;
+      setupLogUrlToggles();
     });
   });
 }
@@ -153,6 +167,7 @@ function renderLogs(logs) {
   }).join('');
 
   setupLogUrlToggles();
+  scheduleLogUrlToggleSetup();
 
   if (!logsList._hasClickListener) {
     logsList.addEventListener('click', (e) => {

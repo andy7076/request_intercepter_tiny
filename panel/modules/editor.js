@@ -79,6 +79,9 @@ function initFormCodeMirror(config) {
   // 同步内容到隐藏的 textarea
   formCodeMirror.on('change', (cm) => {
     textarea.value = cm.getValue();
+    if (window.App && window.App.form && typeof window.App.form.updateNavigationRequestWarning === 'function') {
+      window.App.form.updateNavigationRequestWarning();
+    }
     if (window.App && window.App.editor) {
       // 使用防抖验证
       if (!window.App.editor._debouncedValidate) {
@@ -314,6 +317,9 @@ function closeEditorModal() {
   // 验证内容状态 (仅在表单模式下)
   if (modalMode === 'form') {
     validateJsonRealtime();
+    if (window.App && window.App.form && typeof window.App.form.updateNavigationRequestWarning === 'function') {
+      window.App.form.updateNavigationRequestWarning();
+    }
   }
 }
 

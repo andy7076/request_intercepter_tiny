@@ -100,8 +100,8 @@
           </svg>
         </span>
         <span class="update-text" data-i18n="updateBannerText"
-          >Extension updated. Refresh your target pages to apply
-          interception.</span
+          >Extension installed or updated. Refresh the target page to ensure
+          request modifications take effect.</span
         >
         <button
           type="button"
@@ -406,6 +406,32 @@
                 placeholder="e.g., https://api.example.com/users"
                 required
               />
+              <div class="form-scope-notice">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                  <path d="M12 9v4"></path>
+                  <path d="M12 17h.01"></path>
+                </svg>
+                <span data-i18n="requestScopeNotice">Only supports fetch/XHR requests. Page navigation requests such as opening a page directly, link navigation, and iframe src are not supported.</span>
+              </div>
+              <p
+                id="navigation-request-warning"
+                class="form-warning hidden"
+                data-i18n="navigationRequestWarning"
+              >
+                This rule looks like a page navigation HTML request and may not take effect in the extension.
+              </p>
             </div>
 
             <div id="advanced-settings" class="advanced-settings">

@@ -91,6 +91,15 @@
   "responseContentHint": {
     "message": "Enter response content to return. Supports text, JSON, HTML, XML, and more"
   },
+  "requestScopeNotice": {
+    "message": "Only supports fetch/XHR requests. Page navigation requests such as opening a page directly, link navigation, and iframe src are not supported."
+  },
+  "navigationRequestWarning": {
+    "message": "This rule looks more like a page navigation HTML request and likely will not take effect in the extension."
+  },
+  "navigationRequestConfirm": {
+    "message": "This rule looks like a page navigation HTML request. The extension only intercepts fetch/XHR requests and does not support page navigation requests. Do you still want to save it?"
+  },
   "expandEdit": {
     "message": "Expand Edit"
   },
@@ -121,7 +130,7 @@
     "message": "No Logs"
   },
   "noLogsHint": {
-    "message": "Matched requests will be displayed here when rules match"
+    "message": "Matched fetch/XHR requests will be shown here. Page navigation requests are not logged"
   },
   "noNetworkLogs": {
     "message": "No Network Logs"
@@ -714,6 +723,6 @@
     "message": "Unknown Rule"
   },
   "updateBannerText": {
-    "message": "Extension updated. Refresh your target pages to apply interception."
+    "message": "Extension installed or updated. Refresh the target page to ensure request modifications take effect."
   }
 }

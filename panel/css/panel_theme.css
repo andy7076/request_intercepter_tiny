@@ -346,6 +346,18 @@
   font-weight: 500;
 }
 
+[data-theme="light"] .form-scope-notice {
+  background: #fff7e6;
+  border-color: #f7d9a7;
+  color: #9a3412;
+}
+
+[data-theme="light"] .form-warning {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
 /* Light theme - Toast */
 [data-theme="light"] .toast {
   background: rgba(255, 255, 255, 0.95);

@@ -1169,6 +1169,40 @@ body {
   font-weight: normal;
 }
 
+.form-scope-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  color: #fcd34d;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.form-scope-notice svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.form-warning {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.form-warning.hidden {
+  display: none;
+}
+
 .response-headers-list {
   display: flex;
   flex-direction: column;
@@ -1188,14 +1222,16 @@ body {
 }
 
 .response-header-remove {
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   color: var(--danger);
   line-height: 1;
 }
 
 .response-header-remove svg {
   flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
 }
 
 .btn-add-header {

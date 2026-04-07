@@ -54,6 +54,82 @@ function inferResponseContentType(responseBody, responseHeaders = {}) {
     : 'text/plain; charset=utf-8';
 }
 
+function isHtmlLikeContentType(contentType) {
+  const normalized = String(contentType || '').toLowerCase();
+  return normalized.includes('text/html') || normalized.includes('application/xhtml+xml');
+}
+
+function isHtmlLikeBody(value) {
+  const trimmed = String(value || '').trim().toLowerCase();
+  if (!trimmed) {
+    return false;
+  }
+
+  return trimmed.startsWith('<!doctype html')
+    || trimmed.startsWith('<html')
+    || trimmed.startsWith('<head')
+    || trimmed.startsWith('<body');
+}
+
+function looksLikeNavigationUrl(urlPattern) {
+  const raw = String(urlPattern || '').trim();
+  if (!raw) {
+    return false;
+  }
+
+  const normalized = raw.replace(/\*/g, '').replace(/[?#].*$/, '');
+  if (!normalized) {
+    return false;
+  }
+
+  let pathname = normalized;
+
+  try {
+    if (/^https?:\/\//i.test(normalized)) {
+      pathname = new URL(normalized).pathname || '/';
+    }
+  } catch (err) {
+    pathname = normalized;
+  }
+
+  const lowerPathname = String(pathname || '').toLowerCase();
+  const segments = lowerPathname.split('/').filter(Boolean);
+  const lastSegment = segments[segments.length - 1] || '';
+
+  if (!lastSegment) {
+    return true;
+  }
+
+  if (/\.(html?|xhtml|shtml|php|asp|aspx|jsp|jspx)$/i.test(lastSegment)) {
+    return true;
+  }
+
+  if (!lastSegment.includes('.') && !lowerPathname.includes('/api/') && !lowerPathname.includes('/graphql')) {
+    return true;
+  }
+
+  return false;
+}
+
+function isLikelyNavigationRequestRule(formData) {
+  const method = String(formData.method || DEFAULT_RULE_METHOD).toUpperCase();
+  if (method !== 'GET' && method !== DEFAULT_RULE_METHOD) {
+    return false;
+  }
+
+  const contentType = inferResponseContentType(formData.responseBody, formData.responseHeaders);
+  const htmlLikeResponse = isHtmlLikeContentType(contentType) || isHtmlLikeBody(formData.responseBody);
+  return htmlLikeResponse && looksLikeNavigationUrl(formData.urlPattern);
+}
+
+function updateNavigationRequestWarning(formData = null) {
+  const warning = document.getElementById('navigation-request-warning');
+  if (!warning) return;
+
+  const snapshot = formData || getRuleFormSnapshot();
+  warning.classList.toggle('hidden', !isLikelyNavigationRequestRule(snapshot));
+}
+
 function updateResponseHeaderRowI18n(row) {
   if (!row) return;
 
@@ -322,6 +398,7 @@ function fillRuleForm(rule = {}) {
 
   setAdvancedSettingsExpanded(hasNonDefaultAdvancedSettings(normalizedRule));
   syncAdvancedSettingsSummary(normalizedRule);
+  updateNavigationRequestWarning(normalizedRule);
 
   if (formCodeMirror) {
     formCodeMirror.setValue(normalizedRule.responseBody);
@@ -386,6 +463,16 @@ async function handleFormSubmit(e) {
     return;
   }
 
+  if (isLikelyNavigationRequestRule(formData)) {
+    const shouldContinue = confirm(window.i18n.t('navigationRequestConfirm'));
+    if (!shouldContinue) {
+      const urlPatternInput = document.getElementById('url-pattern');
+      updateNavigationRequestWarning(formData);
+      scrollFieldIntoView(urlPatternInput, urlPatternInput);
+      return;
+    }
+  }
+
   const rule = {
     name: formData.name,
     urlPattern: formData.urlPattern,
@@ -446,6 +533,7 @@ function resetForm() {
 
   // 重置 JSON 验证状态
   window.App.editor.validateJsonRealtime();
+  updateNavigationRequestWarning();
 }
 
 // 检查表单是否有修改
@@ -491,11 +579,13 @@ function initResponseHeadersEditor() {
 
   list.dataset.initialized = 'true';
   ensureResponseHeadersEditorRow();
+  updateNavigationRequestWarning();
 
   addButton.addEventListener('click', () => {
     const row = createResponseHeaderRow();
     list.appendChild(row);
     syncAdvancedSettingsSummary();
+    updateNavigationRequestWarning();
     const nameInput = row.querySelector('.response-header-name');
     if (nameInput) {
       nameInput.focus();
@@ -515,15 +605,18 @@ function initResponseHeadersEditor() {
 
     ensureResponseHeadersEditorRow();
     syncAdvancedSettingsSummary();
+    updateNavigationRequestWarning();
   });
 
   list.addEventListener('input', () => {
     syncAdvancedSettingsSummary();
+    updateNavigationRequestWarning();
   });
 
   window.addEventListener('languageChanged', () => {
     list.querySelectorAll('.response-header-item').forEach(updateResponseHeaderRowI18n);
     syncAdvancedSettingsSummary();
+    updateNavigationRequestWarning();
   });
 }
 
@@ -536,6 +629,7 @@ function initAdvancedSettings() {
   toggle.dataset.initialized = 'true';
   setAdvancedSettingsExpanded(false);
   syncAdvancedSettingsSummary();
+  updateNavigationRequestWarning();
 
   toggle.addEventListener('click', () => {
     const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
@@ -543,6 +637,7 @@ function initAdvancedSettings() {
   });
 
   [
+    'url-pattern',
     'rule-method',
     'rule-match-mode',
     'rule-priority',
@@ -553,14 +648,17 @@ function initAdvancedSettings() {
     if (!field) return;
     field.addEventListener('input', () => {
       syncAdvancedSettingsSummary();
+      updateNavigationRequestWarning();
     });
     field.addEventListener('change', () => {
       syncAdvancedSettingsSummary();
+      updateNavigationRequestWarning();
     });
   });
 
   window.addEventListener('languageChanged', () => {
     syncAdvancedSettingsSummary();
+    updateNavigationRequestWarning();
   });
 }
 
@@ -571,6 +669,7 @@ window.App.form = {
   resetForm,
   checkFormDirty,
   fillRuleForm,
+  updateNavigationRequestWarning,
   getRuleFormSnapshot,
   initResponseHeadersEditor,
   initAdvancedSettings,
