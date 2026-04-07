@@ -77,13 +77,13 @@
     "message": "e.g., Config Modify API"
   },
   "urlPattern": {
-    "message": "URL Match Pattern"
+    "message": "URL"
   },
   "urlPatternPlaceholder": {
-    "message": "e.g., *://api.example.com/*"
+    "message": "e.g., https://api.example.com/users"
   },
   "urlPatternHint": {
-    "message": "Supports wildcard * to match any characters"
+    "message": "Enter the request URL to intercept"
   },
   "responseContent": {
     "message": "Response Content (JSON)"
@@ -598,7 +598,105 @@
       }
     }
   },
+  "requestMethod": {
+    "message": "Request Method"
+  },
+  "methodAll": {
+    "message": "All"
+  },
+  "matchMode": {
+    "message": "Match Mode"
+  },
+  "matchModeContains": {
+    "message": "Contains"
+  },
+  "matchModeWildcard": {
+    "message": "Wildcard"
+  },
+  "matchModeExact": {
+    "message": "Exact"
+  },
+  "rulePriority": {
+    "message": "Priority"
+  },
+  "rulePriorityHint": {
+    "message": "Higher priority rules match first"
+  },
+  "responseStatus": {
+    "message": "Response Status"
+  },
+  "responseDelay": {
+    "message": "Response Delay (ms)"
+  },
+  "responseDelayHint": {
+    "message": "Useful for loading and timeout scenarios"
+  },
+  "responseHeaders": {
+    "message": "Response Headers"
+  },
+  "responseHeadersHint": {
+    "message": "Optional. Add response headers such as Content-Type or Cache-Control"
+  },
+  "responseHeaderNamePlaceholder": {
+    "message": "Header name"
+  },
+  "responseHeaderValuePlaceholder": {
+    "message": "Value"
+  },
+  "addResponseHeader": {
+    "message": "Add Header"
+  },
+  "removeResponseHeader": {
+    "message": "Remove Header"
+  },
+  "responseHeadersIncomplete": {
+    "message": "Complete each response header row or clear it"
+  },
+  "responseHeadersDuplicate": {
+    "message": "Duplicate response header: $VALUE$",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "responseHeadersMustBeObject": {
+    "message": "Response headers must be a JSON object"
+  },
+  "responseStatusInvalid": {
+    "message": "Status code must be an integer between 100 and 599"
+  },
+  "responseDelayInvalid": {
+    "message": "Delay must be a number greater than or equal to 0"
+  },
+  "priorityShort": {
+    "message": "P$VALUE$",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "statusShort": {
+    "message": "Status $VALUE$",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "delayShort": {
+    "message": "$VALUE$ms",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "unknownRule": {
+    "message": "Unknown Rule"
+  },
   "updateBannerText": {
-    "message": "Extension installed/updated! 🔄 Please refresh your target pages for interception to work."
+    "message": "Extension updated. Refresh your target pages to apply interception."
   }
 }

@@ -14,6 +14,12 @@ function isExtensionContextValid() {
 // ========== 日志控制 ==========
 // 日志控制
 let consoleLogsEnabled = false;
+const DEFAULT_MATCH_MODE = 'contains';
+const DEFAULT_METHOD = 'ALL';
+const DEFAULT_PRIORITY = 0;
+const DEFAULT_STATUS = 200;
+const DEFAULT_DELAY_MS = 0;
+const DEFAULT_CONTENT_TYPE = 'application/json';
 
 function log(...args) {
   if (consoleLogsEnabled) {
@@ -28,6 +34,122 @@ let isInitialized = false;
 // 存储待关联的日志，用于将原始响应体与日志关联
 const pendingLogs = new Map();
 
+function normalizeMethod(method) {
+  const normalized = String(method || DEFAULT_METHOD).toUpperCase();
+  return normalized || DEFAULT_METHOD;
+}
+
+function normalizeMatchMode(matchMode) {
+  const allowedModes = new Set(['exact', 'wildcard', 'contains']);
+  return allowedModes.has(matchMode) ? matchMode : DEFAULT_MATCH_MODE;
+}
+
+function inferMatchMode(matchMode, urlPattern) {
+  if (matchMode) {
+    return normalizeMatchMode(matchMode);
+  }
+  return String(urlPattern || '').includes('*') ? 'wildcard' : DEFAULT_MATCH_MODE;
+}
+
+function normalizePriority(priority) {
+  const value = Number(priority);
+  if (!Number.isFinite(value)) {
+    return DEFAULT_PRIORITY;
+  }
+  return Math.trunc(value);
+}
+
+function normalizeStatus(status) {
+  const value = Number(status);
+  if (!Number.isInteger(value) || value < 100 || value > 599) {
+    return DEFAULT_STATUS;
+  }
+  return value;
+}
+
+function normalizeDelayMs(delayMs) {
+  const value = Number(delayMs);
+  if (!Number.isFinite(value) || value < 0) {
+    return DEFAULT_DELAY_MS;
+  }
+  return Math.trunc(value);
+}
+
+function normalizeResponseHeaders(headers) {
+  if (!headers || typeof headers !== 'object' || Array.isArray(headers)) {
+    return {};
+  }
+
+  const normalized = {};
+  for (const [key, value] of Object.entries(headers)) {
+    const headerName = String(key || '').trim();
+    if (!headerName) continue;
+    normalized[headerName] = String(value ?? '');
+  }
+  return normalized;
+}
+
+function getRuleContentType(rule) {
+  const headers = normalizeResponseHeaders(rule.responseHeaders);
+  const headerKey = Object.keys(headers).find(key => key.toLowerCase() === 'content-type');
+  return headerKey ? headers[headerKey] : (rule.contentType || DEFAULT_CONTENT_TYPE);
+}
+
+function sortMockRules(rules) {
+  return rules
+    .map((rule, index) => ({ rule, index }))
+    .sort((a, b) => {
+      const priorityDiff = normalizePriority(b.rule.priority) - normalizePriority(a.rule.priority);
+      if (priorityDiff !== 0) return priorityDiff;
+      return a.index - b.index;
+    })
+    .map(item => item.rule);
+}
+
+function normalizeRule(rule) {
+  const normalized = {
+    ...rule,
+    method: normalizeMethod(rule.method),
+    matchMode: inferMatchMode(rule.matchMode, rule.urlPattern),
+    priority: normalizePriority(rule.priority),
+    responseStatus: normalizeStatus(rule.responseStatus),
+    responseDelayMs: normalizeDelayMs(rule.responseDelayMs),
+    responseHeaders: normalizeResponseHeaders(rule.responseHeaders)
+  };
+  normalized.contentType = getRuleContentType(normalized);
+  return normalized;
+}
+
+function extractMockRules(allRules) {
+  return sortMockRules(
+    (allRules || [])
+      .filter(rule => rule.enabled && rule.type === 'mockResponse')
+      .map(normalizeRule)
+  );
+}
+
+function getStatusText(status) {
+  const statusMap = {
+    200: 'OK',
+    201: 'Created',
+    202: 'Accepted',
+    204: 'No Content',
+    400: 'Bad Request',
+    401: 'Unauthorized',
+    403: 'Forbidden',
+    404: 'Not Found',
+    409: 'Conflict',
+    422: 'Unprocessable Entity',
+    429: 'Too Many Requests',
+    500: 'Internal Server Error',
+    502: 'Bad Gateway',
+    503: 'Service Unavailable',
+    504: 'Gateway Timeout'
+  };
+
+  return statusMap[status] || 'Mocked';
+}
+
 // 从 storage 直接获取规则（不依赖 background）
 function loadMockRules() {
   if (!isExtensionContextValid()) return Promise.resolve([]);
@@ -40,8 +162,7 @@ function loadMockRules() {
         return;
       }
       const allRules = result.interceptRules || [];
-      // 过滤出启用的 mockResponse 类型规则
-      mockRules = allRules.filter(r => r.enabled && r.type === 'mockResponse');
+      mockRules = extractMockRules(allRules);
       log('[Request Interceptor Tiny] ✅', 'Mock rules loaded:', mockRules.length);
       if (mockRules.length > 0) {
         log('[Request Interceptor Tiny] 📋', 'Rules list:', mockRules.map(r => ({
@@ -97,8 +218,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   
   if (areaName === 'local' && changes['interceptRules']) {
     const allRules = changes['interceptRules'].newValue || [];
-    // 过滤出启用的 mockResponse 类型规则
-    mockRules = allRules.filter(r => r.enabled && r.type === 'mockResponse');
+    mockRules = extractMockRules(allRules);
     log('[Request Interceptor Tiny]', 'Rules updated via storage.onChanged, count:', mockRules.length);
     
     // 通知页面规则已更新
@@ -128,7 +248,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 // 监听消息（规则更新或设置更新）
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'MOCK_RULES_UPDATED') {
-    mockRules = message.rules || [];
+    mockRules = extractMockRules(message.rules || []);
     log('[Request Interceptor Tiny]', 'Received MOCK_RULES_UPDATED message, count:', mockRules.length);
     
     // 通知 injected.js 规则已更新
@@ -154,19 +274,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 // URL 匹配函数 - 支持通配符
-function matchUrl(pattern, url) {
-  // 如果模式不包含通配符 *，使用包含匹配
-  if (!pattern.includes('*')) {
+function matchUrl(pattern, url, matchMode = DEFAULT_MATCH_MODE) {
+  const normalizedPattern = String(pattern || '');
+  const normalizedMode = normalizeMatchMode(matchMode);
+
+  if (normalizedMode === 'exact') {
+    return url.toLowerCase() === normalizedPattern.toLowerCase();
+  }
+
+  if (normalizedMode === 'contains' || !normalizedPattern.includes('*')) {
     // 直接检查 URL 是否包含该模式（忽略大小写）
-    return url.toLowerCase().includes(pattern.toLowerCase());
+    return url.toLowerCase().includes(normalizedPattern.toLowerCase());
   }
   
   // 检查pattern的开头和结尾是否有通配符
-  const startsWithWildcard = pattern.startsWith('*');
-  const endsWithWildcard = pattern.endsWith('*');
+  const startsWithWildcard = normalizedPattern.startsWith('*');
+  const endsWithWildcard = normalizedPattern.endsWith('*');
   
   // 将通配符模式转换为正则表达式
-  const regexPattern = pattern
+  const regexPattern = normalizedPattern
     .replace(/[.+?^${}()|[\]\\]/g, '\\$&') // 转义特殊字符
     .replace(/\*/g, '.*'); // 将 * 转换为 .*
   
@@ -198,9 +324,11 @@ function matchUrl(pattern, url) {
 }
 
 // 查找匹配的 mock 规则
-function findMockRule(url) {
+function findMockRule(url, method) {
+  const normalizedMethod = normalizeMethod(method);
   for (const rule of mockRules) {
-    if (rule.enabled && matchUrl(rule.urlPattern, url)) {
+    const methodMatched = rule.method === DEFAULT_METHOD || rule.method === normalizedMethod;
+    if (rule.enabled && methodMatched && matchUrl(rule.urlPattern, url, rule.matchMode)) {
       return rule;
     }
   }
@@ -212,7 +340,7 @@ window.addEventListener('message', async (event) => {
   if (event.source !== window) return;
   
   if (event.data.type === 'REQUEST_INTERCEPTOR_CHECK') {
-    const { url, requestId } = event.data;
+    const { url, method, requestId } = event.data;
     
     log('[Request Interceptor Tiny]', 'Checking URL:', url, '| Rules count:', mockRules.length);
     
@@ -226,7 +354,7 @@ window.addEventListener('message', async (event) => {
       return;
     }
     
-    const mockRule = findMockRule(url);
+    const mockRule = findMockRule(url, method);
     log('[Request Interceptor Tiny]', 'Match result:', mockRule ? `Matched: ${mockRule.name}` : 'No match');
     
     if (mockRule) {
@@ -236,9 +364,11 @@ window.addEventListener('message', async (event) => {
         requestId: requestId,
         mockResponse: {
           body: mockRule.responseBody,
-          contentType: mockRule.contentType || 'application/json',
-          status: 200,
-          statusText: 'OK (Mocked)'
+          contentType: mockRule.contentType || DEFAULT_CONTENT_TYPE,
+          headers: mockRule.responseHeaders || {},
+          status: mockRule.responseStatus || DEFAULT_STATUS,
+          statusText: getStatusText(mockRule.responseStatus || DEFAULT_STATUS),
+          delayMs: mockRule.responseDelayMs || DEFAULT_DELAY_MS
         },
         logRequestId: requestId
       }, '*');
@@ -253,9 +383,14 @@ window.addEventListener('message', async (event) => {
         
         chrome.runtime.sendMessage({
           type: 'LOG_MOCK_REQUEST',
+          ruleId: mockRule.id,
           ruleName: mockRule.name,
           ruleType: mockRule.type,
           url: url,
+          method: method || 'GET',
+          matchMode: mockRule.matchMode,
+          priority: mockRule.priority,
+          status: mockRule.responseStatus || DEFAULT_STATUS,
           mockedBody: mockRule.responseBody,
           logTimestamp: logTimestamp
         });
@@ -299,4 +434,3 @@ window.addEventListener('message', (event) => {
 
 // 注意：injected.js 现在由 manifest.json 直接注入到 MAIN world，无需动态注入
 console.log('[Request Interceptor Tiny] 📦', 'Content script ready');
-

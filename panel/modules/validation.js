@@ -5,7 +5,22 @@
 
 // 初始化表单验证
 function setupFormValidation() {
+  const ruleForm = document.getElementById('rule-form');
   const inputs = document.querySelectorAll('#rule-form input[required]');
+
+  let hasScrolledToInvalidField = false;
+
+  if (ruleForm) {
+    ruleForm.addEventListener('invalid', (e) => {
+      if (hasScrolledToInvalidField) return;
+      hasScrolledToInvalidField = true;
+      scrollFieldIntoView(e.target, e.target);
+      setTimeout(() => {
+        hasScrolledToInvalidField = false;
+      }, 0);
+    }, true);
+  }
+
   inputs.forEach(input => {
     // 当验证失败时（提交表单时），显示自定义错误消息
     input.addEventListener('invalid', (e) => {
@@ -23,6 +38,30 @@ function setupFormValidation() {
       hideInputError(e.target);
     });
   });
+}
+
+function scrollFieldIntoView(target, focusTarget = null) {
+  if (!target) return;
+
+  const anchor = target.closest('.form-group') || target;
+  if (typeof anchor.scrollIntoView === 'function') {
+    anchor.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+      inline: 'nearest'
+    });
+  }
+
+  const finalFocusTarget = focusTarget || target;
+  if (finalFocusTarget && typeof finalFocusTarget.focus === 'function') {
+    requestAnimationFrame(() => {
+      try {
+        finalFocusTarget.focus({ preventScroll: true });
+      } catch (err) {
+        finalFocusTarget.focus();
+      }
+    });
+  }
 }
 
 // 显示输入框错误提示
@@ -88,5 +127,6 @@ window.App = window.App || {};
 window.App.validation = {
   setupFormValidation,
   showInputError,
-  hideInputError
+  hideInputError,
+  scrollFieldIntoView
 };

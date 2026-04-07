@@ -77,13 +77,13 @@
     "message": "例如：配置修改接口"
   },
   "urlPattern": {
-    "message": "URL匹配模式"
+    "message": "URL"
   },
   "urlPatternPlaceholder": {
-    "message": "例如：*://api.example.com/*"
+    "message": "例如：https://api.example.com/users"
   },
   "urlPatternHint": {
-    "message": "支持通配符 * 匹配任意字符"
+    "message": "输入要拦截的请求 URL"
   },
   "responseContent": {
     "message": "响应内容 (JSON)"
@@ -598,7 +598,105 @@
       }
     }
   },
+  "requestMethod": {
+    "message": "请求方法"
+  },
+  "methodAll": {
+    "message": "全部"
+  },
+  "matchMode": {
+    "message": "匹配模式"
+  },
+  "matchModeContains": {
+    "message": "包含"
+  },
+  "matchModeWildcard": {
+    "message": "通配符"
+  },
+  "matchModeExact": {
+    "message": "精确匹配"
+  },
+  "rulePriority": {
+    "message": "优先级"
+  },
+  "rulePriorityHint": {
+    "message": "优先级越高，越先命中"
+  },
+  "responseStatus": {
+    "message": "响应状态码"
+  },
+  "responseDelay": {
+    "message": "响应延迟（毫秒）"
+  },
+  "responseDelayHint": {
+    "message": "适合模拟加载中和超时场景"
+  },
+  "responseHeaders": {
+    "message": "响应头"
+  },
+  "responseHeadersHint": {
+    "message": "可选。可添加 Content-Type、Cache-Control 等响应头"
+  },
+  "responseHeaderNamePlaceholder": {
+    "message": "响应头名称"
+  },
+  "responseHeaderValuePlaceholder": {
+    "message": "值"
+  },
+  "addResponseHeader": {
+    "message": "添加响应头"
+  },
+  "removeResponseHeader": {
+    "message": "删除响应头"
+  },
+  "responseHeadersIncomplete": {
+    "message": "请填写完整的响应头名称和值，或清空该行"
+  },
+  "responseHeadersDuplicate": {
+    "message": "响应头 $VALUE$ 已重复",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "responseHeadersMustBeObject": {
+    "message": "响应头必须是 JSON 对象"
+  },
+  "responseStatusInvalid": {
+    "message": "状态码必须是 100 到 599 之间的整数"
+  },
+  "responseDelayInvalid": {
+    "message": "延迟必须是大于等于 0 的数字"
+  },
+  "priorityShort": {
+    "message": "优先级 $VALUE$",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "statusShort": {
+    "message": "状态 $VALUE$",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "delayShort": {
+    "message": "$VALUE$ms",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "unknownRule": {
+    "message": "未知规则"
+  },
   "updateBannerText": {
-    "message": "插件已安装或更新！刷新您的目标网页以确保拦截生效 🔄"
+    "message": "插件已更新。请刷新目标页面以应用拦截。"
   }
 }

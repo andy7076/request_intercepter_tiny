@@ -43,17 +43,24 @@ function renderLogs(logs) {
     const hasDiffData = log.mockedBody || log.originalBody;
     const clickableClass = hasDiffData ? 'log-item-clickable' : '';
     const titleAttr = hasDiffData ? `title="${window.i18n.t('clickToViewDiff')}"` : '';
+    const method = escapeHtml(log.method || 'GET');
+    const status = escapeHtml(String(log.status || 200));
+    const ruleName = escapeHtml(log.ruleName || window.i18n.t('unknownRule'));
 
     return `
       <div class="log-item ${clickableClass}" data-log-index="${index}" ${titleAttr}>
         <div class="log-header">
           <span>
             <span class="log-type mockResponse">🎯 Mock</span>
-            <span class="log-rule">${escapeHtml(log.ruleName)}</span>
+            <span class="log-rule">${ruleName}</span>
           </span>
           <span class="log-time">${time}</span>
         </div>
-        <div class="log-url">${log.method || 'GET'} ${escapeHtml(log.url)}</div>
+        <div class="log-meta-row">
+          <span class="log-pill">${method}</span>
+          <span class="log-pill">${window.i18n.t('statusShort', status)}</span>
+        </div>
+        <div class="log-url">${method} ${escapeHtml(log.url)}</div>
       </div>
     `;
   }).join('');

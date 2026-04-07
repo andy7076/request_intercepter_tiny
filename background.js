@@ -17,6 +17,88 @@ const LOGS_STORAGE_KEY = 'requestLogs';
 const MAX_LOGS = 100; // 最大日志条数
 
 const BADGE_BACKGROUND_COLOR = '#16a34a';
+const DEFAULT_MATCH_MODE = 'contains';
+const DEFAULT_METHOD = 'ALL';
+const DEFAULT_PRIORITY = 0;
+const DEFAULT_STATUS = 200;
+const DEFAULT_DELAY_MS = 0;
+const DEFAULT_CONTENT_TYPE = 'application/json';
+
+function normalizeMethod(method) {
+  const normalized = String(method || DEFAULT_METHOD).toUpperCase();
+  return normalized || DEFAULT_METHOD;
+}
+
+function normalizeMatchMode(matchMode) {
+  const allowedModes = new Set(['exact', 'wildcard', 'contains']);
+  return allowedModes.has(matchMode) ? matchMode : DEFAULT_MATCH_MODE;
+}
+
+function inferMatchMode(matchMode, urlPattern) {
+  if (matchMode) {
+    return normalizeMatchMode(matchMode);
+  }
+  return String(urlPattern || '').includes('*') ? 'wildcard' : DEFAULT_MATCH_MODE;
+}
+
+function normalizePriority(priority) {
+  const value = Number(priority);
+  if (!Number.isFinite(value)) {
+    return DEFAULT_PRIORITY;
+  }
+  return Math.trunc(value);
+}
+
+function normalizeStatus(status) {
+  const value = Number(status);
+  if (!Number.isInteger(value) || value < 100 || value > 599) {
+    return DEFAULT_STATUS;
+  }
+  return value;
+}
+
+function normalizeDelayMs(delayMs) {
+  const value = Number(delayMs);
+  if (!Number.isFinite(value) || value < 0) {
+    return DEFAULT_DELAY_MS;
+  }
+  return Math.trunc(value);
+}
+
+function normalizeResponseHeaders(headers) {
+  if (!headers || typeof headers !== 'object' || Array.isArray(headers)) {
+    return {};
+  }
+
+  const normalized = {};
+  for (const [key, value] of Object.entries(headers)) {
+    const headerName = String(key || '').trim();
+    if (!headerName) continue;
+    normalized[headerName] = String(value ?? '');
+  }
+  return normalized;
+}
+
+function getRuleContentType(rule) {
+  const headers = normalizeResponseHeaders(rule.responseHeaders);
+  const contentTypeHeader = Object.keys(headers).find(key => key.toLowerCase() === 'content-type');
+  return contentTypeHeader ? headers[contentTypeHeader] : (rule.contentType || DEFAULT_CONTENT_TYPE);
+}
+
+function normalizeRule(rule) {
+  const normalized = {
+    ...rule,
+    method: normalizeMethod(rule.method),
+    matchMode: inferMatchMode(rule.matchMode, rule.urlPattern),
+    priority: normalizePriority(rule.priority),
+    responseStatus: normalizeStatus(rule.responseStatus),
+    responseDelayMs: normalizeDelayMs(rule.responseDelayMs),
+    responseHeaders: normalizeResponseHeaders(rule.responseHeaders)
+  };
+
+  normalized.contentType = getRuleContentType(normalized);
+  return normalized;
+}
 
 async function updateActionBadge(rules) {
   const currentRules = Array.isArray(rules) ? rules : await getRules();
@@ -72,10 +154,14 @@ const messageHandlers = {
   GET_MOCK_RULES: () => getMockRules(),
   LOG_MOCK_REQUEST: (msg, sender) => {
     addLog({
+      ruleId: msg.ruleId || '',
       ruleName: msg.ruleName,
       ruleType: msg.ruleType,
       url: msg.url,
-      method: 'GET',
+      method: normalizeMethod(msg.method || 'GET'),
+      matchMode: normalizeMatchMode(msg.matchMode),
+      priority: normalizePriority(msg.priority),
+      status: normalizeStatus(msg.status),
       mockedBody: msg.mockedBody || '',
       logTimestamp: msg.logTimestamp || '',
       tabId: sender.tab?.id,
@@ -158,7 +244,8 @@ async function executeFetch(requestConfig) {
 // 获取所有规则
 async function getRules() {
   const result = await chrome.storage.local.get(RULES_STORAGE_KEY);
-  return result[RULES_STORAGE_KEY] || [];
+  const rules = result[RULES_STORAGE_KEY] || [];
+  return rules.map(normalizeRule);
 }
 
 // 获取所有启用的 mock 规则
@@ -198,7 +285,7 @@ async function addRule(rule) {
     id: crypto.randomUUID(),
     enabled: true,
     createdAt: new Date().toISOString(),
-    ...rule
+    ...normalizeRule(rule)
   };
   rules.unshift(newRule);
   await chrome.storage.local.set({ [RULES_STORAGE_KEY]: rules });
@@ -216,7 +303,7 @@ async function updateRule(ruleId, updatedRule) {
   const index = rules.findIndex(r => r.id === ruleId);
   if (index !== -1) {
     const oldType = rules[index].type;
-    rules[index] = { ...rules[index], ...updatedRule };
+    rules[index] = normalizeRule({ ...rules[index], ...updatedRule });
     await chrome.storage.local.set({ [RULES_STORAGE_KEY]: rules });
 
     // 如果涉及 mock 规则，通知 content scripts
@@ -321,5 +408,3 @@ async function updateLogOriginalBody(logTimestamp, originalBody) {
     await chrome.storage.local.set({ [LOGS_STORAGE_KEY]: logs });
   }
 }
-
-

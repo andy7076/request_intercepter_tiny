@@ -221,6 +221,24 @@ async function parseAndFillCurl() {
     const urlPatternInput = document.getElementById('url-pattern');
     if (urlPatternInput) { urlPatternInput.value = generateUrlPattern(parsed.url); urlPatternInput.setCustomValidity(''); hideInputError(urlPatternInput); }
 
+    const methodSelect = document.getElementById('rule-method');
+    if (methodSelect) { methodSelect.value = parsed.method || 'GET'; }
+
+    const matchModeSelect = document.getElementById('rule-match-mode');
+    if (matchModeSelect) { matchModeSelect.value = 'exact'; }
+
+    const statusInput = document.getElementById('response-status');
+    if (statusInput) { statusInput.value = String(response.status || 200); }
+
+    const delayInput = document.getElementById('response-delay');
+    if (delayInput) { delayInput.value = '0'; }
+
+    if (window.App.form && window.App.form.setResponseHeaders) {
+      window.App.form.setResponseHeaders(
+        response.contentType ? { 'Content-Type': response.contentType } : {}
+      );
+    }
+
     const formCodeMirror = window.App.editor.getFormCodeMirror();
     if (formCodeMirror) { formCodeMirror.setValue(response.body); }
     const responseBodyInput = document.getElementById('response-body');

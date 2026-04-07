@@ -16,6 +16,54 @@
   // 规则数量状态（默认为 1 以确保初始化期间不漏掉请求，直到收到准确数量）
   let activeRulesCount = 1;
 
+  function wait(ms) {
+    if (!ms || ms <= 0) {
+      return Promise.resolve();
+    }
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  function normalizeMethod(method) {
+    return String(method || 'GET').toUpperCase();
+  }
+
+  function normalizeHeaders(headers, contentType) {
+    const normalized = new Headers();
+
+    if (headers && typeof headers === 'object') {
+      Object.entries(headers).forEach(([key, value]) => {
+        if (!key) return;
+        normalized.set(key, String(value ?? ''));
+      });
+    }
+
+    if (contentType && !normalized.has('content-type')) {
+      normalized.set('content-type', contentType);
+    }
+
+    normalized.set('x-mocked-by', 'Request-Interceptor-Tiny');
+    return normalized;
+  }
+
+  function captureOriginalFetchResponse(fetchPromise, logRequestId) {
+    fetchPromise
+      .then(async (realResponse) => {
+        try {
+          const originalBody = await realResponse.clone().text();
+          window.postMessage({
+            type: 'REQUEST_INTERCEPTOR_ORIGINAL_RESPONSE',
+            logRequestId,
+            originalBody
+          }, '*');
+        } catch (bodyErr) {
+          log('[Request Interceptor Tiny] ⚠️ Failed to read original response body:', bodyErr);
+        }
+      })
+      .catch((err) => {
+        log('[Request Interceptor Tiny] ⚠️ Real request failed (likely blocked by CSP/Network):', err);
+      });
+  }
+
   // 生成唯一 ID
   let requestIdCounter = 0;
   function generateRequestId() {
@@ -101,7 +149,7 @@
   });
   
   // 检查 URL 是否需要被 mock
-  function checkMockRule(url) {
+  function checkMockRule(url, method) {
     // 性能优化：如果没有启用任何规则，直接放行，不进行 postMessage通信
     if (activeRulesCount === 0) {
       return Promise.resolve(null);
@@ -127,6 +175,7 @@
       window.postMessage({
         type: 'REQUEST_INTERCEPTOR_CHECK',
         url: url,
+        method: normalizeMethod(method),
         requestId: requestId
       }, '*');
     });
@@ -137,75 +186,33 @@
   
   window.fetch = async function(input, init) {
     const rawUrl = typeof input === 'string' ? input : input.url;
+    const method = normalizeMethod(init?.method || (typeof input !== 'string' ? input.method : '') || 'GET');
     // 将相对URL转换为绝对URL，以便与用户配置的完整URL匹配
     const url = toAbsoluteUrl(rawUrl);
     
     try {
       // 检查是否有匹配的 mock 规则
-      const mockResult = await checkMockRule(url);
+      const mockResult = await checkMockRule(url, method);
       
       if (mockResult) {
         const { mockResponse, logRequestId } = mockResult;
         log('[Request Interceptor Tiny] 🎭 Will mock fetch response:', url);
-        
-        let realResponse = null;
-        let originalBody = null;
-        try {
-          // 尝试发出真实请求（Network 面板显示原始请求和响应）
-          realResponse = await originalFetch.apply(this, arguments);
-          // 读取原始响应体用于 diff 对比
-          try {
-            const clonedResponse = realResponse.clone();
-            originalBody = await clonedResponse.text();
-          } catch (bodyErr) {
-            log('[Request Interceptor Tiny] ⚠️ Failed to read original response body:', bodyErr);
-          }
-        } catch (err) {
-          log('[Request Interceptor Tiny] ⚠️ Real request failed (likely blocked by CSP/Network), using fallback properties:', err);
-        }
-        
-        // 将原始响应体发送回 content script 用于日志记录
-        if (originalBody !== null) {
-          window.postMessage({
-            type: 'REQUEST_INTERCEPTOR_ORIGINAL_RESPONSE',
-            logRequestId: logRequestId,
-            originalBody: originalBody
-          }, '*');
-        }
-        
-        // 创建一个伪装的 Response 对象，它保留原始响应的属性，但返回 mock 的内容
-        // 这样 Network 面板显示的是真实的原始响应，但代码读取的是 mock 数据
-        
-        // 准备响应头 (使用真实响应的头或根据 mock 配置生成)
-        const headers = realResponse ? realResponse.headers : new Headers({
-          'content-type': mockResponse.contentType || 'application/json'
-        });
-        
-        // 准备状态码
-        const status = realResponse ? realResponse.status : (mockResponse.status || 200);
-        const statusText = realResponse ? realResponse.statusText : (mockResponse.statusText || 'OK (Mocked)');
-        
+
+        const realRequestPromise = originalFetch.apply(this, arguments);
+        captureOriginalFetchResponse(realRequestPromise, logRequestId);
+        await wait(mockResponse.delayMs || 0);
+
         const mockedResponse = new Response(mockResponse.body, {
-          status: status,
-          statusText: statusText,
-          headers: headers
+          status: mockResponse.status || 200,
+          statusText: mockResponse.statusText || 'Mocked',
+          headers: normalizeHeaders(mockResponse.headers, mockResponse.contentType || 'application/json')
         });
-        
-        // 复制原始响应的只读属性
-        if (realResponse) {
-          Object.defineProperties(mockedResponse, {
-            url: { value: realResponse.url },
-            redirected: { value: realResponse.redirected },
-            type: { value: realResponse.type }
-          });
-        } else {
-          // 如果真实请求失败，使用请求 URL 作为响应 URL
-          Object.defineProperties(mockedResponse, {
-            url: { value: url },
-            redirected: { value: false },
-            type: { value: 'basic' }
-          });
-        }
+
+        Object.defineProperties(mockedResponse, {
+          url: { value: url },
+          redirected: { value: false },
+          type: { value: 'basic' }
+        });
         
         log('[Request Interceptor Tiny] ✅ Response mocked for:', url);
         
@@ -248,7 +255,7 @@
     }
     
     // 异步检查 mock 规则
-    checkMockRule(url).then(mockResult => {
+    checkMockRule(url, this._interceptorMethod).then(mockResult => {
       if (mockResult) {
         const { mockResponse, logRequestId } = mockResult;
         log('[Request Interceptor Tiny] 🎭 Will mock XHR response:', url);
@@ -260,71 +267,80 @@
         
         // 标记需要 mock
         xhr._mockResponse = mockResponse;
+        xhr._mockFinalized = false;
+
+        const applyMockResponse = function() {
+          if (xhr._mockFinalized || !xhr._mockResponse) {
+            return;
+          }
+
+          xhr._mockFinalized = true;
+          log('[Request Interceptor Tiny] ✅ Response mocked for XHR:', url);
+          const mock = xhr._mockResponse;
+
+          try {
+            const originalXHRBody = xhr.responseText;
+            if (originalXHRBody) {
+              window.postMessage({
+                type: 'REQUEST_INTERCEPTOR_ORIGINAL_RESPONSE',
+                logRequestId: logRequestId,
+                originalBody: originalXHRBody
+              }, '*');
+            }
+          } catch (bodyErr) {
+            log('[Request Interceptor Tiny] ⚠️ Failed to read original XHR response body:', bodyErr);
+          }
+
+          try {
+            Object.defineProperty(xhr, 'responseText', {
+              get: () => mock.body,
+              configurable: true
+            });
+            Object.defineProperty(xhr, 'response', {
+              get: () => {
+                if (xhr.responseType === '' || xhr.responseType === 'text') {
+                  return mock.body;
+                } else if (xhr.responseType === 'json') {
+                  try {
+                    return JSON.parse(mock.body);
+                  } catch (e) {
+                    return mock.body;
+                  }
+                }
+                return mock.body;
+              },
+              configurable: true
+            });
+            Object.defineProperty(xhr, 'status', {
+              get: () => mock.status || 200,
+              configurable: true
+            });
+            Object.defineProperty(xhr, 'statusText', {
+              get: () => mock.statusText || 'Mocked',
+              configurable: true
+            });
+          } catch (e) {
+            console.warn('[Request Interceptor Tiny] Failed to override XHR properties:', e);
+          }
+
+          const responseHeaders = normalizeHeaders(mock.headers, mock.contentType || 'application/json');
+          xhr.getResponseHeader = function(header) {
+            if (!header) return null;
+            return responseHeaders.get(header) || null;
+          };
+          xhr.getAllResponseHeaders = function() {
+            let allHeaders = '';
+            responseHeaders.forEach((value, key) => {
+              allHeaders += `${key}: ${value}\r\n`;
+            });
+            return allHeaders;
+          };
+        };
         
         // 重写 onreadystatechange
         xhr.onreadystatechange = function() {
           if (xhr.readyState === 4 && xhr._mockResponse) {
-            // 在请求完成后，覆盖响应属性（Network 面板显示原始响应，代码读取 mock 数据）
-            log('[Request Interceptor Tiny] ✅ Response mocked for XHR:', url);
-            const mock = xhr._mockResponse;
-            
-            // 读取原始响应体用于 diff 对比
-            try {
-              const originalXHRBody = xhr.responseText;
-              if (originalXHRBody) {
-                window.postMessage({
-                  type: 'REQUEST_INTERCEPTOR_ORIGINAL_RESPONSE',
-                  logRequestId: logRequestId,
-                  originalBody: originalXHRBody
-                }, '*');
-              }
-            } catch (bodyErr) {
-              log('[Request Interceptor Tiny] ⚠️ Failed to read original XHR response body:', bodyErr);
-            }
-            
-            try {
-              Object.defineProperty(xhr, 'responseText', {
-                get: () => mock.body,
-                configurable: true
-              });
-              Object.defineProperty(xhr, 'response', {
-                get: () => {
-                  if (xhr.responseType === '' || xhr.responseType === 'text') {
-                    return mock.body;
-                  } else if (xhr.responseType === 'json') {
-                    try {
-                      return JSON.parse(mock.body);
-                    } catch (e) {
-                      return mock.body;
-                    }
-                  }
-                  return mock.body;
-                },
-                configurable: true
-              });
-              Object.defineProperty(xhr, 'status', {
-                get: () => mock.status || 200,
-                configurable: true
-              });
-              Object.defineProperty(xhr, 'statusText', {
-                get: () => mock.statusText || 'OK (Mocked)',
-                configurable: true
-              });
-            } catch (e) {
-              console.warn('[Request Interceptor Tiny] Failed to override XHR properties:', e);
-            }
-            
-            // 覆盖 getResponseHeader
-            const originalGetResponseHeader = xhr.getResponseHeader.bind(xhr);
-            xhr.getResponseHeader = function(header) {
-              if (header.toLowerCase() === 'content-type') {
-                return mock.contentType || 'application/json';
-              }
-              if (header.toLowerCase() === 'x-mocked-by') {
-                return 'Request-Interceptor-Tiny';
-              }
-              return originalGetResponseHeader(header);
-            };
+            applyMockResponse();
           }
           
           if (typeof originalOnReadyStateChange === 'function') {
@@ -334,6 +350,9 @@
         
         // 重写 onload
         xhr.onload = function(event) {
+          if (xhr.readyState === 4 && xhr._mockResponse) {
+            applyMockResponse();
+          }
           if (typeof originalOnLoad === 'function') {
             originalOnLoad.apply(xhr, arguments);
           }
@@ -341,13 +360,18 @@
         
         // 重写 onloadend
         xhr.onloadend = function(event) {
+          if (xhr.readyState === 4 && xhr._mockResponse) {
+            applyMockResponse();
+          }
           if (typeof originalOnLoadEnd === 'function') {
             originalOnLoadEnd.apply(xhr, arguments);
           }
         };
         
         // 正常发送请求（这样 Network 面板能看到）
-        originalXHRSend.call(xhr, body);
+        setTimeout(() => {
+          originalXHRSend.call(xhr, body);
+        }, mockResponse.delayMs || 0);
       } else {
         // 正常发送请求
         originalXHRSend.call(xhr, body);

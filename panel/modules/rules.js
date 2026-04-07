@@ -50,16 +50,47 @@ function clearSearch() {
   filterAndRenderRules();
 }
 
+function getRuleContentType(rule) {
+  const headers = rule.responseHeaders || {};
+  const headerKey = Object.keys(headers).find(key => key.toLowerCase() === 'content-type');
+  return headerKey ? headers[headerKey] : (rule.contentType || 'application/json');
+}
+
+function getMatchModeLabel(matchMode) {
+  const labelMap = {
+    contains: window.i18n.t('matchModeContains'),
+    wildcard: window.i18n.t('matchModeWildcard'),
+    exact: window.i18n.t('matchModeExact')
+  };
+  return labelMap[matchMode] || window.i18n.t('matchModeContains');
+}
+
+function renderRuleMeta(rule) {
+  const methodLabel = rule.method === 'ALL' ? window.i18n.t('methodAll') : rule.method;
+  const chips = [
+    `<span class="meta-chip meta-chip-method">${methodLabel}</span>`,
+    `<span class="meta-chip meta-chip-match">${getMatchModeLabel(rule.matchMode)}</span>`,
+    `<span class="meta-chip meta-chip-priority">${window.i18n.t('priorityShort', String(rule.priority || 0))}</span>`,
+    `<span class="meta-chip meta-chip-status">${window.i18n.t('statusShort', String(rule.responseStatus || 200))}</span>`
+  ];
+
+  if (rule.responseDelayMs > 0) {
+    chips.push(`<span class="meta-chip meta-chip-delay">${window.i18n.t('delayShort', String(rule.responseDelayMs))}</span>`);
+  }
+
+  return `<div class="rule-meta">${chips.join('')}</div>`;
+}
+
 function renderRuleDetails(rule) {
   if (rule.responseBody) {
     return `<div class="rule-details response-preview" data-rule-id="${rule.id}">
         <div class="response-header clickable" data-toggle-id="${rule.id}">
           <div class="header-left">
-             <span class="toggle-icon" style="transform: rotate(90deg)">▶</span>
-             <span class="content-type-label">application/json</span>
+             <span class="toggle-icon">▶</span>
+             <span class="content-type-label">${window.App.utils.escapeHtml(getRuleContentType(rule))}</span>
           </div>
         </div>
-        <div class="response-content" id="content-${rule.id}" data-content-id="${rule.id}">
+        <div class="response-content hidden" id="content-${rule.id}" data-content-id="${rule.id}">
           <div class="renderjson-container" data-json-id="${rule.id}"></div>
         </div>
       </div>`;
@@ -103,6 +134,7 @@ function renderRules(rules, highlightQuery = '') {
         <div class="rule-info"><div class="rule-name-row"><span class="rule-name" title="${escapeHtml(rule.name)}">${highlightText(escapeHtml(rule.name), highlightQuery)}</span></div></div>
         <div class="rule-status"><div class="rule-toggle ${rule.enabled ? 'active' : ''}" data-id="${rule.id}" title="${rule.enabled ? window.i18n.t('clickToDisable') : window.i18n.t('clickToEnable')}"></div></div>
       </div>
+      ${renderRuleMeta(rule)}
       <div class="rule-url">${highlightText(escapeHtml(rule.urlPattern), highlightQuery)}</div>
       ${renderRuleDetails(rule)}
       <div class="rule-footer">
@@ -128,11 +160,11 @@ function renderRules(rules, highlightQuery = '') {
       e.stopPropagation();
       const ruleId = header.dataset.toggleId;
       const content = document.getElementById(`content-${ruleId}`);
-      const icon = header.querySelector('.toggle-icon');
       if (content) {
         const isHidden = content.classList.contains('hidden');
-        if (isHidden) { content.classList.remove('hidden'); if (icon) icon.style.transform = 'rotate(90deg)'; }
-        else { content.classList.add('hidden'); if (icon) icon.style.transform = 'rotate(0deg)'; }
+        header.classList.toggle('expanded', isHidden);
+        if (isHidden) { content.classList.remove('hidden'); }
+        else { content.classList.add('hidden'); }
       }
     });
   });
@@ -155,17 +187,12 @@ async function handleEdit(ruleId) {
 
   editingRuleId = ruleId;
   currentEditingRuleData = JSON.parse(JSON.stringify(rule));
+  window.App.form.fillRuleForm(rule);
 
   const ruleNameInput = document.getElementById('rule-name');
   const urlPatternInput = document.getElementById('url-pattern');
-  ruleNameInput.value = rule.name;
-  urlPatternInput.value = rule.urlPattern;
-  document.getElementById('response-body').value = rule.responseBody || '';
   ruleNameInput.setCustomValidity('');
   urlPatternInput.setCustomValidity('');
-
-  const formCodeMirror = window.App.editor.getFormCodeMirror();
-  if (formCodeMirror) { formCodeMirror.setValue(rule.responseBody || ''); }
 
   const addTabBtn = document.querySelector('.tab-btn[data-tab="add"]');
   if (addTabBtn) {

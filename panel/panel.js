@@ -125,11 +125,7 @@ function setupEventListeners() {
       const editingRuleId = getEditingRuleId();
       const currentEditingRuleData = getCurrentEditingRuleData();
       if (editingRuleId && currentEditingRuleData) {
-        document.getElementById('rule-name').value = currentEditingRuleData.name;
-        document.getElementById('url-pattern').value = currentEditingRuleData.urlPattern;
-        document.getElementById('response-body').value = currentEditingRuleData.responseBody || '';
-        const formCM = getFormCodeMirror();
-        if (formCM) { formCM.setValue(currentEditingRuleData.responseBody || ''); }
+        window.App.form.fillRuleForm(currentEditingRuleData);
         validateJsonRealtime();
         showToast(window.i18n.t('resetDone'));
       } else {
@@ -296,6 +292,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 4. 设置 UI
   setupEventListeners();
+  window.App.form.initResponseHeadersEditor();
   window.App.tooltip.initGlobalTooltip();
   initLanguageSelector();
   window.App.editor.initCodeMirrorEditors();

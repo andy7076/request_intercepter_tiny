@@ -240,6 +240,33 @@
   border-color: transparent transparent rgba(15, 23, 42, 0.9) transparent;
 }
 
+/* Light theme - Update banner */
+[data-theme="light"] .update-banner {
+  background: #eaf3ff;
+  border-color: #b9d4ff;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+}
+
+[data-theme="light"] .update-banner .update-icon {
+  background: #dbeafe;
+  border-color: #bfdbfe;
+  color: #2563eb;
+}
+
+[data-theme="light"] .update-banner .update-text {
+  color: #1e3a8a;
+}
+
+[data-theme="light"] .update-banner .btn-banner-close {
+  background: rgba(30, 58, 138, 0.06);
+  color: #475569;
+}
+
+[data-theme="light"] .update-banner .btn-banner-close:hover {
+  background: rgba(37, 99, 235, 0.12);
+  color: #1e3a8a;
+}
+
 /* Light theme - Editor modal */
 [data-theme="light"] .editor-modal {
   background: rgba(15, 23, 42, 0.3);
@@ -470,4 +497,3 @@
 [data-theme-transition] * {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
 }
-
