@@ -3,10 +3,10 @@
     "message": "Request Interceptor Tiny"
   },
   "extDescription": {
-    "message": "轻量级接口模拟工具"
+    "message": "好用的接口模拟工具"
   },
   "subtitle": {
-    "message": "轻量级接口模拟工具"
+    "message": "好用的接口模拟工具"
   },
   "fullView": {
     "message": "完整视图"
@@ -150,6 +150,12 @@
   "settingsTitle": {
     "message": "设置"
   },
+  "globalInterception": {
+    "message": "插件开关"
+  },
+  "globalInterceptionDesc": {
+    "message": "关闭后，插件不会在新打开的页面中生效"
+  },
   "consoleLogs": {
     "message": "控制台日志"
   },
@@ -279,6 +285,21 @@
   },
   "consoleLogsDisabled": {
     "message": "控制台日志已关闭"
+  },
+  "globalInterceptionEnabled": {
+    "message": "插件已开启"
+  },
+  "globalInterceptionDisabled": {
+    "message": "插件已关闭"
+  },
+  "globalInterceptionToggleFailed": {
+    "message": "插件开关更新失败"
+  },
+  "globalInterceptionRefreshTitle": {
+    "message": "需要刷新页面"
+  },
+  "globalInterceptionRefreshNotice": {
+    "message": "设置已更新。请刷新当前已打开的目标页面，以确保变更生效。新打开的页面会自动使用新的插件开关状态。"
   },
   "jsonValid": {
     "message": "✓ JSON 格式有效"

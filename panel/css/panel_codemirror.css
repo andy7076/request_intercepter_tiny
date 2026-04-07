@@ -433,7 +433,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 }
 
 .alert-modal .alert-modal-header {
-  background: rgba(0, 0, 0, 0.2);
+  border-bottom-color: var(--border);
 }
 
 .alert-modal .alert-modal-header h3 {
@@ -442,6 +442,11 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 
 .alert-modal .alert-icon {
   font-size: 16px;
+  color: var(--warning);
+}
+
+.alert-modal .alert-icon svg {
+  color: var(--warning);
 }
 
 .alert-modal .alert-modal-body {

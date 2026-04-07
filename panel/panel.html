@@ -28,7 +28,7 @@
             <div class="header-title">
               <h1>Request Interceptor Tiny</h1>
               <p class="subtitle" data-i18n="subtitle">
-                Lightweight API Mock Tool
+                Easy-to-use API Mock Tool
               </p>
             </div>
             <button
@@ -750,6 +750,20 @@
         <div class="modal-body">
           <div class="setting-item">
             <div class="setting-info">
+              <span class="setting-title" data-i18n="globalInterception"
+                >Plugin Switch</span
+              >
+              <span class="setting-desc" data-i18n="globalInterceptionDesc"
+                >When disabled, the plugin will not take effect on newly opened pages</span
+              >
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="setting-interceptor-enabled" />
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="setting-item">
+            <div class="setting-info">
               <span class="setting-title" data-i18n="consoleLogs"
                 >Console Logs</span
               >
@@ -957,7 +971,23 @@
       <div class="modal-content alert-modal-content">
         <div class="modal-header alert-modal-header">
           <h3>
-            <span class="alert-icon">⚠️</span>
+            <span class="alert-icon" aria-hidden="true">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <path d="M12 9v4"></path>
+                <path d="M12 17h.01"></path>
+              </svg>
+            </span>
             <span id="alert-title" data-i18n="alertTitle">Alert</span>
           </h3>
           <button

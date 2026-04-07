@@ -1536,6 +1536,28 @@ body {
   color: var(--primary-light);
 }
 
+.alert-modal-content {
+  max-width: 420px;
+}
+
+.alert-modal-header h3 {
+  color: var(--text-primary);
+}
+
+.alert-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fbbf24;
+  flex: 0 0 auto;
+}
+
+.alert-message {
+  color: var(--text-secondary);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
 .modal .btn-modal-close {
   background: transparent;
   border: 1px solid var(--border);

@@ -3,10 +3,10 @@
     "message": "Request Interceptor Tiny"
   },
   "extDescription": {
-    "message": "Lightweight API Mock Tool"
+    "message": "Easy-to-use API Mock Tool"
   },
   "subtitle": {
-    "message": "Lightweight API Mock Tool"
+    "message": "Easy-to-use API Mock Tool"
   },
   "fullView": {
     "message": "Full View"
@@ -150,6 +150,12 @@
   "settingsTitle": {
     "message": "Settings"
   },
+  "globalInterception": {
+    "message": "Plugin Switch"
+  },
+  "globalInterceptionDesc": {
+    "message": "When disabled, the plugin will not take effect on newly opened pages"
+  },
   "consoleLogs": {
     "message": "Console Logs"
   },
@@ -279,6 +285,21 @@
   },
   "consoleLogsDisabled": {
     "message": "Console logs disabled"
+  },
+  "globalInterceptionEnabled": {
+    "message": "Plugin enabled"
+  },
+  "globalInterceptionDisabled": {
+    "message": "Plugin disabled"
+  },
+  "globalInterceptionToggleFailed": {
+    "message": "Failed to update the plugin switch"
+  },
+  "globalInterceptionRefreshTitle": {
+    "message": "Refresh Required"
+  },
+  "globalInterceptionRefreshNotice": {
+    "message": "The setting has been updated. Refresh any already open target pages to fully apply the change. Newly opened pages will automatically use the new plugin switch state."
   },
   "jsonValid": {
     "message": "✓ JSON format valid"

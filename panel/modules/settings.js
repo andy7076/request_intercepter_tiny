@@ -7,8 +7,12 @@
 function loadSettings() {
   const { applyTheme } = window.App.theme;
   const settingConsoleLog = document.getElementById('setting-console-log');
+  const settingInterceptorEnabled = document.getElementById('setting-interceptor-enabled');
 
-  chrome.storage.local.get(['consoleLogs', 'theme'], (result) => {
+  chrome.storage.local.get(['consoleLogs', 'theme', 'interceptorEnabled'], (result) => {
+    if (settingInterceptorEnabled) {
+      settingInterceptorEnabled.checked = result.interceptorEnabled !== false;
+    }
     if (settingConsoleLog) {
       settingConsoleLog.checked = result.consoleLogs || false;
     }

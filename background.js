@@ -14,15 +14,40 @@ function t(key) {
 // 存储规则的键名
 const RULES_STORAGE_KEY = 'interceptRules';
 const LOGS_STORAGE_KEY = 'requestLogs';
+const INTERCEPTOR_ENABLED_KEY = 'interceptorEnabled';
 const MAX_LOGS = 100; // 最大日志条数
 
 const BADGE_BACKGROUND_COLOR = '#16a34a';
+const BADGE_DISABLED_COLOR = '#64748b';
 const DEFAULT_MATCH_MODE = 'contains';
 const DEFAULT_METHOD = 'ALL';
 const DEFAULT_PRIORITY = 0;
 const DEFAULT_STATUS = 200;
 const DEFAULT_DELAY_MS = 0;
 const DEFAULT_CONTENT_TYPE = 'text/plain; charset=utf-8';
+const CONTENT_SCRIPT_IDS = ['request-interceptor-main', 'request-interceptor-content'];
+
+function getContentScriptDefinitions() {
+  return [
+    {
+      id: 'request-interceptor-main',
+      matches: ['<all_urls>'],
+      js: ['injected.js'],
+      runAt: 'document_start',
+      allFrames: true,
+      persistAcrossSessions: true,
+      world: 'MAIN'
+    },
+    {
+      id: 'request-interceptor-content',
+      matches: ['<all_urls>'],
+      js: ['content.js'],
+      runAt: 'document_start',
+      allFrames: true,
+      persistAcrossSessions: true
+    }
+  ];
+}
 
 function normalizeMethod(method) {
   const normalized = String(method || DEFAULT_METHOD).toUpperCase();
@@ -120,7 +145,64 @@ function normalizeRule(rule) {
   return normalized;
 }
 
+async function isInterceptorEnabled() {
+  const result = await chrome.storage.local.get(INTERCEPTOR_ENABLED_KEY);
+  return result[INTERCEPTOR_ENABLED_KEY] !== false;
+}
+
+async function syncContentScriptRegistration(enabled = null) {
+  const shouldEnable = typeof enabled === 'boolean' ? enabled : await isInterceptorEnabled();
+
+  try {
+    await chrome.scripting.unregisterContentScripts({ ids: CONTENT_SCRIPT_IDS });
+  } catch (err) {
+    // ignore when not registered
+  }
+
+  if (!shouldEnable) {
+    return;
+  }
+
+  await chrome.scripting.registerContentScripts(getContentScriptDefinitions());
+}
+
+async function broadcastInterceptorEnabled(enabled) {
+  try {
+    const tabs = await chrome.tabs.query({});
+    await Promise.allSettled(
+      tabs
+        .filter(tab => tab.id)
+        .map(tab => chrome.tabs.sendMessage(tab.id, {
+          type: 'INTERCEPTOR_ENABLED_UPDATED',
+          enabled
+        }))
+    );
+  } catch (err) {
+    console.warn('[Request Interceptor Tiny]', 'Failed to broadcast interceptor enabled state:', err);
+  }
+}
+
+async function setInterceptorEnabled(enabled) {
+  const normalized = enabled !== false;
+  await chrome.storage.local.set({ [INTERCEPTOR_ENABLED_KEY]: normalized });
+  await syncContentScriptRegistration(normalized);
+  await broadcastInterceptorEnabled(normalized);
+  await updateActionBadge();
+  return {
+    success: true,
+    enabled: normalized,
+    refreshRequired: true
+  };
+}
+
 async function updateActionBadge(rules) {
+  const interceptorEnabled = await isInterceptorEnabled();
+  if (!interceptorEnabled) {
+    await chrome.action.setBadgeBackgroundColor({ color: BADGE_DISABLED_COLOR });
+    await chrome.action.setBadgeText({ text: '' });
+    return;
+  }
+
   const currentRules = Array.isArray(rules) ? rules : await getRules();
   const enabledRuleCount = currentRules.filter(rule => rule.enabled).length;
   await chrome.action.setBadgeBackgroundColor({ color: BADGE_BACKGROUND_COLOR });
@@ -129,9 +211,12 @@ async function updateActionBadge(rules) {
 
 // 初始化规则
 chrome.runtime.onInstalled.addListener(async (details) => {
-  const result = await chrome.storage.local.get(RULES_STORAGE_KEY);
+  const result = await chrome.storage.local.get([RULES_STORAGE_KEY, INTERCEPTOR_ENABLED_KEY]);
   if (!result[RULES_STORAGE_KEY]) {
     await chrome.storage.local.set({ [RULES_STORAGE_KEY]: [] });
+  }
+  if (typeof result[INTERCEPTOR_ENABLED_KEY] !== 'boolean') {
+    await chrome.storage.local.set({ [INTERCEPTOR_ENABLED_KEY]: true });
   }
   
   // Set flag for update banner
@@ -139,9 +224,19 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     await chrome.storage.local.set({ justUpdated: true });
   }
 
+  await syncContentScriptRegistration(result[INTERCEPTOR_ENABLED_KEY] !== false);
   await updateActionBadge(result[RULES_STORAGE_KEY] || []);
 
   console.log('[Request Interceptor Tiny]', `Extension ${details.reason} action triggered`);
+});
+
+chrome.runtime.onStartup.addListener(() => {
+  syncContentScriptRegistration().catch(err => {
+    console.error('[Request Interceptor Tiny]', 'Failed to sync content scripts on startup:', err);
+  });
+  updateActionBadge().catch(err => {
+    console.error('[Request Interceptor Tiny]', 'Failed to update badge on startup:', err);
+  });
 });
 
 // 点击扩展图标时打开 Side Panel
@@ -152,11 +247,18 @@ chrome.action.onClicked.addListener((tab) => {
 updateActionBadge();
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName !== 'local' || !changes[RULES_STORAGE_KEY]) {
+  if (areaName !== 'local') {
     return;
   }
 
-  updateActionBadge(changes[RULES_STORAGE_KEY].newValue || []);
+  if (changes[RULES_STORAGE_KEY] || changes[INTERCEPTOR_ENABLED_KEY]) {
+    updateActionBadge(
+      changes[RULES_STORAGE_KEY]
+        ? (changes[RULES_STORAGE_KEY].newValue || [])
+        : undefined
+    );
+  }
+
 });
 
 // 监听来自 side panel 和 content script 的消息
@@ -172,6 +274,8 @@ const messageHandlers = {
   CLEAR_ALL_RULES: () => clearAllRules(),
   DISABLE_ALL_RULES: () => disableAllRules(),
   GET_MOCK_RULES: () => getMockRules(),
+  GET_INTERCEPTOR_ENABLED: () => isInterceptorEnabled(),
+  SET_INTERCEPTOR_ENABLED: (msg) => setInterceptorEnabled(msg.enabled),
   LOG_MOCK_REQUEST: (msg, sender) => {
     addLog({
       ruleId: msg.ruleId || '',
@@ -204,6 +308,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       .catch(err => sendResponse({ error: err.message }));
     return true;
   }
+});
+
+syncContentScriptRegistration().catch(err => {
+  console.error('[Request Interceptor Tiny]', 'Failed to sync content scripts:', err);
 });
 
 // 执行 fetch 请求

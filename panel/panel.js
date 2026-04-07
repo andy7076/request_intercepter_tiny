@@ -92,6 +92,7 @@ function setupEventListeners() {
   const settingsBtn = document.getElementById('settings-btn');
   const settingsModal = document.getElementById('settings-modal');
   const settingsClose = document.getElementById('settings-close');
+  const settingInterceptorEnabled = document.getElementById('setting-interceptor-enabled');
   const settingConsoleLog = document.getElementById('setting-console-log');
 
   // Tab 切换
@@ -234,6 +235,35 @@ function setupEventListeners() {
       if (e.key === 'Escape' && settingsModal.classList.contains('active')) {
         settingsModal.classList.remove('active');
         if (document.activeElement) { document.activeElement.blur(); }
+      }
+    });
+  }
+
+  if (settingInterceptorEnabled) {
+    settingInterceptorEnabled.addEventListener('change', async (e) => {
+      const enabled = e.target.checked;
+
+      try {
+        const result = await window.App.utils.sendMessage({
+          type: 'SET_INTERCEPTOR_ENABLED',
+          enabled
+        });
+
+        if (result && result.error) {
+          throw new Error(result.error);
+        }
+
+        showToast(enabled ? window.i18n.t('globalInterceptionEnabled') : window.i18n.t('globalInterceptionDisabled'));
+
+        if (result && result.refreshRequired) {
+          await showAlert(
+            window.i18n.t('globalInterceptionRefreshNotice'),
+            window.i18n.t('globalInterceptionRefreshTitle')
+          );
+        }
+      } catch (error) {
+        e.target.checked = !enabled;
+        showToast(window.i18n.t('globalInterceptionToggleFailed'), true);
       }
     });
   }

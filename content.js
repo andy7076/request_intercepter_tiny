@@ -14,6 +14,7 @@ function isExtensionContextValid() {
 // ========== 日志控制 ==========
 // 日志控制
 let consoleLogsEnabled = false;
+let interceptorEnabled = true;
 const DEFAULT_MATCH_MODE = 'contains';
 const DEFAULT_METHOD = 'ALL';
 const DEFAULT_PRIORITY = 0;
@@ -33,6 +34,24 @@ let isInitialized = false;
 
 // 存储待关联的日志，用于将原始响应体与日志关联
 const pendingLogs = new Map();
+
+function syncRulesCountToInjected() {
+  window.postMessage({
+    type: 'REQUEST_INTERCEPTOR_RULES_UPDATED',
+    rulesCount: interceptorEnabled ? mockRules.length : 0
+  }, '*');
+}
+
+function applyInterceptorEnabledState(enabled) {
+  interceptorEnabled = enabled !== false;
+
+  if (!interceptorEnabled) {
+    mockRules = [];
+    pendingLogs.clear();
+  }
+
+  syncRulesCountToInjected();
+}
 
 function normalizeMethod(method) {
   const normalized = String(method || DEFAULT_METHOD).toUpperCase();
@@ -175,10 +194,18 @@ function loadMockRules() {
   if (!isExtensionContextValid()) return Promise.resolve([]);
   return new Promise((resolve) => {
     try {
-      chrome.storage.local.get('interceptRules', (result) => {
+      chrome.storage.local.get(['interceptRules', 'interceptorEnabled'], (result) => {
         if (chrome.runtime.lastError) {
         console.error('[Request Interceptor Tiny]', 'Failed to load rules:', chrome.runtime.lastError.message);
         resolve([]);
+        return;
+      }
+      interceptorEnabled = result.interceptorEnabled !== false;
+      if (!interceptorEnabled) {
+        mockRules = [];
+        isInitialized = true;
+        syncRulesCountToInjected();
+        resolve(mockRules);
         return;
       }
       const allRules = result.interceptRules || [];
@@ -191,6 +218,7 @@ function loadMockRules() {
         })));
       }
       isInitialized = true;
+      syncRulesCountToInjected();
         resolve(mockRules);
       });
     } catch (e) {
@@ -223,11 +251,7 @@ function loadSettings() {
 log('[Request Interceptor Tiny] 🚀', 'Initializing content script...');
 loadMockRules().then(() => {
   log('[Request Interceptor Tiny] ✨', 'Initialization complete');
-  // Send initial rules count to injected script
-  window.postMessage({
-    type: 'REQUEST_INTERCEPTOR_RULES_UPDATED',
-    rulesCount: mockRules.length
-  }, '*');
+  syncRulesCountToInjected();
 });
 loadSettings();
 
@@ -237,15 +261,23 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   if (!isExtensionContextValid()) return;
   
   if (areaName === 'local' && changes['interceptRules']) {
+    if (!interceptorEnabled) {
+      return;
+    }
     const allRules = changes['interceptRules'].newValue || [];
     mockRules = extractMockRules(allRules);
     log('[Request Interceptor Tiny]', 'Rules updated via storage.onChanged, count:', mockRules.length);
-    
-    // 通知页面规则已更新
-    window.postMessage({
-      type: 'REQUEST_INTERCEPTOR_RULES_UPDATED',
-      rulesCount: mockRules.length
-    }, '*');
+    syncRulesCountToInjected();
+  }
+
+  if (areaName === 'local' && changes['interceptorEnabled']) {
+    const enabled = changes['interceptorEnabled'].newValue !== false;
+    if (interceptorEnabled === enabled) return;
+
+    applyInterceptorEnabledState(enabled);
+    if (enabled) {
+      loadMockRules();
+    }
   }
 
 
@@ -268,14 +300,14 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 // 监听消息（规则更新或设置更新）
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'MOCK_RULES_UPDATED') {
+    if (!interceptorEnabled) {
+      mockRules = [];
+      syncRulesCountToInjected();
+      return;
+    }
     mockRules = extractMockRules(message.rules || []);
     log('[Request Interceptor Tiny]', 'Received MOCK_RULES_UPDATED message, count:', mockRules.length);
-    
-    // 通知 injected.js 规则已更新
-    window.postMessage({
-      type: 'REQUEST_INTERCEPTOR_RULES_UPDATED',
-      rulesCount: mockRules.length
-    }, '*');
+    syncRulesCountToInjected();
   } else if (message.type === 'CONSOLE_LOGS_UPDATED') {
     const enabled = message.enabled;
     // 防止重复通知
@@ -290,6 +322,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }, '*');
     
     // Removed redundant console.log to avoid duplicates
+  } else if (message.type === 'INTERCEPTOR_ENABLED_UPDATED') {
+    const enabled = message.enabled !== false;
+    if (interceptorEnabled === enabled) return;
+    applyInterceptorEnabledState(enabled);
+    if (enabled) {
+      loadMockRules();
+    }
   }
 });
 
@@ -345,6 +384,10 @@ function matchUrl(pattern, url, matchMode = DEFAULT_MATCH_MODE) {
 
 // 查找匹配的 mock 规则
 function findMockRule(url, method) {
+  if (!interceptorEnabled) {
+    return null;
+  }
+
   const normalizedMethod = normalizeMethod(method);
   for (const rule of mockRules) {
     const methodMatched = rule.method === DEFAULT_METHOD || rule.method === normalizedMethod;
