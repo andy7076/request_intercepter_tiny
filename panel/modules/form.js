@@ -405,6 +405,9 @@ function fillRuleForm(rule = {}) {
 
   if (formCodeMirror) {
     formCodeMirror.setValue(normalizedRule.responseBody);
+    if (typeof formCodeMirror.clearHistory === 'function') {
+      formCodeMirror.clearHistory();
+    }
   }
 }
 
@@ -589,8 +592,8 @@ function initResponseHeadersEditor() {
     list.appendChild(row);
     syncAdvancedSettingsSummary();
     updateNavigationRequestWarning();
-    if (window.App && window.App.editor && typeof window.App.editor.refreshEditorModes === 'function') {
-      window.App.editor.refreshEditorModes();
+    if (window.App && window.App.editor && typeof window.App.editor.scheduleEditorModeRefresh === 'function') {
+      window.App.editor.scheduleEditorModeRefresh();
     }
     const nameInput = row.querySelector('.response-header-name');
     if (nameInput) {
@@ -612,16 +615,16 @@ function initResponseHeadersEditor() {
     ensureResponseHeadersEditorRow();
     syncAdvancedSettingsSummary();
     updateNavigationRequestWarning();
-    if (window.App && window.App.editor && typeof window.App.editor.refreshEditorModes === 'function') {
-      window.App.editor.refreshEditorModes();
+    if (window.App && window.App.editor && typeof window.App.editor.scheduleEditorModeRefresh === 'function') {
+      window.App.editor.scheduleEditorModeRefresh();
     }
   });
 
   list.addEventListener('input', () => {
     syncAdvancedSettingsSummary();
     updateNavigationRequestWarning();
-    if (window.App && window.App.editor && typeof window.App.editor.refreshEditorModes === 'function') {
-      window.App.editor.refreshEditorModes();
+    if (window.App && window.App.editor && typeof window.App.editor.scheduleEditorModeRefresh === 'function') {
+      window.App.editor.scheduleEditorModeRefresh();
     }
   });
 

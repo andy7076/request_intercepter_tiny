@@ -163,18 +163,24 @@ function generateRuleNameFromUrl(url) {
       });
     const meaningfulParts = pathParts.filter(part => !isIgnoredPathPart(part));
 
-    let coreName = '';
-    if (meaningfulParts.length > 0) {
-      coreName = meaningfulParts[meaningfulParts.length - 1];
+    let nameParts = [];
+    if (meaningfulParts.length > 1) {
+      nameParts = meaningfulParts.slice(-2);
+    } else if (meaningfulParts.length === 1) {
+      nameParts = meaningfulParts;
     } else if (urlObj.searchParams.size > 0) {
-      coreName = Array.from(urlObj.searchParams.keys()).find(key => key && !isIgnoredPathPart(key)) || 'Request';
+      nameParts = [Array.from(urlObj.searchParams.keys()).find(key => key && !isIgnoredPathPart(key)) || 'Request'];
     } else if (pathParts.length > 0) {
-      coreName = pathParts[pathParts.length - 1];
+      nameParts = pathParts.length > 1 ? pathParts.slice(-2) : [pathParts[pathParts.length - 1]];
     } else {
-      coreName = 'Request';
+      nameParts = ['Request'];
     }
 
-    const formattedName = toTitleCase(normalizeNamePart(coreName));
+    const formattedName = nameParts
+      .map(part => toTitleCase(normalizeNamePart(part)))
+      .filter(Boolean)
+      .join(' ');
+
     return formattedName || 'API Rule';
   } catch {
     return 'API Rule';
@@ -244,7 +250,12 @@ async function parseAndFillCurl() {
     }
 
     const formCodeMirror = window.App.editor.getFormCodeMirror();
-    if (formCodeMirror) { formCodeMirror.setValue(response.body); }
+    if (formCodeMirror) {
+      formCodeMirror.setValue(response.body);
+      if (typeof formCodeMirror.clearHistory === 'function') {
+        formCodeMirror.clearHistory();
+      }
+    }
     const responseBodyInput = document.getElementById('response-body');
     if (responseBodyInput) { responseBodyInput.value = response.body; }
 

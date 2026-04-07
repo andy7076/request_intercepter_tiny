@@ -309,9 +309,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const closeBtn = document.getElementById('close-update-banner');
       if (banner && closeBtn) {
         banner.style.display = 'flex';
+        chrome.storage.local.set({ justUpdated: false });
         closeBtn.addEventListener('click', () => {
           banner.style.display = 'none';
-          chrome.storage.local.set({ justUpdated: false });
         });
       }
     }

@@ -11,6 +11,10 @@ let allRules = [];
 let editingRuleId = null;
 let currentEditingRuleData = null;
 
+function getRuleById(ruleId) {
+  return allRules.find(rule => String(rule.id) === String(ruleId));
+}
+
 function getEditingRuleId() { return editingRuleId; }
 function setEditingRuleId(id) { editingRuleId = id; }
 function getCurrentEditingRuleData() { return currentEditingRuleData; }
@@ -60,12 +64,12 @@ function getRuleContentType(rule) {
     return rule.contentType;
   }
 
-  try {
-    JSON.parse(String(rule.responseBody || '').trim());
+  const trimmedBody = String(rule.responseBody || '').trim();
+  if (/^(?:\{|\[)/.test(trimmedBody)) {
     return 'application/json';
-  } catch (err) {
-    return 'text/plain; charset=utf-8';
   }
+
+  return 'text/plain; charset=utf-8';
 }
 
 function getMatchModeLabel(matchMode) {
@@ -113,7 +117,7 @@ function renderRuleDetails(rule) {
 function initRenderjson(rule) {
   const { escapeHtml } = window.App.utils;
   const container = document.querySelector(`.renderjson-container[data-json-id="${rule.id}"]`);
-  if (!container) return;
+  if (!container || container.dataset.rendered === 'true') return;
   try {
     const jsonData = JSON.parse(rule.responseBody);
     renderjson.set_show_to_level(1);
@@ -123,6 +127,7 @@ function initRenderjson(rule) {
   } catch (e) {
     container.innerHTML = `<pre class="json-error-fallback">${escapeHtml(rule.responseBody)}</pre>`;
   }
+  container.dataset.rendered = 'true';
 }
 
 function syncRuleUrlToggleState(toggleButton, urlElement, expanded) {
@@ -224,13 +229,20 @@ function renderRules(rules, highlightQuery = '') {
       if (content) {
         const isHidden = content.classList.contains('hidden');
         header.classList.toggle('expanded', isHidden);
-        if (isHidden) { content.classList.remove('hidden'); }
-        else { content.classList.add('hidden'); }
+        if (isHidden) {
+          content.classList.remove('hidden');
+          const rule = getRuleById(ruleId);
+          if (rule) {
+            requestAnimationFrame(() => {
+              initRenderjson(rule);
+            });
+          }
+        } else {
+          content.classList.add('hidden');
+        }
       }
     });
   });
-
-  rules.forEach(rule => { if (rule.responseBody) { initRenderjson(rule); } });
 }
 
 async function handleToggle(ruleId) {

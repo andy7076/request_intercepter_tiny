@@ -9,10 +9,14 @@ let modalCodeMirror = null;
 let formEditorSearch = null;
 let modalEditorSearch = null;
 let modalEditorContext = {};
+let debouncedRefreshEditorModes = null;
 
 // 模态框状态
 let modalMode = 'form'; // 'form' | 'direct'
 let modalTargetRuleId = null;
+
+const MAX_MODE_DETECTION_PARSE_LENGTH = 120000;
+const MAX_JSON_VALIDATION_LENGTH = 250000;
 
 // 获取编辑器实例（供其他模块调用）
 function getFormCodeMirror() {
@@ -30,6 +34,15 @@ function getModalMode() {
 function getContentTypeFromHeaders(headers = {}) {
   const headerKey = Object.keys(headers || {}).find(key => key.toLowerCase() === 'content-type');
   return headerKey ? String(headers[headerKey] || '') : '';
+}
+
+function looksLikeJsonValue(value) {
+  const trimmed = String(value || '').trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  return /^(?:\{|\[|"|-?\d|true\b|false\b|null\b)/.test(trimmed);
 }
 
 function isLikelyJsonContent(value) {
@@ -58,13 +71,18 @@ function isLikelyMarkupContent(value) {
 }
 
 function resolveEditorMode(value, context = {}) {
+  const trimmed = String(value || '').trim();
   const contentType = String(
     context.contentType
       || getContentTypeFromHeaders(context.responseHeaders || {})
       || ''
   ).toLowerCase();
 
-  if (contentType.includes('json') || isLikelyJsonContent(value)) {
+  if (
+    contentType.includes('json')
+    || (looksLikeJsonValue(trimmed)
+      && (trimmed.length > MAX_MODE_DETECTION_PARSE_LENGTH || isLikelyJsonContent(trimmed)))
+  ) {
     return { name: 'javascript', json: true };
   }
 
@@ -73,7 +91,7 @@ function resolveEditorMode(value, context = {}) {
     || contentType.includes('xml')
     || contentType.includes('svg')
     || contentType.includes('xhtml')
-    || isLikelyMarkupContent(value)
+    || isLikelyMarkupContent(trimmed)
   ) {
     return 'request-interceptor-markup';
   }
@@ -82,15 +100,28 @@ function resolveEditorMode(value, context = {}) {
 }
 
 function getFormEditorContext() {
-  if (window.App && window.App.form && typeof window.App.form.getRuleFormSnapshot === 'function') {
-    const snapshot = window.App.form.getRuleFormSnapshot();
-    return {
-      responseHeaders: snapshot.responseHeaders || {},
-      contentType: ''
-    };
+  const list = document.getElementById('response-headers-list');
+  const responseHeaders = {};
+
+  if (list) {
+    list.querySelectorAll('.response-header-item').forEach((row) => {
+      const nameInput = row.querySelector('.response-header-name');
+      const valueInput = row.querySelector('.response-header-value');
+      const name = nameInput ? nameInput.value.trim() : '';
+      const value = valueInput ? valueInput.value.trim() : '';
+
+      if (!name || !value) {
+        return;
+      }
+
+      responseHeaders[name] = value;
+    });
   }
 
-  return {};
+  return {
+    responseHeaders,
+    contentType: ''
+  };
 }
 
 function applyEditorMode(editor, value, context = {}) {
@@ -108,6 +139,19 @@ function refreshEditorModes() {
   const modalValue = modalCodeMirror ? modalCodeMirror.getValue() : (modalTextarea ? modalTextarea.value : '');
   const modalContext = modalMode === 'form' ? getFormEditorContext() : modalEditorContext;
   applyEditorMode(modalCodeMirror, modalValue, modalContext || {});
+}
+
+function scheduleEditorModeRefresh() {
+  if (!window.App || !window.App.utils || typeof window.App.utils.debounce !== 'function') {
+    refreshEditorModes();
+    return;
+  }
+
+  if (!debouncedRefreshEditorModes) {
+    debouncedRefreshEditorModes = window.App.utils.debounce(refreshEditorModes, 120);
+  }
+
+  debouncedRefreshEditorModes();
 }
 
 // 初始化 CodeMirror 编辑器
@@ -164,7 +208,7 @@ function initFormCodeMirror(config) {
   // 同步内容到隐藏的 textarea
   formCodeMirror.on('change', (cm) => {
     textarea.value = cm.getValue();
-    refreshEditorModes();
+    scheduleEditorModeRefresh();
     if (window.App && window.App.form && typeof window.App.form.updateNavigationRequestWarning === 'function') {
       window.App.form.updateNavigationRequestWarning();
     }
@@ -244,7 +288,7 @@ function initModalCodeMirror() {
     }
 
     if (window.App && window.App.editor) {
-      window.App.editor.refreshEditorModes();
+      window.App.editor.scheduleEditorModeRefresh();
       // 使用防抖验证
       if (!window.App.editor._debouncedValidate) {
         window.App.editor._debouncedValidate = window.App.utils.debounce(window.App.editor.validateJsonRealtime, 300);
@@ -296,9 +340,37 @@ function validateJsonRealtime() {
   }
 
   const trimmedValue = rawValue.trim();
+  const editorContext = modalMode === 'direct' ? (modalEditorContext || {}) : getFormEditorContext();
+  const contentType = String(
+    editorContext.contentType
+      || getContentTypeFromHeaders(editorContext.responseHeaders || {})
+      || ''
+  ).toLowerCase();
 
   if (!trimmedValue) {
     // 空内容时重置为默认状态
+    targets.forEach(({ indicator, text }) => {
+      indicator.className = 'json-status-indicator';
+      text.className = 'hint';
+      text.textContent = window.i18n.t('responseContentHint');
+    });
+    return false;
+  }
+
+  if (!contentType.includes('json') && !looksLikeJsonValue(trimmedValue)) {
+    editorsToClear.forEach(cm => cm.getAllMarks().forEach(mark => mark.clear()));
+
+    targets.forEach(({ indicator, text }) => {
+      indicator.className = 'json-status-indicator';
+      text.className = 'hint';
+      text.textContent = window.i18n.t('responseContentHint');
+    });
+    return false;
+  }
+
+  if (rawValue.length > MAX_JSON_VALIDATION_LENGTH) {
+    editorsToClear.forEach(cm => cm.getAllMarks().forEach(mark => mark.clear()));
+
     targets.forEach(({ indicator, text }) => {
       indicator.className = 'json-status-indicator';
       text.className = 'hint';
@@ -365,6 +437,9 @@ function openEditorModal(mode = 'form', content = null, ruleId = null, context =
   // 设置模态框编辑器内容
   if (modalCodeMirror) {
     modalCodeMirror.setValue(currentValue);
+    if (typeof modalCodeMirror.clearHistory === 'function') {
+      modalCodeMirror.clearHistory();
+    }
     applyEditorMode(modalCodeMirror, currentValue, modalMode === 'form' ? getFormEditorContext() : modalEditorContext);
     editorModal.classList.add('active');
     // 延迟刷新和聚焦，确保模态框显示后再操作
@@ -470,6 +545,7 @@ window.App.editor = {
   getModalEditorSearch,
   validateJsonRealtime,
   refreshEditorModes,
+  scheduleEditorModeRefresh,
   openEditorModal,
   closeEditorModal,
   handleModalSave,
