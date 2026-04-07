@@ -399,6 +399,9 @@ function fillRuleForm(rule = {}) {
   setAdvancedSettingsExpanded(hasNonDefaultAdvancedSettings(normalizedRule));
   syncAdvancedSettingsSummary(normalizedRule);
   updateNavigationRequestWarning(normalizedRule);
+  if (window.App && window.App.editor && typeof window.App.editor.refreshEditorModes === 'function') {
+    window.App.editor.refreshEditorModes();
+  }
 
   if (formCodeMirror) {
     formCodeMirror.setValue(normalizedRule.responseBody);
@@ -586,6 +589,9 @@ function initResponseHeadersEditor() {
     list.appendChild(row);
     syncAdvancedSettingsSummary();
     updateNavigationRequestWarning();
+    if (window.App && window.App.editor && typeof window.App.editor.refreshEditorModes === 'function') {
+      window.App.editor.refreshEditorModes();
+    }
     const nameInput = row.querySelector('.response-header-name');
     if (nameInput) {
       nameInput.focus();
@@ -606,11 +612,17 @@ function initResponseHeadersEditor() {
     ensureResponseHeadersEditorRow();
     syncAdvancedSettingsSummary();
     updateNavigationRequestWarning();
+    if (window.App && window.App.editor && typeof window.App.editor.refreshEditorModes === 'function') {
+      window.App.editor.refreshEditorModes();
+    }
   });
 
   list.addEventListener('input', () => {
     syncAdvancedSettingsSummary();
     updateNavigationRequestWarning();
+    if (window.App && window.App.editor && typeof window.App.editor.refreshEditorModes === 'function') {
+      window.App.editor.refreshEditorModes();
+    }
   });
 
   window.addEventListener('languageChanged', () => {

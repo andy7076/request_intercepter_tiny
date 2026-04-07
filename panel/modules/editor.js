@@ -8,6 +8,7 @@ let formCodeMirror = null;
 let modalCodeMirror = null;
 let formEditorSearch = null;
 let modalEditorSearch = null;
+let modalEditorContext = {};
 
 // 模态框状态
 let modalMode = 'form'; // 'form' | 'direct'
@@ -24,6 +25,89 @@ function getModalCodeMirror() {
 
 function getModalMode() {
   return modalMode;
+}
+
+function getContentTypeFromHeaders(headers = {}) {
+  const headerKey = Object.keys(headers || {}).find(key => key.toLowerCase() === 'content-type');
+  return headerKey ? String(headers[headerKey] || '') : '';
+}
+
+function isLikelyJsonContent(value) {
+  const trimmed = String(value || '').trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  try {
+    JSON.parse(trimmed);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+function isLikelyMarkupContent(value) {
+  const trimmed = String(value || '').trim();
+  if (!trimmed || !trimmed.startsWith('<')) {
+    return false;
+  }
+
+  return /^<(!doctype|html|head|body|[a-zA-Z_][\w:-]*)/i.test(trimmed)
+    || /^<\?xml/i.test(trimmed)
+    || /^<!--/i.test(trimmed);
+}
+
+function resolveEditorMode(value, context = {}) {
+  const contentType = String(
+    context.contentType
+      || getContentTypeFromHeaders(context.responseHeaders || {})
+      || ''
+  ).toLowerCase();
+
+  if (contentType.includes('json') || isLikelyJsonContent(value)) {
+    return { name: 'javascript', json: true };
+  }
+
+  if (
+    contentType.includes('html')
+    || contentType.includes('xml')
+    || contentType.includes('svg')
+    || contentType.includes('xhtml')
+    || isLikelyMarkupContent(value)
+  ) {
+    return 'request-interceptor-markup';
+  }
+
+  return 'text/plain';
+}
+
+function getFormEditorContext() {
+  if (window.App && window.App.form && typeof window.App.form.getRuleFormSnapshot === 'function') {
+    const snapshot = window.App.form.getRuleFormSnapshot();
+    return {
+      responseHeaders: snapshot.responseHeaders || {},
+      contentType: ''
+    };
+  }
+
+  return {};
+}
+
+function applyEditorMode(editor, value, context = {}) {
+  if (!editor || typeof editor.setOption !== 'function') return;
+  editor.setOption('mode', resolveEditorMode(value, context));
+}
+
+function refreshEditorModes() {
+  const responseBody = document.getElementById('response-body');
+  const modalTextarea = document.getElementById('modal-textarea');
+
+  const formValue = formCodeMirror ? formCodeMirror.getValue() : (responseBody ? responseBody.value : '');
+  applyEditorMode(formCodeMirror, formValue, getFormEditorContext());
+
+  const modalValue = modalCodeMirror ? modalCodeMirror.getValue() : (modalTextarea ? modalTextarea.value : '');
+  const modalContext = modalMode === 'form' ? getFormEditorContext() : modalEditorContext;
+  applyEditorMode(modalCodeMirror, modalValue, modalContext || {});
 }
 
 // 初始化 CodeMirror 编辑器
@@ -75,10 +159,12 @@ function initFormCodeMirror(config) {
     ...config,
     value: textarea.value || ''
   });
+  applyEditorMode(formCodeMirror, textarea.value || '', getFormEditorContext());
 
   // 同步内容到隐藏的 textarea
   formCodeMirror.on('change', (cm) => {
     textarea.value = cm.getValue();
+    refreshEditorModes();
     if (window.App && window.App.form && typeof window.App.form.updateNavigationRequestWarning === 'function') {
       window.App.form.updateNavigationRequestWarning();
     }
@@ -130,6 +216,7 @@ function initModalCodeMirror() {
       }
     }
   });
+  applyEditorMode(cm, '', modalEditorContext);
 
   // Initialize Search
   try {
@@ -157,6 +244,7 @@ function initModalCodeMirror() {
     }
 
     if (window.App && window.App.editor) {
+      window.App.editor.refreshEditorModes();
       // 使用防抖验证
       if (!window.App.editor._debouncedValidate) {
         window.App.editor._debouncedValidate = window.App.utils.debounce(window.App.editor.validateJsonRealtime, 300);
@@ -244,7 +332,7 @@ function validateJsonRealtime() {
 }
 
 // 打开全屏编辑器
-function openEditorModal(mode = 'form', content = null, ruleId = null) {
+function openEditorModal(mode = 'form', content = null, ruleId = null, context = {}) {
   // Check if mode is an event object (clicked directly)
   if (typeof mode === 'object') {
     mode = 'form';
@@ -257,6 +345,7 @@ function openEditorModal(mode = 'form', content = null, ruleId = null) {
 
   modalMode = mode;
   modalTargetRuleId = ruleId;
+  modalEditorContext = context || {};
 
   // 获取当前内容
   let currentValue = '';
@@ -276,6 +365,7 @@ function openEditorModal(mode = 'form', content = null, ruleId = null) {
   // 设置模态框编辑器内容
   if (modalCodeMirror) {
     modalCodeMirror.setValue(currentValue);
+    applyEditorMode(modalCodeMirror, currentValue, modalMode === 'form' ? getFormEditorContext() : modalEditorContext);
     editorModal.classList.add('active');
     // 延迟刷新和聚焦，确保模态框显示后再操作
     setTimeout(() => {
@@ -317,6 +407,7 @@ function closeEditorModal() {
   // 验证内容状态 (仅在表单模式下)
   if (modalMode === 'form') {
     validateJsonRealtime();
+    refreshEditorModes();
     if (window.App && window.App.form && typeof window.App.form.updateNavigationRequestWarning === 'function') {
       window.App.form.updateNavigationRequestWarning();
     }
@@ -358,7 +449,10 @@ async function handleDirectEdit(ruleId) {
 
   if (!rule || !rule.responseBody) return;
 
-  openEditorModal('direct', rule.responseBody, ruleId);
+  openEditorModal('direct', rule.responseBody, ruleId, {
+    responseHeaders: rule.responseHeaders || {},
+    contentType: rule.contentType || ''
+  });
 }
 
 // 获取模态框编辑器搜索实例
@@ -375,6 +469,7 @@ window.App.editor = {
   getModalMode,
   getModalEditorSearch,
   validateJsonRealtime,
+  refreshEditorModes,
   openEditorModal,
   closeEditorModal,
   handleModalSave,
