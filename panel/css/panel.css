@@ -219,6 +219,54 @@ body {
   color: white;
 }
 
+.plugin-status-banner {
+  margin: 12px 20px 0;
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.08);
+  flex-shrink: 0;
+}
+
+.plugin-status-banner .plugin-status-icon {
+  width: 18px;
+  height: 18px;
+  color: #f59e0b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.plugin-status-banner .plugin-status-text {
+  font-size: 13px;
+  color: #fecaca;
+  line-height: 1.45;
+  flex: 1;
+}
+
+.btn-plugin-status-action {
+  border: 1px solid rgba(248, 113, 113, 0.22);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff1f2;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.btn-plugin-status-action:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(248, 113, 113, 0.34);
+}
+
 /* Tabs */
 .tabs {
   display: flex;

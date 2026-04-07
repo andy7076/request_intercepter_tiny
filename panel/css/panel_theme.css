@@ -301,6 +301,31 @@
   color: #9a3412;
 }
 
+[data-theme="light"] .plugin-status-banner {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.08);
+}
+
+[data-theme="light"] .plugin-status-banner .plugin-status-icon {
+  color: #d97706;
+}
+
+[data-theme="light"] .plugin-status-banner .plugin-status-text {
+  color: #9f1239;
+}
+
+[data-theme="light"] .btn-plugin-status-action {
+  background: rgba(190, 24, 93, 0.06);
+  border-color: rgba(190, 24, 93, 0.14);
+  color: #9f1239;
+}
+
+[data-theme="light"] .btn-plugin-status-action:hover {
+  background: rgba(190, 24, 93, 0.12);
+  border-color: rgba(190, 24, 93, 0.2);
+}
+
 /* Light theme - Editor modal */
 [data-theme="light"] .editor-modal {
   background: rgba(15, 23, 42, 0.3);

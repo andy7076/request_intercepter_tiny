@@ -156,6 +156,12 @@
   "globalInterceptionDesc": {
     "message": "关闭后，插件不会在新打开的页面中生效"
   },
+  "pluginDisabledBannerText": {
+    "message": "插件开关当前已关闭，请求拦截暂未生效。如需恢复，请前往设置重新开启。"
+  },
+  "pluginDisabledBannerAction": {
+    "message": "去开启"
+  },
   "consoleLogs": {
     "message": "控制台日志"
   },

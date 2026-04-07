@@ -156,6 +156,12 @@
   "globalInterceptionDesc": {
     "message": "When disabled, the plugin will not take effect on newly opened pages"
   },
+  "pluginDisabledBannerText": {
+    "message": "The plugin switch is currently off, so request interception is disabled. Turn it back on in Settings when needed."
+  },
+  "pluginDisabledBannerAction": {
+    "message": "Turn On"
+  },
   "consoleLogs": {
     "message": "Console Logs"
   },

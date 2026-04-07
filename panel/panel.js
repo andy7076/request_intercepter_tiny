@@ -92,6 +92,7 @@ function setupEventListeners() {
   const settingsBtn = document.getElementById('settings-btn');
   const settingsModal = document.getElementById('settings-modal');
   const settingsClose = document.getElementById('settings-close');
+  const pluginDisabledOpenSettings = document.getElementById('plugin-disabled-open-settings');
   const settingInterceptorEnabled = document.getElementById('setting-interceptor-enabled');
   const settingConsoleLog = document.getElementById('setting-console-log');
 
@@ -223,6 +224,11 @@ function setupEventListeners() {
 
   // Settings Modal
   if (settingsBtn) { settingsBtn.addEventListener('click', () => { settingsModal.classList.add('active'); }); }
+  if (pluginDisabledOpenSettings && settingsModal) {
+    pluginDisabledOpenSettings.addEventListener('click', () => {
+      settingsModal.classList.add('active');
+    });
+  }
   if (settingsClose) {
     settingsClose.addEventListener('click', () => {
       settingsModal.classList.remove('active');
@@ -251,6 +257,10 @@ function setupEventListeners() {
 
         if (result && result.error) {
           throw new Error(result.error);
+        }
+
+        if (window.App && window.App.settings && typeof window.App.settings.updateInterceptorStateUI === 'function') {
+          window.App.settings.updateInterceptorStateUI(enabled);
         }
 
         showToast(enabled ? window.i18n.t('globalInterceptionEnabled') : window.i18n.t('globalInterceptionDisabled'));

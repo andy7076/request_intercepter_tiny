@@ -3,6 +3,15 @@
  * 加载和应用用户设置
  */
 
+function updateInterceptorStateUI(enabled) {
+  const banner = document.getElementById('plugin-disabled-banner');
+  if (!banner) {
+    return;
+  }
+
+  banner.classList.toggle('hidden', enabled);
+}
+
 // 加载设置
 function loadSettings() {
   const { applyTheme } = window.App.theme;
@@ -10,8 +19,10 @@ function loadSettings() {
   const settingInterceptorEnabled = document.getElementById('setting-interceptor-enabled');
 
   chrome.storage.local.get(['consoleLogs', 'theme', 'interceptorEnabled'], (result) => {
+    const interceptorEnabled = result.interceptorEnabled !== false;
+
     if (settingInterceptorEnabled) {
-      settingInterceptorEnabled.checked = result.interceptorEnabled !== false;
+      settingInterceptorEnabled.checked = interceptorEnabled;
     }
     if (settingConsoleLog) {
       settingConsoleLog.checked = result.consoleLogs || false;
@@ -23,11 +34,13 @@ function loadSettings() {
       themeSelect.value = themePref;
     }
     applyTheme(themePref, false);
+    updateInterceptorStateUI(interceptorEnabled);
   });
 }
 
 // 导出到全局
 window.App = window.App || {};
 window.App.settings = {
-  loadSettings
+  loadSettings,
+  updateInterceptorStateUI
 };
