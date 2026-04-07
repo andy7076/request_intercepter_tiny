@@ -1226,6 +1226,81 @@ body {
   display: none;
 }
 
+.advanced-settings {
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.advanced-settings-toggle {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: var(--transition);
+}
+
+.advanced-settings-toggle:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.advanced-settings-toggle-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.advanced-settings-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.advanced-settings-summary {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.advanced-settings-chevron {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+.advanced-settings.expanded .advanced-settings-chevron {
+  transform: rotate(180deg);
+}
+
+.advanced-settings-body {
+  padding: 0 14px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.advanced-settings-body.hidden {
+  display: none;
+}
+
+.advanced-settings-body .form-grid:first-child {
+  padding-top: 14px;
+}
+
+.advanced-settings-body .config-section {
+  margin-bottom: 0;
+}
+
 .section-header {
   display: flex;
   justify-content: space-between;

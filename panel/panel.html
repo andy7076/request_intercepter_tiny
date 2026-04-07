@@ -408,136 +408,152 @@
               />
             </div>
 
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="rule-method" data-i18n="requestMethod"
-                  >Request Method</label
-                >
-                <select id="rule-method">
-                  <option value="ALL" data-i18n="methodAll">All</option>
-                  <option value="GET">GET</option>
-                  <option value="POST">POST</option>
-                  <option value="PUT">PUT</option>
-                  <option value="PATCH">PATCH</option>
-                  <option value="DELETE">DELETE</option>
-                  <option value="HEAD">HEAD</option>
-                  <option value="OPTIONS">OPTIONS</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="rule-match-mode" data-i18n="matchMode"
-                  >Match Mode</label
-                >
-                <select id="rule-match-mode">
-                  <option value="contains" data-i18n="matchModeContains"
-                    >Contains</option
-                  >
-                  <option value="wildcard" data-i18n="matchModeWildcard"
-                    >Wildcard</option
-                  >
-                  <option value="exact" data-i18n="matchModeExact">Exact</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <div class="form-label-row">
-                  <label for="rule-priority" data-i18n="rulePriority">Priority</label>
-                  <button
-                    type="button"
-                    class="label-tooltip-trigger tooltip-trigger"
-                    data-i18n-title="rulePriorityHint"
-                    title="Higher priority rules match first"
-                  >?</button>
+            <div id="advanced-settings" class="advanced-settings">
+              <button
+                type="button"
+                id="advanced-settings-toggle"
+                class="advanced-settings-toggle"
+                aria-expanded="false"
+              >
+                <div class="advanced-settings-toggle-main">
+                  <span class="advanced-settings-title" data-i18n="advancedSettings">Advanced Settings</span>
+                  <span id="advanced-settings-summary" class="advanced-settings-summary" data-i18n="advancedSettingsSummaryDefault">Using default options</span>
                 </div>
-                <input type="number" id="rule-priority" value="0" step="1" />
-              </div>
-            </div>
+                <span id="advanced-settings-chevron" class="advanced-settings-chevron" aria-hidden="true">▾</span>
+              </button>
 
-            <!-- Mock Response Config -->
-            <div id="mock-config" class="config-section">
-              <div class="form-grid">
-                <div class="form-group">
-                  <label for="response-status" data-i18n="responseStatus"
-                    >Response Status</label
-                  >
-                  <input
-                    type="number"
-                    id="response-status"
-                    min="100"
-                    max="599"
-                    value="200"
-                    step="1"
-                  />
-                </div>
-                <div class="form-group">
-                  <div class="form-label-row">
-                    <label for="response-delay" data-i18n="responseDelay">Response Delay (ms)</label>
-                    <button
-                      type="button"
-                      class="label-tooltip-trigger tooltip-trigger"
-                      data-i18n-title="responseDelayHint"
-                      title="Useful for loading and timeout scenarios"
-                    >?</button>
-                  </div>
-                  <input
-                    type="number"
-                    id="response-delay"
-                    min="0"
-                    value="0"
-                    step="50"
-                  />
-                </div>
-              </div>
-
-              <div class="form-group">
-                <div class="form-label-row">
-                  <label data-i18n="responseHeaders">Response Headers</label>
-                  <button
-                    type="button"
-                    class="label-tooltip-trigger tooltip-trigger"
-                    data-i18n-title="responseHeadersHint"
-                    title="Optional. Add response headers such as Content-Type or Cache-Control"
-                  >?</button>
-                </div>
-                <div id="response-headers-list" class="response-headers-list"></div>
-                <button
-                  type="button"
-                  id="add-response-header"
-                  class="btn-secondary btn-add-header"
-                  data-i18n="addResponseHeader"
-                >
-                  Add Header
-                </button>
-              </div>
-
-              <div class="form-group">
-                <div class="response-label-row">
-                  <label for="response-body" class="required-label" data-i18n="responseContent"
-                    >Response Content (JSON)</label
-                  >
-                  <div class="editor-actions">
-                    <button
-                      type="button"
-                      id="expand-editor"
-                      class="btn-expand"
-                      data-i18n-title="expandEdit"
+              <div id="advanced-settings-body" class="advanced-settings-body hidden">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="rule-method" data-i18n="requestMethod"
+                      >Request Method</label
                     >
-                      ⛶
+                    <select id="rule-method">
+                      <option value="ALL" data-i18n="methodAll">All</option>
+                      <option value="GET">GET</option>
+                      <option value="POST">POST</option>
+                      <option value="PUT">PUT</option>
+                      <option value="PATCH">PATCH</option>
+                      <option value="DELETE">DELETE</option>
+                      <option value="HEAD">HEAD</option>
+                      <option value="OPTIONS">OPTIONS</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="rule-match-mode" data-i18n="matchMode"
+                      >Match Mode</label
+                    >
+                    <select id="rule-match-mode">
+                      <option value="contains" data-i18n="matchModeContains"
+                        >Contains</option
+                      >
+                      <option value="wildcard" data-i18n="matchModeWildcard"
+                        >Wildcard</option
+                      >
+                      <option value="exact" data-i18n="matchModeExact">Exact</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <div class="form-label-row">
+                      <label for="rule-priority" data-i18n="rulePriority">Priority</label>
+                      <button
+                        type="button"
+                        class="label-tooltip-trigger tooltip-trigger"
+                        data-i18n-title="rulePriorityHint"
+                        title="Higher priority rules match first"
+                      >?</button>
+                    </div>
+                    <input type="number" id="rule-priority" value="0" step="1" />
+                  </div>
+                </div>
+
+                <div id="mock-config" class="config-section">
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label for="response-status" data-i18n="responseStatus"
+                        >Response Status</label
+                      >
+                      <input
+                        type="number"
+                        id="response-status"
+                        min="100"
+                        max="599"
+                        value="200"
+                        step="1"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <div class="form-label-row">
+                        <label for="response-delay" data-i18n="responseDelay">Response Delay (ms)</label>
+                        <button
+                          type="button"
+                          class="label-tooltip-trigger tooltip-trigger"
+                          data-i18n-title="responseDelayHint"
+                          title="Useful for loading and timeout scenarios"
+                        >?</button>
+                      </div>
+                      <input
+                        type="number"
+                        id="response-delay"
+                        min="0"
+                        value="0"
+                        step="50"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <div class="form-label-row">
+                      <label data-i18n="responseHeaders">Response Headers</label>
+                      <button
+                        type="button"
+                        class="label-tooltip-trigger tooltip-trigger"
+                        data-i18n-title="responseHeadersHint"
+                        title="Optional. Add response headers such as Content-Type or Cache-Control"
+                      >?</button>
+                    </div>
+                    <div id="response-headers-list" class="response-headers-list"></div>
+                    <button
+                      type="button"
+                      id="add-response-header"
+                      class="btn-secondary btn-add-header"
+                      data-i18n="addResponseHeader"
+                    >
+                      Add Header
                     </button>
                   </div>
                 </div>
-                <textarea id="response-body" rows="10"></textarea>
-                <div class="json-status">
-                  <span
-                    id="json-status-indicator"
-                    class="json-status-indicator"
-                  ></span>
-                  <span
-                    id="json-status-text"
-                    class="hint"
-                    data-i18n="responseContentHint"
-                    >Enter JSON response content to return</span
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="response-label-row">
+                <label for="response-body" class="required-label" data-i18n="responseContent"
+                  >Response Content (JSON)</label
+                >
+                <div class="editor-actions">
+                  <button
+                    type="button"
+                    id="expand-editor"
+                    class="btn-expand"
+                    data-i18n-title="expandEdit"
                   >
+                    ⛶
+                  </button>
                 </div>
+              </div>
+              <textarea id="response-body" rows="10"></textarea>
+              <div class="json-status">
+                <span
+                  id="json-status-indicator"
+                  class="json-status-indicator"
+                ></span>
+                <span
+                  id="json-status-text"
+                  class="hint"
+                  data-i18n="responseContentHint"
+                  >Enter JSON response content to return</span
+                >
               </div>
             </div>
           </div>

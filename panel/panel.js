@@ -293,6 +293,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 4. 设置 UI
   setupEventListeners();
   window.App.form.initResponseHeadersEditor();
+  window.App.form.initAdvancedSettings();
   window.App.tooltip.initGlobalTooltip();
   initLanguageSelector();
   window.App.editor.initCodeMirrorEditors();

@@ -643,6 +643,12 @@
   "responseHeaderValuePlaceholder": {
     "message": "Value"
   },
+  "advancedSettings": {
+    "message": "Advanced Settings"
+  },
+  "advancedSettingsSummaryDefault": {
+    "message": "Using default options"
+  },
   "addResponseHeader": {
     "message": "Add Header"
   },
@@ -687,6 +693,14 @@
   },
   "delayShort": {
     "message": "$VALUE$ms",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "headerCountShort": {
+    "message": "$VALUE$ headers",
     "placeholders": {
       "value": {
         "content": "$1"

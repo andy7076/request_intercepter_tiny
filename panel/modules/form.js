@@ -9,6 +9,15 @@ const DEFAULT_PRIORITY = 0;
 const DEFAULT_RESPONSE_STATUS = 200;
 const DEFAULT_RESPONSE_DELAY = 0;
 
+function getAdvancedSettingsElements() {
+  return {
+    container: document.getElementById('advanced-settings'),
+    toggle: document.getElementById('advanced-settings-toggle'),
+    body: document.getElementById('advanced-settings-body'),
+    summary: document.getElementById('advanced-settings-summary')
+  };
+}
+
 function getResponseHeadersList() {
   return document.getElementById('response-headers-list');
 }
@@ -158,6 +167,88 @@ function getDefaultMatchMode(matchMode, urlPattern = '') {
   return String(urlPattern || '').includes('*') ? 'wildcard' : DEFAULT_MATCH_MODE;
 }
 
+function countNonEmptyResponseHeaders(headers = {}) {
+  return Object.entries(headers || {}).filter(([name, value]) => {
+    return String(name || '').trim() !== '' && String(value || '').trim() !== '';
+  }).length;
+}
+
+function hasNonDefaultAdvancedSettings(formData = {}) {
+  return (formData.method || DEFAULT_RULE_METHOD) !== DEFAULT_RULE_METHOD
+    || (formData.matchMode || DEFAULT_MATCH_MODE) !== DEFAULT_MATCH_MODE
+    || Number(formData.priority || DEFAULT_PRIORITY) !== DEFAULT_PRIORITY
+    || Number(formData.responseStatus || DEFAULT_RESPONSE_STATUS) !== DEFAULT_RESPONSE_STATUS
+    || Number(formData.responseDelayMs || DEFAULT_RESPONSE_DELAY) !== DEFAULT_RESPONSE_DELAY
+    || countNonEmptyResponseHeaders(formData.responseHeaders) > 0;
+}
+
+function buildAdvancedSettingsSummary(formData = {}) {
+  const parts = [];
+  const method = formData.method || DEFAULT_RULE_METHOD;
+  const matchMode = formData.matchMode || DEFAULT_MATCH_MODE;
+  const priority = Number(formData.priority || DEFAULT_PRIORITY);
+  const responseStatus = Number(formData.responseStatus || DEFAULT_RESPONSE_STATUS);
+  const responseDelayMs = Number(formData.responseDelayMs || DEFAULT_RESPONSE_DELAY);
+  const headerCount = countNonEmptyResponseHeaders(formData.responseHeaders);
+
+  if (method !== DEFAULT_RULE_METHOD) {
+    parts.push(method);
+  }
+  if (matchMode !== DEFAULT_MATCH_MODE) {
+    parts.push(window.i18n.t(
+      matchMode === 'wildcard' ? 'matchModeWildcard'
+        : matchMode === 'exact' ? 'matchModeExact'
+          : 'matchModeContains'
+    ));
+  }
+  if (priority !== DEFAULT_PRIORITY) {
+    parts.push(window.i18n.t('priorityShort', String(priority)));
+  }
+  if (responseStatus !== DEFAULT_RESPONSE_STATUS) {
+    parts.push(window.i18n.t('statusShort', String(responseStatus)));
+  }
+  if (responseDelayMs !== DEFAULT_RESPONSE_DELAY) {
+    parts.push(window.i18n.t('delayShort', String(responseDelayMs)));
+  }
+  if (headerCount > 0) {
+    parts.push(window.i18n.t('headerCountShort', String(headerCount)));
+  }
+
+  return parts.length > 0
+    ? parts.join(' · ')
+    : window.i18n.t('advancedSettingsSummaryDefault');
+}
+
+function setAdvancedSettingsExpanded(expanded) {
+  const { container, toggle, body } = getAdvancedSettingsElements();
+  if (!container || !toggle || !body) return;
+
+  container.classList.toggle('expanded', expanded);
+  toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  body.classList.toggle('hidden', !expanded);
+}
+
+function syncAdvancedSettingsSummary(formData = null) {
+  const { summary } = getAdvancedSettingsElements();
+  if (!summary) return;
+
+  const snapshot = formData || getRuleFormSnapshot();
+  summary.textContent = buildAdvancedSettingsSummary(snapshot);
+}
+
+function ensureAdvancedSettingsVisible() {
+  setAdvancedSettingsExpanded(true);
+}
+
+function refreshAdvancedSettingsUI({ expandIfNeeded = false } = {}) {
+  const snapshot = getRuleFormSnapshot();
+  syncAdvancedSettingsSummary(snapshot);
+
+  if (expandIfNeeded && hasNonDefaultAdvancedSettings(snapshot)) {
+    ensureAdvancedSettingsVisible();
+  }
+}
+
 function getRuleFormSnapshot() {
   const formCodeMirror = window.App.editor.getFormCodeMirror();
   const responseHeadersState = getResponseHeadersState();
@@ -203,6 +294,9 @@ function fillRuleForm(rule = {}) {
   document.getElementById('response-delay').value = String(normalizedRule.responseDelayMs);
   setResponseHeaders(normalizedRule.responseHeaders);
   document.getElementById('response-body').value = normalizedRule.responseBody;
+
+  setAdvancedSettingsExpanded(hasNonDefaultAdvancedSettings(normalizedRule));
+  syncAdvancedSettingsSummary(normalizedRule);
 
   if (formCodeMirror) {
     formCodeMirror.setValue(normalizedRule.responseBody);
@@ -263,12 +357,14 @@ async function handleFormSubmit(e) {
 
   if (formData.responseHeadersHasIncomplete) {
     showToast(window.i18n.t('responseHeadersIncomplete'), true);
+    ensureAdvancedSettingsVisible();
     scrollFieldIntoView(formData.responseHeadersIncompleteElement || getResponseHeadersList(), formData.responseHeadersIncompleteElement || null);
     return;
   }
 
   if (formData.responseHeadersDuplicateName) {
     showToast(window.i18n.t('responseHeadersDuplicate', formData.responseHeadersDuplicateName), true);
+    ensureAdvancedSettingsVisible();
     scrollFieldIntoView(formData.responseHeadersDuplicateElement || getResponseHeadersList(), formData.responseHeadersDuplicateElement || null);
     return;
   }
@@ -277,12 +373,14 @@ async function handleFormSubmit(e) {
 
   if (!Number.isInteger(formData.responseStatus) || formData.responseStatus < 100 || formData.responseStatus > 599) {
     showToast(window.i18n.t('responseStatusInvalid'), true);
+    ensureAdvancedSettingsVisible();
     scrollFieldIntoView(responseStatusInput, responseStatusInput);
     return;
   }
 
   if (!Number.isFinite(formData.responseDelayMs) || formData.responseDelayMs < 0) {
     showToast(window.i18n.t('responseDelayInvalid'), true);
+    ensureAdvancedSettingsVisible();
     scrollFieldIntoView(responseDelayInput, responseDelayInput);
     return;
   }
@@ -396,6 +494,7 @@ function initResponseHeadersEditor() {
   addButton.addEventListener('click', () => {
     const row = createResponseHeaderRow();
     list.appendChild(row);
+    syncAdvancedSettingsSummary();
     const nameInput = row.querySelector('.response-header-name');
     if (nameInput) {
       nameInput.focus();
@@ -414,10 +513,53 @@ function initResponseHeadersEditor() {
     }
 
     ensureResponseHeadersEditorRow();
+    syncAdvancedSettingsSummary();
+  });
+
+  list.addEventListener('input', () => {
+    syncAdvancedSettingsSummary();
   });
 
   window.addEventListener('languageChanged', () => {
     list.querySelectorAll('.response-header-item').forEach(updateResponseHeaderRowI18n);
+    syncAdvancedSettingsSummary();
+  });
+}
+
+function initAdvancedSettings() {
+  const { toggle } = getAdvancedSettingsElements();
+  if (!toggle || toggle.dataset.initialized === 'true') {
+    return;
+  }
+
+  toggle.dataset.initialized = 'true';
+  setAdvancedSettingsExpanded(false);
+  syncAdvancedSettingsSummary();
+
+  toggle.addEventListener('click', () => {
+    const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+    setAdvancedSettingsExpanded(!isExpanded);
+  });
+
+  [
+    'rule-method',
+    'rule-match-mode',
+    'rule-priority',
+    'response-status',
+    'response-delay'
+  ].forEach((id) => {
+    const field = document.getElementById(id);
+    if (!field) return;
+    field.addEventListener('input', () => {
+      syncAdvancedSettingsSummary();
+    });
+    field.addEventListener('change', () => {
+      syncAdvancedSettingsSummary();
+    });
+  });
+
+  window.addEventListener('languageChanged', () => {
+    syncAdvancedSettingsSummary();
   });
 }
 
@@ -430,5 +572,8 @@ window.App.form = {
   fillRuleForm,
   getRuleFormSnapshot,
   initResponseHeadersEditor,
-  setResponseHeaders
+  initAdvancedSettings,
+  refreshAdvancedSettingsUI,
+  setResponseHeaders,
+  ensureAdvancedSettingsVisible
 };

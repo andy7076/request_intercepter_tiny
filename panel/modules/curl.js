@@ -239,6 +239,10 @@ async function parseAndFillCurl() {
       );
     }
 
+    if (window.App.form && window.App.form.refreshAdvancedSettingsUI) {
+      window.App.form.refreshAdvancedSettingsUI({ expandIfNeeded: true });
+    }
+
     const formCodeMirror = window.App.editor.getFormCodeMirror();
     if (formCodeMirror) { formCodeMirror.setValue(response.body); }
     const responseBodyInput = document.getElementById('response-body');

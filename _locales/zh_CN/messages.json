@@ -643,6 +643,12 @@
   "responseHeaderValuePlaceholder": {
     "message": "值"
   },
+  "advancedSettings": {
+    "message": "高级设置"
+  },
+  "advancedSettingsSummaryDefault": {
+    "message": "使用默认选项"
+  },
   "addResponseHeader": {
     "message": "添加响应头"
   },
@@ -687,6 +693,14 @@
   },
   "delayShort": {
     "message": "$VALUE$ms",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "headerCountShort": {
+    "message": "$VALUE$ 个响应头",
     "placeholders": {
       "value": {
         "content": "$1"
