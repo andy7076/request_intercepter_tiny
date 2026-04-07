@@ -29,6 +29,31 @@ function stringifyHeaderValue(value) {
   return typeof value === 'string' ? value : JSON.stringify(value);
 }
 
+function isLikelyJsonContent(value) {
+  const trimmed = String(value || '').trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  try {
+    JSON.parse(trimmed);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+function inferResponseContentType(responseBody, responseHeaders = {}) {
+  const contentTypeHeader = Object.keys(responseHeaders || {}).find(key => key.toLowerCase() === 'content-type');
+  if (contentTypeHeader) {
+    return responseHeaders[contentTypeHeader];
+  }
+
+  return isLikelyJsonContent(responseBody)
+    ? 'application/json'
+    : 'text/plain; charset=utf-8';
+}
+
 function updateResponseHeaderRowI18n(row) {
   if (!row) return;
 
@@ -331,30 +356,6 @@ async function handleFormSubmit(e) {
     return;
   }
 
-  // 验证 JSON 格式（必须是对象或数组）
-  try {
-    const parsed = JSON.parse(responseBodyValue);
-    if (typeof parsed !== 'object' || parsed === null) {
-      showToast(window.i18n.t('needJsonObjectOrArray'), true);
-      scrollFieldIntoView(responseBodyTarget);
-      if (formCodeMirror && typeof formCodeMirror.focus === 'function') {
-        requestAnimationFrame(() => {
-          formCodeMirror.focus();
-        });
-      }
-      return;
-    }
-  } catch (err) {
-    showToast(window.i18n.t('pleaseEnterValidJson'), true);
-    scrollFieldIntoView(responseBodyTarget);
-    if (formCodeMirror && typeof formCodeMirror.focus === 'function') {
-      requestAnimationFrame(() => {
-        formCodeMirror.focus();
-      });
-    }
-    return;
-  }
-
   if (formData.responseHeadersHasIncomplete) {
     showToast(window.i18n.t('responseHeadersIncomplete'), true);
     ensureAdvancedSettingsVisible();
@@ -395,7 +396,7 @@ async function handleFormSubmit(e) {
     responseStatus: formData.responseStatus,
     responseDelayMs: formData.responseDelayMs,
     responseHeaders,
-    contentType: responseHeaders['Content-Type'] || responseHeaders['content-type'] || 'application/json',
+    contentType: inferResponseContentType(responseBodyValue, responseHeaders),
     responseBody: responseBodyValue
   };
 

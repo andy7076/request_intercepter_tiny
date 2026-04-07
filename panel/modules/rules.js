@@ -53,7 +53,19 @@ function clearSearch() {
 function getRuleContentType(rule) {
   const headers = rule.responseHeaders || {};
   const headerKey = Object.keys(headers).find(key => key.toLowerCase() === 'content-type');
-  return headerKey ? headers[headerKey] : (rule.contentType || 'application/json');
+  if (headerKey) {
+    return headers[headerKey];
+  }
+  if (rule.contentType) {
+    return rule.contentType;
+  }
+
+  try {
+    JSON.parse(String(rule.responseBody || '').trim());
+    return 'application/json';
+  } catch (err) {
+    return 'text/plain; charset=utf-8';
+  }
 }
 
 function getMatchModeLabel(matchMode) {
@@ -113,6 +125,49 @@ function initRenderjson(rule) {
   }
 }
 
+function syncRuleUrlToggleState(toggleButton, urlElement, expanded) {
+  if (!toggleButton || !urlElement) return;
+
+  urlElement.classList.toggle('expanded', expanded);
+  urlElement.classList.toggle('has-toggle', !toggleButton.classList.contains('hidden'));
+  toggleButton.dataset.expanded = expanded ? 'true' : 'false';
+  toggleButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  toggleButton.textContent = window.i18n.t(expanded ? 'collapse' : 'expand');
+}
+
+function setupRuleUrlToggles() {
+  const urlBlocks = document.querySelectorAll('.rule-url-block');
+
+  urlBlocks.forEach((block) => {
+    const urlElement = block.querySelector('.rule-url');
+    const urlTextElement = block.querySelector('.rule-url-text');
+    const toggleButton = block.querySelector('.rule-url-toggle');
+    if (!urlElement || !urlTextElement || !toggleButton) return;
+
+    syncRuleUrlToggleState(toggleButton, urlElement, false);
+
+    const isOverflowing = urlTextElement.scrollHeight > urlTextElement.clientHeight + 1;
+    toggleButton.classList.toggle('hidden', !isOverflowing);
+    urlElement.classList.toggle('has-toggle', isOverflowing);
+
+    if (!isOverflowing) {
+      toggleButton.dataset.bound = 'false';
+      return;
+    }
+
+    if (toggleButton.dataset.bound === 'true') {
+      return;
+    }
+
+    toggleButton.dataset.bound = 'true';
+    toggleButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const shouldExpand = toggleButton.dataset.expanded !== 'true';
+      syncRuleUrlToggleState(toggleButton, urlElement, shouldExpand);
+    });
+  });
+}
+
 function renderRules(rules, highlightQuery = '') {
   const { escapeHtml, highlightText } = window.App.utils;
   const rulesList = document.getElementById('rules-list');
@@ -135,7 +190,12 @@ function renderRules(rules, highlightQuery = '') {
         <div class="rule-status"><div class="rule-toggle ${rule.enabled ? 'active' : ''}" data-id="${rule.id}" title="${rule.enabled ? window.i18n.t('clickToDisable') : window.i18n.t('clickToEnable')}"></div></div>
       </div>
       ${renderRuleMeta(rule)}
-      <div class="rule-url">${highlightText(escapeHtml(rule.urlPattern), highlightQuery)}</div>
+      <div class="rule-url-block">
+        <div class="rule-url">
+          <div class="rule-url-text">${highlightText(escapeHtml(rule.urlPattern), highlightQuery)}</div>
+          <button type="button" class="rule-url-toggle hidden" aria-expanded="false">${window.i18n.t('expand')}</button>
+        </div>
+      </div>
       ${renderRuleDetails(rule)}
       <div class="rule-footer">
         <button class="btn-modify-response" data-id="${rule.id}">${window.i18n.t('editResponse')}</button>
@@ -154,6 +214,7 @@ function renderRules(rules, highlightQuery = '') {
   rulesList.querySelectorAll('.btn-delete').forEach(b => { b.addEventListener('click', (e) => { e.stopPropagation(); handleDelete(b.dataset.id); }); });
   rulesList.querySelectorAll('.btn-export-icon').forEach(b => { b.addEventListener('click', (e) => { e.stopPropagation(); handleExportRule(b.dataset.id); }); });
   rulesList.querySelectorAll('.btn-modify-response').forEach(b => { b.addEventListener('click', (e) => { e.stopPropagation(); window.App.editor.handleDirectEdit(b.dataset.id); }); });
+  setupRuleUrlToggles();
 
   rulesList.querySelectorAll('.response-header.clickable').forEach(header => {
     header.addEventListener('click', (e) => {

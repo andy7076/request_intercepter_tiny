@@ -45,6 +45,27 @@
     return normalized;
   }
 
+  function isLikelyJsonContent(value) {
+    const trimmed = String(value || '').trim();
+    if (!trimmed) {
+      return false;
+    }
+
+    try {
+      JSON.parse(trimmed);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function inferContentType(body, contentType) {
+    if (contentType) {
+      return contentType;
+    }
+    return isLikelyJsonContent(body) ? 'application/json' : 'text/plain; charset=utf-8';
+  }
+
   function captureOriginalFetchResponse(fetchPromise, logRequestId) {
     fetchPromise
       .then(async (realResponse) => {
@@ -205,7 +226,7 @@
         const mockedResponse = new Response(mockResponse.body, {
           status: mockResponse.status || 200,
           statusText: mockResponse.statusText || 'Mocked',
-          headers: normalizeHeaders(mockResponse.headers, mockResponse.contentType || 'application/json')
+          headers: normalizeHeaders(mockResponse.headers, inferContentType(mockResponse.body, mockResponse.contentType))
         });
 
         Object.defineProperties(mockedResponse, {
@@ -323,7 +344,7 @@
             console.warn('[Request Interceptor Tiny] Failed to override XHR properties:', e);
           }
 
-          const responseHeaders = normalizeHeaders(mock.headers, mock.contentType || 'application/json');
+          const responseHeaders = normalizeHeaders(mock.headers, inferContentType(mock.body, mock.contentType));
           xhr.getResponseHeader = function(header) {
             if (!header) return null;
             return responseHeaders.get(header) || null;

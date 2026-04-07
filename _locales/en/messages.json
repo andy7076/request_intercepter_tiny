@@ -86,10 +86,10 @@
     "message": "Enter the request URL to intercept"
   },
   "responseContent": {
-    "message": "Response Content (JSON)"
+    "message": "Response Content"
   },
   "responseContentHint": {
-    "message": "Enter JSON response content to return"
+    "message": "Enter response content to return. Supports text, JSON, HTML, XML, and more"
   },
   "expandEdit": {
     "message": "Expand Edit"
@@ -130,7 +130,7 @@
     "message": "Enable rules, and matched requests will be displayed here in real-time"
   },
   "responseEditor": {
-    "message": "Response Content Editor"
+    "message": "Response Editor"
   },
   "searchReplace": {
     "message": "Search & Replace"
@@ -568,6 +568,9 @@
   },
   "clickToViewDiff": {
     "message": "Click to view response diff"
+  },
+  "viewDetails": {
+    "message": "View Details"
   },
   "diffNoData": {
     "message": "No response data available"

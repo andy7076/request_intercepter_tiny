@@ -94,9 +94,9 @@
             stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M12 8h.01"></path>
-            <path d="M11 12h1v4h1"></path>
+            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <path d="M12 9v4"></path>
+            <path d="M12 17h.01"></path>
           </svg>
         </span>
         <span class="update-text" data-i18n="updateBannerText"
@@ -529,7 +529,7 @@
             <div class="form-group">
               <div class="response-label-row">
                 <label for="response-body" class="required-label" data-i18n="responseContent"
-                  >Response Content (JSON)</label
+                  >Response Content</label
                 >
                 <div class="editor-actions">
                   <button
@@ -548,12 +548,12 @@
                   id="json-status-indicator"
                   class="json-status-indicator"
                 ></span>
-                <span
-                  id="json-status-text"
-                  class="hint"
-                  data-i18n="responseContentHint"
-                  >Enter JSON response content to return</span
-                >
+                  <span
+                    id="json-status-text"
+                    class="hint"
+                    data-i18n="responseContentHint"
+                    >Enter response content to return</span
+                  >
               </div>
             </div>
           </div>
@@ -628,7 +628,7 @@
             <polyline points="16 18 22 12 16 6"></polyline>
             <polyline points="8 6 2 12 8 18"></polyline>
           </svg>
-          <span data-i18n="responseEditor">JSON Editor</span>
+          <span data-i18n="responseEditor">Response Editor</span>
         </h3>
         <div class="editor-modal-actions">
           <button type="button" id="modal-search-btn" class="btn-search-text">
@@ -673,7 +673,7 @@
             id="modal-json-status-text"
             class="hint"
             data-i18n="responseContentHint"
-            >Enter JSON response content to return</span
+            >Enter response content to return</span
           >
         </div>
         <div class="modal-footer-actions">

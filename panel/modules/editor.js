@@ -36,7 +36,7 @@ function initCodeMirrorEditors() {
 
   // CodeMirror 通用配置
   const commonConfig = {
-    mode: { name: 'javascript', json: true },
+    mode: 'text/plain',
     lineNumbers: true,
     lineWrapping: true,
     matchBrackets: true,
@@ -110,7 +110,7 @@ function initModalCodeMirror() {
 
   // 初始化 CodeMirror
   const cm = CodeMirror(wrapper, {
-    mode: { name: 'javascript', json: true },
+    mode: 'text/plain',
     lineNumbers: true,
     lineWrapping: true,
     matchBrackets: true,
@@ -165,7 +165,7 @@ function initModalCodeMirror() {
   return cm;
 }
 
-// 实时验证 JSON 格式
+// 实时验证响应内容状态
 function validateJsonRealtime() {
   const mainIndicator = document.getElementById('json-status-indicator');
   const mainStatusText = document.getElementById('json-status-text');
@@ -217,16 +217,7 @@ function validateJsonRealtime() {
   }
 
   try {
-    const parsed = JSON.parse(rawValue);
-    // 检查是否为对象或数组（API 响应通常是这两种格式）
-    if (typeof parsed !== 'object' || parsed === null) {
-      targets.forEach(({ indicator, text }) => {
-        indicator.className = 'json-status-indicator invalid';
-        text.className = 'hint invalid';
-        text.textContent = window.i18n.t('needJsonObjectOrArray');
-      });
-      return false;
-    }
+    JSON.parse(rawValue);
 
     // 清除错误标记
     editorsToClear.forEach(cm => cm.getAllMarks().forEach(mark => mark.clear()));
@@ -238,72 +229,12 @@ function validateJsonRealtime() {
     });
     return true;
   } catch (err) {
-    // 提取错误位置信息
-    const match = err.message.match(/position (\d+)/);
-    let errorMsg = window.i18n.t('jsonError');
-    let errorLine = -1;
-    let errorCol = -1;
-
-    if (match) {
-      const position = parseInt(match[1], 10);
-      // 计算行号和列号
-      const lines = rawValue.substring(0, position).split('\n');
-      errorLine = lines.length;
-      errorCol = lines[lines.length - 1].length + 1;
-
-      errorMsg = window.i18n.t('jsonErrorDetailed', errorLine, errorCol);
-    } else if (err.message.match(/Unexpected end of JSON input/)) {
-      // JSON 意外结束（通常在最后）
-      if (editorsToMark.length > 0) {
-        // Use the first editor to calculate position (assuming sync)
-        const pos = editorsToMark[0].posFromIndex(rawValue.length);
-        errorLine = pos.line + 1;
-        errorCol = pos.ch + 1;
-      } else {
-        const lines = rawValue.split('\n');
-        errorLine = lines.length;
-        errorCol = lines[lines.length - 1].length + 1;
-      }
-      errorMsg = window.i18n.t('jsonErrorDetailed', errorLine, errorCol);
-    }
-
-    // 在 CodeMirror 中标记错误
-    if (errorLine > 0) {
-      const markError = (cm) => {
-        // 清除旧标记
-        cm.getAllMarks().forEach(mark => mark.clear());
-
-        const lineIndex = errorLine - 1;
-        const colIndex = errorCol - 1;
-
-        // 标记精确字符
-        let from = { line: lineIndex, ch: colIndex };
-        let to = { line: lineIndex, ch: colIndex + 1 };
-
-        // 处理行尾/文件尾情况
-        const lineContent = cm.getLine(lineIndex) || "";
-        if (colIndex >= lineContent.length) {
-          if (lineContent.length > 0) {
-            // 如果在行尾，标记最后一个字符
-            from.ch = lineContent.length - 1;
-            to.ch = lineContent.length;
-          } else {
-            // 空行的情况，标记开头即可
-            from.ch = 0;
-            to.ch = 1;
-          }
-        }
-
-        cm.markText(from, to, { className: "cm-json-error" });
-      };
-
-      editorsToMark.forEach(cm => markError(cm));
-    }
+    editorsToClear.forEach(cm => cm.getAllMarks().forEach(mark => mark.clear()));
 
     targets.forEach(({ indicator, text }) => {
-      indicator.className = 'json-status-indicator invalid';
-      text.className = 'hint invalid';
-      text.textContent = errorMsg;
+      indicator.className = 'json-status-indicator';
+      text.className = 'hint';
+      text.textContent = window.i18n.t('responseContentHint');
     });
     return false;
   }
@@ -380,7 +311,7 @@ function closeEditorModal() {
 
   editorModal.classList.remove('active');
 
-  // 验证 JSON 格式 (仅在表单模式下)
+  // 验证内容状态 (仅在表单模式下)
   if (modalMode === 'form') {
     validateJsonRealtime();
   }
@@ -395,15 +326,8 @@ async function handleModalSave() {
 
   const content = modalCodeMirror ? modalCodeMirror.getValue() : modalTextarea.value;
 
-  // 验证 JSON
-  try {
-    const parsed = JSON.parse(content);
-    if (typeof parsed !== 'object' || parsed === null) {
-      showToast(window.i18n.t('needJsonObjectOrArray'), true);
-      return;
-    }
-  } catch (e) {
-    showToast(window.i18n.t('jsonError'), true);
+  if (!String(content || '').trim()) {
+    showToast(window.i18n.t('pleaseEnterResponseContent'), true);
     return;
   }
 

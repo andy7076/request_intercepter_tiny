@@ -86,10 +86,10 @@
     "message": "输入要拦截的请求 URL"
   },
   "responseContent": {
-    "message": "响应内容 (JSON)"
+    "message": "响应内容"
   },
   "responseContentHint": {
-    "message": "输入要返回的 JSON 响应内容"
+    "message": "输入要返回的响应内容，支持文本、JSON、HTML、XML 等"
   },
   "expandEdit": {
     "message": "放大编辑"
@@ -130,7 +130,7 @@
     "message": "开启规则后，匹配到的请求将在此实时展示"
   },
   "responseEditor": {
-    "message": "响应内容编辑器"
+    "message": "响应编辑器"
   },
   "searchReplace": {
     "message": "搜索替换"
@@ -568,6 +568,9 @@
   },
   "clickToViewDiff": {
     "message": "点击查看响应数据对比"
+  },
+  "viewDetails": {
+    "message": "查看详情"
   },
   "diffNoData": {
     "message": "暂无响应数据"

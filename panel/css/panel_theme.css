@@ -11,6 +11,8 @@
   --primary-glow: rgba(99, 102, 241, 0.4);
   --primary-dark: #4f46e5;
   --primary-light: #818cf8;
+  --action-link: #a5b4fc;
+  --action-link-hover: #c7d2fe;
 
   --success: #10b981;
   --success-bg: rgba(16, 185, 129, 0.1);
@@ -54,6 +56,8 @@
   --primary-glow: rgba(79, 70, 229, 0.2);
   --primary-dark: #4338ca;
   --primary-light: #6366f1;
+  --action-link: #4f46e5;
+  --action-link-hover: #312e81;
 
   --success: #059669;
   --success-bg: rgba(5, 150, 105, 0.1);
@@ -160,6 +164,38 @@
   border: 1px solid rgba(15, 23, 42, 0.06);
 }
 
+[data-theme="light"] .log-url {
+  background: rgba(241, 245, 249, 0.8);
+  border-color: rgba(15, 23, 42, 0.06);
+}
+
+[data-theme="light"] .meta-chip {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(241, 245, 249, 0.9));
+  border-color: rgba(148, 163, 184, 0.32);
+  color: #334155;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="light"] .meta-chip-method {
+  color: #1d4ed8;
+}
+
+[data-theme="light"] .meta-chip-match {
+  color: #047857;
+}
+
+[data-theme="light"] .meta-chip-priority {
+  color: #4338ca;
+}
+
+[data-theme="light"] .meta-chip-status {
+  color: #b45309;
+}
+
+[data-theme="light"] .meta-chip-delay {
+  color: #be185d;
+}
+
 /* Light theme - Toggle switch */
 [data-theme="light"] .rule-toggle {
   background: #cbd5e1;
@@ -242,29 +278,27 @@
 
 /* Light theme - Update banner */
 [data-theme="light"] .update-banner {
-  background: #eaf3ff;
-  border-color: #b9d4ff;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+  background: #fff7e6;
+  border-color: #f7d9a7;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.08);
 }
 
 [data-theme="light"] .update-banner .update-icon {
-  background: #dbeafe;
-  border-color: #bfdbfe;
-  color: #2563eb;
+  color: #c2410c;
 }
 
 [data-theme="light"] .update-banner .update-text {
-  color: #1e3a8a;
+  color: #9a3412;
 }
 
 [data-theme="light"] .update-banner .btn-banner-close {
-  background: rgba(30, 58, 138, 0.06);
+  background: rgba(154, 52, 18, 0.06);
   color: #475569;
 }
 
 [data-theme="light"] .update-banner .btn-banner-close:hover {
-  background: rgba(37, 99, 235, 0.12);
-  color: #1e3a8a;
+  background: rgba(194, 65, 12, 0.12);
+  color: #9a3412;
 }
 
 /* Light theme - Editor modal */
@@ -310,11 +344,6 @@
 [data-theme="light"] .empty-state p {
   color: var(--text-secondary);
   font-weight: 500;
-}
-
-/* Light theme - Log items */
-[data-theme="light"] .log-url {
-  background: rgba(241, 245, 249, 0.8);
 }
 
 /* Light theme - Toast */

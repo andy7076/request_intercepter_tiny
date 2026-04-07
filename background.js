@@ -22,7 +22,7 @@ const DEFAULT_METHOD = 'ALL';
 const DEFAULT_PRIORITY = 0;
 const DEFAULT_STATUS = 200;
 const DEFAULT_DELAY_MS = 0;
-const DEFAULT_CONTENT_TYPE = 'application/json';
+const DEFAULT_CONTENT_TYPE = 'text/plain; charset=utf-8';
 
 function normalizeMethod(method) {
   const normalized = String(method || DEFAULT_METHOD).toUpperCase();
@@ -79,10 +79,30 @@ function normalizeResponseHeaders(headers) {
   return normalized;
 }
 
+function isLikelyJsonContent(value) {
+  const trimmed = String(value || '').trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  try {
+    JSON.parse(trimmed);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
 function getRuleContentType(rule) {
   const headers = normalizeResponseHeaders(rule.responseHeaders);
   const contentTypeHeader = Object.keys(headers).find(key => key.toLowerCase() === 'content-type');
-  return contentTypeHeader ? headers[contentTypeHeader] : (rule.contentType || DEFAULT_CONTENT_TYPE);
+  if (contentTypeHeader) {
+    return headers[contentTypeHeader];
+  }
+  if (rule.contentType) {
+    return rule.contentType;
+  }
+  return isLikelyJsonContent(rule.responseBody) ? 'application/json' : DEFAULT_CONTENT_TYPE;
 }
 
 function normalizeRule(rule) {

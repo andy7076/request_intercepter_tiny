@@ -19,7 +19,7 @@ const DEFAULT_METHOD = 'ALL';
 const DEFAULT_PRIORITY = 0;
 const DEFAULT_STATUS = 200;
 const DEFAULT_DELAY_MS = 0;
-const DEFAULT_CONTENT_TYPE = 'application/json';
+const DEFAULT_CONTENT_TYPE = 'text/plain; charset=utf-8';
 
 function log(...args) {
   if (consoleLogsEnabled) {
@@ -89,10 +89,30 @@ function normalizeResponseHeaders(headers) {
   return normalized;
 }
 
+function isLikelyJsonContent(value) {
+  const trimmed = String(value || '').trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  try {
+    JSON.parse(trimmed);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
 function getRuleContentType(rule) {
   const headers = normalizeResponseHeaders(rule.responseHeaders);
   const headerKey = Object.keys(headers).find(key => key.toLowerCase() === 'content-type');
-  return headerKey ? headers[headerKey] : (rule.contentType || DEFAULT_CONTENT_TYPE);
+  if (headerKey) {
+    return headers[headerKey];
+  }
+  if (rule.contentType) {
+    return rule.contentType;
+  }
+  return isLikelyJsonContent(rule.responseBody) ? 'application/json' : DEFAULT_CONTENT_TYPE;
 }
 
 function sortMockRules(rules) {

@@ -7,6 +7,73 @@
 let cachedLogs = [];
 let currentDiffLog = null;
 let hasDiffIndexResizeListener = false;
+const expandedLogUrlKeys = new Set();
+
+function getLogKey(log) {
+  if (!log) return '';
+
+  return [
+    log.timestamp || '',
+    log.method || '',
+    log.url || '',
+    log.ruleName || '',
+    log.status || ''
+  ].join('::');
+}
+
+function syncLogUrlToggleState(toggleButton, urlElement, expanded) {
+  if (!toggleButton || !urlElement) return;
+
+  urlElement.classList.toggle('expanded', expanded);
+  urlElement.classList.toggle('has-toggle', !toggleButton.classList.contains('hidden'));
+  toggleButton.dataset.expanded = expanded ? 'true' : 'false';
+  toggleButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  toggleButton.textContent = window.i18n.t(expanded ? 'collapse' : 'expand');
+}
+
+function setupLogUrlToggles() {
+  const urlBlocks = document.querySelectorAll('.log-url-block');
+
+  urlBlocks.forEach((block) => {
+    const urlElement = block.querySelector('.log-url');
+    const urlTextElement = block.querySelector('.log-url-text');
+    const toggleButton = block.querySelector('.log-url-toggle');
+    const logKey = block.dataset.logKey || '';
+    if (!urlElement || !urlTextElement || !toggleButton) return;
+
+    const isOverflowing = urlTextElement.scrollHeight > urlTextElement.clientHeight + 1;
+    toggleButton.classList.toggle('hidden', !isOverflowing);
+    urlElement.classList.toggle('has-toggle', isOverflowing);
+    const shouldExpand = isOverflowing && logKey && expandedLogUrlKeys.has(logKey);
+    syncLogUrlToggleState(toggleButton, urlElement, shouldExpand);
+
+    if (!isOverflowing) {
+      if (logKey) {
+        expandedLogUrlKeys.delete(logKey);
+      }
+      toggleButton.dataset.bound = 'false';
+      return;
+    }
+
+    if (toggleButton.dataset.bound === 'true') {
+      return;
+    }
+
+    toggleButton.dataset.bound = 'true';
+    toggleButton.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+    });
+    toggleButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const nextExpanded = toggleButton.dataset.expanded !== 'true';
+      syncLogUrlToggleState(toggleButton, urlElement, nextExpanded);
+      if (logKey) {
+        if (nextExpanded) expandedLogUrlKeys.add(logKey);
+        else expandedLogUrlKeys.delete(logKey);
+      }
+    });
+  });
+}
 
 // 加载日志
 async function loadLogs() {
@@ -20,9 +87,15 @@ function renderLogs(logs) {
   const { escapeHtml } = window.App.utils;
   const logsList = document.getElementById('logs-list');
   const logCount = document.getElementById('logs-count-text');
+  const currentLogKeys = new Set(logs.map(log => getLogKey(log)));
 
   cachedLogs = logs;
   logCount.textContent = window.i18n.t('recentMatchRecords', logs.length);
+  expandedLogUrlKeys.forEach((key) => {
+    if (!currentLogKeys.has(key)) {
+      expandedLogUrlKeys.delete(key);
+    }
+  });
 
   if (logs.length === 0) {
     logsList.innerHTML = `
@@ -41,14 +114,22 @@ function renderLogs(logs) {
       hour: '2-digit', minute: '2-digit', second: '2-digit'
     });
     const hasDiffData = log.mockedBody || log.originalBody;
-    const clickableClass = hasDiffData ? 'log-item-clickable' : '';
-    const titleAttr = hasDiffData ? `title="${window.i18n.t('clickToViewDiff')}"` : '';
     const method = escapeHtml(log.method || 'GET');
     const status = escapeHtml(String(log.status || 200));
     const ruleName = escapeHtml(log.ruleName || window.i18n.t('unknownRule'));
+    const logKey = escapeHtml(getLogKey(log));
+    const detailsAction = hasDiffData
+      ? `<button type="button" class="btn-view-log-details" data-log-index="${index}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <span>${window.i18n.t('viewDetails')}</span>
+        </button>`
+      : '';
 
     return `
-      <div class="log-item ${clickableClass}" data-log-index="${index}" ${titleAttr}>
+      <div class="log-item" data-log-index="${index}">
         <div class="log-header">
           <span>
             <span class="log-type mockResponse">🎯 Mock</span>
@@ -60,22 +141,24 @@ function renderLogs(logs) {
           <span class="log-pill">${method}</span>
           <span class="log-pill">${window.i18n.t('statusShort', status)}</span>
         </div>
-        <div class="log-url">${method} ${escapeHtml(log.url)}</div>
+        <div class="log-url-block" data-log-key="${logKey}">
+          <div class="log-url">
+            <div class="log-url-text">${method} ${escapeHtml(log.url)}</div>
+            <button type="button" class="log-url-toggle hidden" aria-expanded="false">${window.i18n.t('expand')}</button>
+          </div>
+        </div>
+        ${detailsAction ? `<div class="log-footer">${detailsAction}</div>` : ''}
       </div>
     `;
   }).join('');
 
+  setupLogUrlToggles();
 
-
-  // 优化：使用事件委托处理点击事件
-  // 移除旧的事件监听（如果有）可以避免重复，但这里是重新渲染 innerHTML，旧的元素已经被销毁，所以不需要手动移除旧元素的监听器
-  // 但是需要在 logsList 上绑定一次监听器。为了避免多次绑定，可以先检查或在 init 时绑定。
-  // 简单起见，这里我们确保 logsList 的点击事件只处理 .log-item-clickable
   if (!logsList._hasClickListener) {
     logsList.addEventListener('click', (e) => {
-      const item = e.target.closest('.log-item-clickable');
-      if (item) {
-        const index = parseInt(item.dataset.logIndex);
+      const detailButton = e.target.closest('.btn-view-log-details');
+      if (detailButton) {
+        const index = parseInt(detailButton.dataset.logIndex);
         const log = cachedLogs[index];
         if (log) { openDiffModal(log); }
       }
