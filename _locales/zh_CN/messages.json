@@ -3,10 +3,10 @@
     "message": "Request Interceptor Tiny"
   },
   "extDescription": {
-    "message": "好用的接口模拟工具"
+    "message": "轻量级的接口模拟工具"
   },
   "subtitle": {
-    "message": "好用的接口模拟工具"
+    "message": "轻量级的接口模拟工具"
   },
   "fullView": {
     "message": "完整视图"
@@ -151,13 +151,25 @@
     "message": "设置"
   },
   "globalInterception": {
-    "message": "插件开关"
+    "message": "拦截开关"
   },
   "globalInterceptionDesc": {
-    "message": "关闭后，插件不会在新打开的页面中生效"
+    "message": "关闭后，页面中的请求规则不生效"
+  },
+  "globalInterceptionActionEnable": {
+    "message": "开启插件"
+  },
+  "globalInterceptionActionEnableDesc": {
+    "message": "开启后，页面中的请求规则生效"
+  },
+  "globalInterceptionActionDisable": {
+    "message": "关闭插件"
+  },
+  "globalInterceptionActionDisableDesc": {
+    "message": "关闭后，页面中的请求规则不生效"
   },
   "pluginDisabledBannerText": {
-    "message": "插件开关当前已关闭，请求拦截暂未生效。如需恢复，请前往设置重新开启。"
+    "message": "插件开关当前已关闭，请求规则暂未生效。如需恢复，请前往设置重新开启。"
   },
   "pluginDisabledBannerAction": {
     "message": "去开启"
@@ -299,13 +311,13 @@
     "message": "插件已关闭"
   },
   "globalInterceptionToggleFailed": {
-    "message": "插件开关更新失败"
+    "message": "拦截开关更新失败"
   },
   "globalInterceptionRefreshTitle": {
-    "message": "需要刷新页面"
+    "message": "刷新目标页面"
   },
   "globalInterceptionRefreshNotice": {
-    "message": "设置已更新。请刷新当前已打开的目标页面，以确保变更生效。新打开的页面会自动使用新的插件开关状态。"
+    "message": "插件已开启。请刷新当前已打开的目标页面，以确保变更生效。"
   },
   "jsonValid": {
     "message": "✓ JSON 格式有效"
@@ -750,6 +762,6 @@
     "message": "未知规则"
   },
   "updateBannerText": {
-    "message": "插件已安装或更新，请刷新目标页面以确保请求修改生效。"
+    "message": "插件已安装或更新，请刷新目标页面以确保规则生效。"
   }
 }

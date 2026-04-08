@@ -156,6 +156,18 @@
   "globalInterceptionDesc": {
     "message": "When disabled, the plugin will not take effect on newly opened pages"
   },
+  "globalInterceptionActionEnable": {
+    "message": "Enable Plugin"
+  },
+  "globalInterceptionActionEnableDesc": {
+    "message": "When enabled, interception scripts will be injected into pages"
+  },
+  "globalInterceptionActionDisable": {
+    "message": "Disable Plugin"
+  },
+  "globalInterceptionActionDisableDesc": {
+    "message": "When disabled, interception scripts will no longer be injected into pages"
+  },
   "pluginDisabledBannerText": {
     "message": "The plugin switch is currently off, so request interception is disabled. Turn it back on in Settings when needed."
   },

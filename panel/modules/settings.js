@@ -3,13 +3,28 @@
  * 加载和应用用户设置
  */
 
-function updateInterceptorStateUI(enabled) {
-  const banner = document.getElementById('plugin-disabled-banner');
-  if (!banner) {
+function updateInterceptorToggleCopy(enabled) {
+  const title = document.querySelector('[data-i18n="globalInterception"]');
+  const desc = document.querySelector('[data-i18n="globalInterceptionDesc"]');
+  if (!title || !desc || !window.i18n) {
     return;
   }
 
-  banner.classList.toggle('hidden', enabled);
+  title.textContent = window.i18n.t(
+    enabled ? 'globalInterceptionActionDisable' : 'globalInterceptionActionEnable'
+  );
+  desc.textContent = window.i18n.t(
+    enabled ? 'globalInterceptionActionDisableDesc' : 'globalInterceptionActionEnableDesc'
+  );
+}
+
+function updateInterceptorStateUI(enabled) {
+  const banner = document.getElementById('plugin-disabled-banner');
+  updateInterceptorToggleCopy(enabled);
+
+  if (banner) {
+    banner.classList.toggle('hidden', enabled);
+  }
 }
 
 // 加载设置
@@ -44,3 +59,8 @@ window.App.settings = {
   loadSettings,
   updateInterceptorStateUI
 };
+
+window.addEventListener('languageChanged', () => {
+  const settingInterceptorEnabled = document.getElementById('setting-interceptor-enabled');
+  updateInterceptorStateUI(settingInterceptorEnabled ? settingInterceptorEnabled.checked : true);
+});

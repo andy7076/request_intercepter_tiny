@@ -372,9 +372,9 @@
 }
 
 [data-theme="light"] .form-scope-notice {
-  background: #fff7e6;
-  border-color: #f7d9a7;
-  color: #9a3412;
+  background: #eef8ff;
+  border-color: #b6e3ff;
+  color: #0369a1;
 }
 
 [data-theme="light"] .form-warning {

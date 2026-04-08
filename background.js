@@ -17,8 +17,15 @@ const LOGS_STORAGE_KEY = 'requestLogs';
 const INTERCEPTOR_ENABLED_KEY = 'interceptorEnabled';
 const MAX_LOGS = 100; // 最大日志条数
 
-const BADGE_BACKGROUND_COLOR = '#16a34a';
-const BADGE_DISABLED_COLOR = '#64748b';
+const BADGE_BACKGROUND_COLOR = '#4ade80';
+const BADGE_DISABLED_COLOR = '#94a3b8';
+const ACTION_INDICATOR_SIZES = [16, 32, 48, 128];
+const DEFAULT_ACTION_ICON_PATHS = {
+  16: 'icons/icon16.png',
+  32: 'icons/icon48.png',
+  48: 'icons/icon48.png',
+  128: 'icons/icon128.png'
+};
 const DEFAULT_MATCH_MODE = 'contains';
 const DEFAULT_METHOD = 'ALL';
 const DEFAULT_PRIORITY = 0;
@@ -26,6 +33,86 @@ const DEFAULT_STATUS = 200;
 const DEFAULT_DELAY_MS = 0;
 const DEFAULT_CONTENT_TYPE = 'text/plain; charset=utf-8';
 const CONTENT_SCRIPT_IDS = ['request-interceptor-main', 'request-interceptor-content'];
+const actionIconCache = new Map();
+
+function getIndicatorColor(enabled) {
+  return enabled ? BADGE_BACKGROUND_COLOR : BADGE_DISABLED_COLOR;
+}
+
+function getIndicatorMetrics(size) {
+  if (size <= 16) {
+    return { radius: 3.8, offsetX: -0.45, offsetY: -0.45, lineWidth: 1.3 };
+  }
+  if (size <= 32) {
+    return { radius: 6.5, offsetX: 0.2, offsetY: 0.2, lineWidth: 1.9 };
+  }
+  if (size <= 48) {
+    return { radius: 8.4, offsetX: 0.5, offsetY: 0.5, lineWidth: 2.3 };
+  }
+  return { radius: 19, offsetX: 3, offsetY: 3, lineWidth: 3.6 };
+}
+
+async function loadBaseActionIcon(size) {
+  const cacheKey = `base:${size}`;
+  if (actionIconCache.has(cacheKey)) {
+    return actionIconCache.get(cacheKey);
+  }
+
+  const sourcePath = DEFAULT_ACTION_ICON_PATHS[size];
+  const response = await fetch(chrome.runtime.getURL(sourcePath));
+  const blob = await response.blob();
+  const bitmap = await createImageBitmap(blob);
+  const canvas = new OffscreenCanvas(size, size);
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(bitmap, 0, 0, size, size);
+  const imageData = ctx.getImageData(0, 0, size, size);
+  actionIconCache.set(cacheKey, imageData);
+  return imageData;
+}
+
+async function getIndicatorActionIcons(enabled) {
+  const cacheKey = `indicator:${enabled}`;
+  if (actionIconCache.has(cacheKey)) {
+    return actionIconCache.get(cacheKey);
+  }
+
+  const color = getIndicatorColor(enabled);
+  const iconEntries = await Promise.all(
+    ACTION_INDICATOR_SIZES.map(async (size) => {
+      const baseImageData = await loadBaseActionIcon(size);
+      const canvas = new OffscreenCanvas(size, size);
+      const ctx = canvas.getContext('2d');
+      ctx.putImageData(baseImageData, 0, 0);
+
+      const { radius, offsetX, offsetY, lineWidth } = getIndicatorMetrics(size);
+      const centerX = size - radius - offsetX;
+      const centerY = size - radius - offsetY;
+
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.lineWidth = lineWidth;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.96)';
+      ctx.stroke();
+
+      return [size, ctx.getImageData(0, 0, size, size)];
+    })
+  );
+
+  const imageData = Object.fromEntries(iconEntries);
+  actionIconCache.set(cacheKey, imageData);
+  return imageData;
+}
+
+async function setActionIndicatorIcon(enabled) {
+  const imageData = await getIndicatorActionIcons(enabled);
+  await chrome.action.setIcon({ imageData });
+}
+
+async function restoreDefaultActionIcon() {
+  await chrome.action.setIcon({ path: DEFAULT_ACTION_ICON_PATHS });
+}
 
 function getContentScriptDefinitions() {
   return [
@@ -191,22 +278,25 @@ async function setInterceptorEnabled(enabled) {
   return {
     success: true,
     enabled: normalized,
-    refreshRequired: true
+    refreshRequired: normalized
   };
 }
 
 async function updateActionBadge(rules) {
   const interceptorEnabled = await isInterceptorEnabled();
-  if (!interceptorEnabled) {
-    await chrome.action.setBadgeBackgroundColor({ color: BADGE_DISABLED_COLOR });
+  const currentRules = Array.isArray(rules) ? rules : await getRules();
+  const enabledRuleCount = currentRules.filter(rule => rule.enabled).length;
+  const indicatorColor = getIndicatorColor(interceptorEnabled);
+
+  if (enabledRuleCount === 0) {
     await chrome.action.setBadgeText({ text: '' });
+    await setActionIndicatorIcon(interceptorEnabled);
     return;
   }
 
-  const currentRules = Array.isArray(rules) ? rules : await getRules();
-  const enabledRuleCount = currentRules.filter(rule => rule.enabled).length;
-  await chrome.action.setBadgeBackgroundColor({ color: BADGE_BACKGROUND_COLOR });
-  await chrome.action.setBadgeText({ text: enabledRuleCount > 0 ? String(enabledRuleCount) : '' });
+  await restoreDefaultActionIcon();
+  await chrome.action.setBadgeBackgroundColor({ color: indicatorColor });
+  await chrome.action.setBadgeText({ text: String(enabledRuleCount) });
 }
 
 // 初始化规则
