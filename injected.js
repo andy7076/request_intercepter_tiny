@@ -204,13 +204,19 @@
 
   // ========== 拦截 Fetch ==========
   const originalFetch = window.fetch;
-  
+
   window.fetch = async function(input, init) {
+    // 快路径：没有启用任何规则时直接透传，避免 toAbsoluteUrl / 跨 world
+    // postMessage 等额外开销。
+    if (activeRulesCount === 0) {
+      return originalFetch.apply(this, arguments);
+    }
+
     const rawUrl = typeof input === 'string' ? input : input.url;
     const method = normalizeMethod(init?.method || (typeof input !== 'string' ? input.method : '') || 'GET');
     // 将相对URL转换为绝对URL，以便与用户配置的完整URL匹配
     const url = toAbsoluteUrl(rawUrl);
-    
+
     try {
       // 检查是否有匹配的 mock 规则
       const mockResult = await checkMockRule(url, method);
@@ -262,19 +268,19 @@
   XHR.prototype.send = function(body) {
     const xhr = this;
     const rawUrl = this._interceptorUrl;
-    
-    if (!rawUrl) {
+
+    // 快路径：
+    //   1. 没有 URL 的异常情况
+    //   2. 同步请求（无法异步检查规则）
+    //   3. 没有启用任何规则时，绝不要把 send 异步化——这会改变 XHR
+    //      原本的同步调度语义，破坏依赖它的老代码。
+    if (!rawUrl || !this._interceptorAsync || activeRulesCount === 0) {
       return originalXHRSend.apply(this, arguments);
     }
-    
+
     // 将相对URL转换为绝对URL，以便与用户配置的完整URL匹配
     const url = toAbsoluteUrl(rawUrl);
-    
-    // 对于同步请求，不进行拦截（因为无法异步检查规则）
-    if (!this._interceptorAsync) {
-      return originalXHRSend.apply(this, arguments);
-    }
-    
+
     // 异步检查 mock 规则
     checkMockRule(url, this._interceptorMethod).then(mockResult => {
       if (mockResult) {
@@ -312,37 +318,50 @@
             log('[Request Interceptor Tiny] ⚠️ Failed to read original XHR response body:', bodyErr);
           }
 
-          try {
-            Object.defineProperty(xhr, 'responseText', {
-              get: () => mock.body,
-              configurable: true
-            });
-            Object.defineProperty(xhr, 'response', {
-              get: () => {
-                if (xhr.responseType === '' || xhr.responseType === 'text') {
-                  return mock.body;
-                } else if (xhr.responseType === 'json') {
-                  try {
-                    return JSON.parse(mock.body);
-                  } catch (e) {
-                    return mock.body;
-                  }
-                }
+          // 把四个属性的覆盖分开做，避免前面一个失败后后面几个被整体跳过。
+          // 任何一个 critical property（responseText/response）失败都直接报错，
+          // 否则页面会以为 mock 生效，但读到的却是原始响应体。
+          const defineMockProp = (name, descriptor) => {
+            try {
+              Object.defineProperty(xhr, name, descriptor);
+              return true;
+            } catch (err) {
+              console.error(
+                '[Request Interceptor Tiny] Mock degraded: failed to override XHR.' + name +
+                ' for ' + url + ':',
+                err
+              );
+              return false;
+            }
+          };
+
+          defineMockProp('responseText', {
+            get: () => mock.body,
+            configurable: true
+          });
+          defineMockProp('response', {
+            get: () => {
+              if (xhr.responseType === '' || xhr.responseType === 'text') {
                 return mock.body;
-              },
-              configurable: true
-            });
-            Object.defineProperty(xhr, 'status', {
-              get: () => mock.status || 200,
-              configurable: true
-            });
-            Object.defineProperty(xhr, 'statusText', {
-              get: () => mock.statusText || 'Mocked',
-              configurable: true
-            });
-          } catch (e) {
-            console.warn('[Request Interceptor Tiny] Failed to override XHR properties:', e);
-          }
+              } else if (xhr.responseType === 'json') {
+                try {
+                  return JSON.parse(mock.body);
+                } catch (e) {
+                  return mock.body;
+                }
+              }
+              return mock.body;
+            },
+            configurable: true
+          });
+          defineMockProp('status', {
+            get: () => mock.status || 200,
+            configurable: true
+          });
+          defineMockProp('statusText', {
+            get: () => mock.statusText || 'Mocked',
+            configurable: true
+          });
 
           const responseHeaders = normalizeHeaders(mock.headers, inferContentType(mock.body, mock.contentType));
           xhr.getResponseHeader = function(header) {
