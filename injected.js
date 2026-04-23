@@ -66,15 +66,48 @@
     return isLikelyJsonContent(body) ? 'application/json' : 'text/plain; charset=utf-8';
   }
 
+  // 超过此大小的响应体不再 clone 读取，避免把一整份大 body 留在内存里
+  // 仅用于日志展示，超过阈值时截断即可。
+  const ORIGINAL_BODY_MAX_BYTES = 512 * 1024; // 512KB
+  // 这些 content-type 要么是流式（无法 await text()），要么对原始 body 无意义
+  const NON_CAPTURABLE_CONTENT_TYPES = [
+    'text/event-stream',
+    'application/octet-stream',
+    'video/',
+    'audio/',
+    'image/'
+  ];
+
+  function shouldSkipBodyCapture(response) {
+    const contentType = (response.headers.get('content-type') || '').toLowerCase();
+    if (NON_CAPTURABLE_CONTENT_TYPES.some(t => contentType.includes(t))) {
+      return true;
+    }
+    const lengthHeader = response.headers.get('content-length');
+    if (lengthHeader) {
+      const length = Number(lengthHeader);
+      if (Number.isFinite(length) && length > ORIGINAL_BODY_MAX_BYTES) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   function captureOriginalFetchResponse(fetchPromise, logRequestId) {
     fetchPromise
       .then(async (realResponse) => {
+        if (shouldSkipBodyCapture(realResponse)) {
+          return;
+        }
         try {
           const originalBody = await realResponse.clone().text();
+          const truncated = originalBody.length > ORIGINAL_BODY_MAX_BYTES
+            ? originalBody.slice(0, ORIGINAL_BODY_MAX_BYTES) + '\n/* …truncated by Request Interceptor Tiny */'
+            : originalBody;
           window.postMessage({
             type: 'REQUEST_INTERCEPTOR_ORIGINAL_RESPONSE',
             logRequestId,
-            originalBody
+            originalBody: truncated
           }, '*');
         } catch (bodyErr) {
           log('[Request Interceptor Tiny] ⚠️ Failed to read original response body:', bodyErr);
@@ -306,12 +339,17 @@
           const mock = xhr._mockResponse;
 
           try {
-            const originalXHRBody = xhr.responseText;
+            // responseType 非 '' / 'text' 时访问 responseText 会抛 InvalidStateError
+            const canReadText = xhr.responseType === '' || xhr.responseType === 'text';
+            const originalXHRBody = canReadText ? xhr.responseText : '';
             if (originalXHRBody) {
+              const truncated = originalXHRBody.length > ORIGINAL_BODY_MAX_BYTES
+                ? originalXHRBody.slice(0, ORIGINAL_BODY_MAX_BYTES) + '\n/* …truncated by Request Interceptor Tiny */'
+                : originalXHRBody;
               window.postMessage({
                 type: 'REQUEST_INTERCEPTOR_ORIGINAL_RESPONSE',
                 logRequestId: logRequestId,
-                originalBody: originalXHRBody
+                originalBody: truncated
               }, '*');
             }
           } catch (bodyErr) {

@@ -10,18 +10,6 @@ const {
   normalizeRule
 } = RuleNormalize;
 
-// ========== i18n 模块（使用 Chrome 内置 API）==========
-// 获取翻译文本
-function t(key) {
-  try {
-    // 直接使用 Chrome i18n API
-    const msg = chrome.i18n.getMessage(key);
-    return msg || key;
-  } catch (e) {
-    return key;
-  }
-}
-
 // ========== 规则存储 ==========
 // 存储规则的键名
 const RULES_STORAGE_KEY = 'interceptRules';
@@ -215,11 +203,30 @@ async function setInterceptorEnabled(enabled) {
   };
 }
 
+// 缓存上一次渲染的 badge/icon 状态，storage.onChanged 频繁触发时可以跳过
+// 不必要的 chrome.action API 调用（尤其是 setIcon，每次都要画 canvas）。
+let lastBadgeState = null;
+
 async function updateActionBadge(rules) {
   const interceptorEnabled = await isInterceptorEnabled();
   const currentRules = Array.isArray(rules) ? rules : await getRules();
   const enabledRuleCount = currentRules.filter(rule => rule.enabled).length;
   const indicatorColor = getIndicatorColor(interceptorEnabled);
+
+  const nextState = {
+    interceptorEnabled,
+    enabledRuleCount,
+    indicatorColor
+  };
+  if (
+    lastBadgeState &&
+    lastBadgeState.interceptorEnabled === nextState.interceptorEnabled &&
+    lastBadgeState.enabledRuleCount === nextState.enabledRuleCount &&
+    lastBadgeState.indicatorColor === nextState.indicatorColor
+  ) {
+    return;
+  }
+  lastBadgeState = nextState;
 
   if (enabledRuleCount === 0) {
     await chrome.action.setBadgeText({ text: '' });

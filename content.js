@@ -33,6 +33,15 @@ function log(...args) {
   }
 }
 
+// 惰性版本：接受一个返回数组的工厂函数，只有在开关开启时才求值
+// 用在热路径里，避免 mockRules.map(...) 这类昂贵参数被白算
+function logLazy(factory) {
+  if (consoleLogsEnabled) {
+    const args = factory();
+    console.log(...(Array.isArray(args) ? args : [args]));
+  }
+}
+
 // 存储 mock 规则（已经预编译好匹配器）
 let mockRules = [];
 let isInitialized = false;
@@ -152,10 +161,10 @@ function loadMockRules() {
         mockRules = extractMockRules(allRules);
         log('[Request Interceptor Tiny] ✅', 'Mock rules loaded:', mockRules.length);
         if (mockRules.length > 0) {
-          log('[Request Interceptor Tiny] 📋', 'Rules list:', mockRules.map(r => ({
+          logLazy(() => ['[Request Interceptor Tiny] 📋', 'Rules list:', mockRules.map(r => ({
             name: r.name,
             pattern: r.urlPattern
-          })));
+          }))]);
         }
         isInitialized = true;
         syncRulesCountToInjected();

@@ -114,14 +114,10 @@
   }
 
   function sortMockRules(rules) {
-    return rules
-      .map((rule, index) => ({ rule, index }))
-      .sort((a, b) => {
-        const priorityDiff = normalizePriority(b.rule.priority) - normalizePriority(a.rule.priority);
-        if (priorityDiff !== 0) return priorityDiff;
-        return a.index - b.index;
-      })
-      .map(item => item.rule);
+    // Array.prototype.sort 自 ES2019 起稳定，无需 decorate-sort-undecorate
+    return rules.slice().sort(
+      (a, b) => normalizePriority(b.priority) - normalizePriority(a.priority)
+    );
   }
 
   function extractMockRules(allRules) {
