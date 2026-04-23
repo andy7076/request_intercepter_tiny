@@ -137,7 +137,23 @@ async function isInterceptorEnabled() {
   return result[INTERCEPTOR_ENABLED_KEY] !== false;
 }
 
-async function syncContentScriptRegistration(enabled = null) {
+// background.js 有多个 syncContentScriptRegistration 的入口
+// （top-level、onInstalled、onStartup、setInterceptorEnabled），它们可能并发
+// 执行，在 getRegistered → unregister → register 的交错里造成
+// "Duplicate script ID" 错误。这里用一个单 Promise 队列串行化所有调用。
+let syncInFlight = Promise.resolve();
+
+function syncContentScriptRegistration(enabled = null) {
+  const next = syncInFlight.then(
+    () => doSyncContentScriptRegistration(enabled),
+    () => doSyncContentScriptRegistration(enabled)
+  );
+  // 无论成功失败都让后续调用继续，避免一次失败把队列卡死
+  syncInFlight = next.catch(() => {});
+  return next;
+}
+
+async function doSyncContentScriptRegistration(enabled) {
   const explicit = typeof enabled === 'boolean';
   const shouldEnable = explicit ? enabled : await isInterceptorEnabled();
 
@@ -171,7 +187,21 @@ async function syncContentScriptRegistration(enabled = null) {
     return;
   }
 
-  await chrome.scripting.registerContentScripts(getContentScriptDefinitions());
+  try {
+    await chrome.scripting.registerContentScripts(getContentScriptDefinitions());
+  } catch (err) {
+    // 兜底：极端情况下（比如多个 SW 实例同时跑、或者浏览器在我们刚 unregister
+    // 完但还没 register 时又自动恢复了旧脚本）register 依然会报 Duplicate ID。
+    // 这时强制 unregister 所有同 id 脚本再注册一次。
+    if (String(err && err.message).includes('Duplicate script ID')) {
+      try {
+        await chrome.scripting.unregisterContentScripts({ ids: CONTENT_SCRIPT_IDS });
+      } catch {}
+      await chrome.scripting.registerContentScripts(getContentScriptDefinitions());
+      return;
+    }
+    throw err;
+  }
 }
 
 async function broadcastInterceptorEnabled(enabled) {

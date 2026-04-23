@@ -4,6 +4,11 @@
   "private": true,
   "description": "Chrome extension to mock HTTP responses. This package.json exists only for running unit tests; the extension itself has no npm dependencies.",
   "scripts": {
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/*.test.js",
+    "smoke": "playwright test --config=tests/smoke/playwright.config.js",
+    "smoke:install": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.0"
   }
 }

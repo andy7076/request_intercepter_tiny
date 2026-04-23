@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smoke target</title>
+</head>
+<body>
+  <h1>Smoke target page</h1>
+  <pre id="fetch-out">pending</pre>
+  <pre id="xhr-out">pending</pre>
+  <script>
+    // 把 fetch / XHR 的结果挂到页面上，Playwright 用选择器读取即可。
+    window.__runFetch = async function (url, init) {
+      const start = performance.now();
+      const res = await fetch(url, init);
+      const text = await res.text();
+      const result = {
+        status: res.status,
+        statusText: res.statusText,
+        body: text,
+        mockedBy: res.headers.get('x-mocked-by'),
+        xFoo: res.headers.get('x-foo'),
+        durationMs: performance.now() - start
+      };
+      document.getElementById('fetch-out').textContent = JSON.stringify(result);
+      return result;
+    };
+
+    window.__runXhr = function (url, method) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open(method || 'GET', url, true);
+        xhr.onload = () => {
+          const result = {
+            status: xhr.status,
+            statusText: xhr.statusText,
+            body: xhr.responseText,
+            mockedBy: xhr.getResponseHeader('x-mocked-by')
+          };
+          document.getElementById('xhr-out').textContent = JSON.stringify(result);
+          resolve(result);
+        };
+        xhr.onerror = reject;
+        xhr.send();
+      });
+    };
+
+    // 专门测 responseType=json 分支（injected.js 里的 JSON.parse(mock.body)）
+    window.__runXhrJson = function (url) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'json';
+        xhr.onload = () => {
+          resolve({
+            status: xhr.status,
+            response: xhr.response, // 应该是对象，不是字符串
+            mockedBy: xhr.getResponseHeader('x-mocked-by')
+          });
+        };
+        xhr.onerror = reject;
+        xhr.send();
+      });
+    };
+
+    // 消费一段 SSE 流；超时后返回 received 条数
+    window.__runSse = function (url, timeoutMs) {
+      return new Promise((resolve) => {
+        const received = [];
+        const es = new EventSource(url);
+        es.onmessage = (ev) => received.push(ev.data);
+        setTimeout(() => {
+          es.close();
+          resolve({ count: received.length });
+        }, timeoutMs || 800);
+      });
+    };
+  </script>
+</body>
+</html>

@@ -105,8 +105,58 @@ Request Interceptor Tiny is a Chrome extension designed for developers, providin
 ## 🛠️ Tech Stack
 
 - **Core**: HTML5, CSS3, Vanilla JavaScript
-- **Platform**: Chrome Extension Manifest V3
+- **Platform**: Chrome Extension Manifest V3 (Chrome 114+ required for the Side Panel API)
 - **Icons**: Google Fonts (Inter, Outfit), Lucide Icons (SVG)
+
+## 🗂️ Project Structure
+
+```
+├── manifest.json            # MV3 manifest
+├── background.js            # Service worker: rules/logs storage, action badge, fetch proxy
+├── content.js               # ISOLATED-world content script: storage ↔ injected bridge
+├── injected.js              # MAIN-world hooks for window.fetch / XMLHttpRequest
+├── shared/rule-normalize.js # Pure helpers shared by background & content scripts
+├── panel/                   # Side panel UI (html / css / modules)
+├── _locales/                # Chrome i18n (en, zh_CN)
+└── tests/
+    ├── rule-normalize.test.js  # Node:test unit tests
+    └── smoke/                  # Playwright end-to-end tests
+```
+
+## 🧪 Development
+
+The extension itself has zero runtime dependencies. `package.json` only exists
+for running tests.
+
+### Unit tests
+
+Pure-function coverage for `shared/rule-normalize.js` (method/status/priority
+normalization, content-type inference, rule sorting, etc.).
+
+```bash
+npm test
+```
+
+Powered by Node's built-in `node:test` — no install required.
+
+### Smoke tests (end-to-end)
+
+Loads the unpacked extension into a real Chromium instance via Playwright,
+writes rules through `chrome.storage`, then exercises `fetch` / XHR / SSE
+against a local fixture server. Covers 12 scenarios including match modes,
+method filtering, priority, delay, custom status & headers, XHR
+`responseType=json`, rule hot reload, and SSE pass-through.
+
+```bash
+npm install                 # installs @playwright/test (first time only)
+npm run smoke:install       # downloads Chromium (~150MB, first time only)
+npm run smoke
+```
+
+Chromium must run headed — MV3 service workers don't boot reliably under the
+legacy headless mode. On CI, wrap with `xvfb-run -a npm run smoke`.
+
+See `tests/smoke/README.md` for more detail.
 
 ## 📄 License
 
