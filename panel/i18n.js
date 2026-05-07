@@ -1,6 +1,10 @@
 /**
  * Internationalization (i18n) Module
  * Supports English (default) and Chinese
+ *
+ * The UI defaults to English regardless of browser locale; users can still
+ * opt in to another supported language by setting `preferredLanguage` in
+ * chrome.storage.local (e.g. via the language switcher when it is exposed).
  */
 
 // Supported languages
@@ -12,19 +16,6 @@ const STORAGE_KEY = 'preferredLanguage';
 let messages = {};
 let currentLanguage = DEFAULT_LANGUAGE;
 let isInitialized = false;
-
-/**
- * Get browser language preference
- * @returns {string} Language code
- */
-function getBrowserLanguage() {
-  const lang = navigator.language || navigator.userLanguage;
-  // Map browser language to supported language
-  if (lang.startsWith('zh')) {
-    return 'zh_CN';
-  }
-  return 'en';
-}
 
 /**
  * Load messages for a specific language
@@ -61,9 +52,9 @@ async function initI18n() {
   });
   
   const savedLang = result[STORAGE_KEY];
-  currentLanguage = savedLang && SUPPORTED_LANGUAGES.includes(savedLang) 
-    ? savedLang 
-    : getBrowserLanguage();
+  currentLanguage = savedLang && SUPPORTED_LANGUAGES.includes(savedLang)
+    ? savedLang
+    : DEFAULT_LANGUAGE;
   
   // Load messages
   messages = await loadMessages(currentLanguage);
